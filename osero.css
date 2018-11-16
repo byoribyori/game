@@ -1,0 +1,75 @@
+body{
+  background-color: lightblue;
+}
+
+.table{
+  border: 1px;
+  background-color: #555555;
+  margin-right: auto;
+  margin-left : auto;
+}
+td{
+  background-color: rgb(7, 192, 7);
+  font-size: 76px;
+  width: 115px;
+  height: 115px;
+  text-align: center;
+}
+.black{
+  color: black;
+  text-shadow: 
+        black 1px 1px 0, black -1px -1px 0,
+        black -1px 1px 0, black 1px -1px 0,
+        black 0px 1px 0, black  0 -1px 0,
+        black -1px 0 0, black 1px 0 0; 
+}
+.white{
+  color: white;
+  text-shadow: 
+        black 1px 1px 0, black -1px -1px 0,
+        black -1px 1px 0, black 1px -1px 0,
+        black 0px 1px 0, black  0 -1px 0,
+        black -1px 0 0, black 1px 0 0; 
+}
+
+.winb{
+  border-bottom: solid 4px red;
+  position: absolute;
+  bottom :700px;
+  left: 10%;
+color: black;
+display: block;
+}
+.winw{
+  border-bottom: solid 4px red;
+  position: absolute;
+    bottom:700px;
+    right: 10%;
+  color: white;
+  display: block;
+}
+
+.bla{
+  position: absolute;
+    bottom :700px;
+    left: 10%;
+  color: black;
+  display: block;
+}
+.whi{
+  position: absolute;
+    bottom:700px;
+    right: 10%;
+  color: white;
+  display: block;
+}
+p{
+  font-size: 3em;
+}
+.re{
+  height: 30px;
+  width: 90px;
+  position: absolute;
+  bottom :600px;
+  left: 8%;
+}
