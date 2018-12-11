@@ -2,7 +2,7 @@
   'use strict';
   var area = document.getElementById('area');
   var are = document.getElementById('are');
-  var i, ii, id,ha,a, en = false;
+  var i, ii, id,ha,a, en = false,reee=false;
   var table = document.createElement('table');
   for (i = 0; i < 4; i++) {
     var tr = document.createElement('tr');
@@ -22,12 +22,11 @@
   mon();
   }
 
-
-
   function mon() {
     while (are.firstChild) {
       are.removeChild(are.firstChild);
     }
+    if(!reee){
     while (area.firstChild) {
       area.removeChild(area.firstChild);
     }
@@ -50,9 +49,11 @@
     area.appendChild(table);
     tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
     var end = false;
-    for (var iii = 0; iii < 2000; iii++) {
+    for (var iii = 0; iii < 2000; iii++) {/////2000
       ir((Math.floor(Math.random() * 16)) + 1);
     }
+    var re = tiles.toString();
+  }
     end = true;
 
     function onclick(e) {
@@ -86,9 +87,6 @@
     }
 
     function swap(q, w) {
-      //if (!end) {
-        //console.log('入れ替え', q, w);//入れ替え text mo tiles
-      //}
       var kanu = tiles[q - 1];//データ
       tiles[q - 1] = tiles[w - 1];
       tiles[w - 1] = kanu;
@@ -96,17 +94,37 @@
         document.getElementById(i).innerText = tiles[i - 1] === 0 ? '' : tiles[i - 1];
       }
       sw = false;
-      var qq = 0;
-      for (var q = 0; q < 15; q++) {
-        if (tiles[q] === [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0][q]) {
-          qq++;
-        }
+      var ok = false;
+      if (tiles.toString()===[1,2,3,4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0].toString()){
+        ok=true;
       }
       var ti;
       function al() {
-        alert('完成\n '+ti+'秒かかりました');
+        alert('完成\n ' + ti + '秒かかりました'+(reee?'\n やり直しました':''));
+        var ree = document.createElement('button');
+        ree.innerText = '同じ問題をもう一度';
+        ree.onclick = function () {
+          ha = Date.now();
+          reee = true;
+          tiles = re.split(',');
+          for (var k = 1; k < 17; k++) {
+            document.getElementById(k).innerText = tiles[k - 1] === '0' ? '' : tiles[k - 1];
+          }
+          for(var j=0;j<16;j++){
+            tiles[j]=Number(tiles[j]);
+          }
+          en=false;
+          mon();
+        }
+        are.appendChild(ree);
+        are.appendChild(document.createElement('br'));
+        var mou = document.createElement('button');
+        mou.innerText = 'もう一度';
+        mou.onclick = function () { window.location.reload(); }
+        are.appendChild(mou);
+
       }
-      if (end && qq === 15) {
+      if (end && ok) {
         en = false;
         a = Date.now();
         ti = Math.round((a - ha)/1000);
