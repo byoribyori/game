@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>色並べ</title>
+  <style>
+    body {
+      background-color: lightblue;
+      width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.3em;
+    }
+
+    .area {
+      font-size: 1.4em;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .li {
+      width: 430px;
+      height: 160px;
+      margin: auto;
+      font-size: 1.1em;
+    }
+
+    .input {
+      border-radius: 4px;
+      border: none;
+      display: block;
+      margin: auto;
+      font-size: 25px;
+      width: 8em;
+      height: 1em;
+    }
+
+    .input:focus {
+      border: solid blue 1.2px;
+    }
+
+    .select {
+      margin: auto auto 20px auto;
+
+    }
+
+    .sel {
+      width: 40px;
+      height: 40px;
+      border: solid 1.5px lightblue;
+      cursor: pointer;
+    }
+
+    .selo {
+      width: 40px;
+      height: 40px;
+      border: solid 1.5px black;
+    }
+
+    .se {
+      width: 35px;
+      height: 35px;
+      margin: auto;
+    }
+
+    .s {
+      cursor: pointer;
+    }
+
+    .start {
+      width: 200px;
+      height: 40px;
+      display: block;
+      margin: auto;
+      background-color: blanchedalmond;
+      border: 1px black solid;
+      border-radius: 10px;
+      color: gray;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 5px 9px 7px black;
+      transition: 0.4s;
+    }
+
+    .start:hover {
+      box-shadow: none;
+      color: black;
+      text-decoration: underline;
+    }
+
+    .info {
+      width: 500px;
+      height: 80px;
+      border: 3px red solid;
+      margin-top: 40px;
+    }
+
+    .info>span {
+      color: blue;
+      margin-left: 55px;
+    }
+
+    .info>div {
+      font-size: 1.6em;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .start:hover {
+      border: 1.8px black solid;
+    }
+  </style>
+  <div class="area">
+    <h1>
+      <span style="color:red">色</span>
+      <span style="color:blue">並</span>
+      <span style="color:yellow">べ</span>
+    </h1>
+    <div class="li">
+      <li>自分の色を縦・横・斜めに<br>　 4つ並べたら勝ち!</li>
+      <li>コマは落ちていく</li>
+    </div>
+    <div style="height:85px;text-align:center">
+      ユーザーネーム:<br>
+      <input type="text" class="input">
+    </div>
+    <table class="select">
+      <tr>
+        <th class="sel" id="1">
+          <div class="se" style="background-color:red"></div>
+        </th>
+        <th class="sel" id="2">
+          <div class="se" style="background-color:blue"></div>
+        </th>
+        <th class="sel" id="3">
+          <div class="se" style="background-color:yellow"></div>
+        </th>
+      </tr>
+      <tr>
+        <th class="sel" id="4">
+          <div class="se" style="background-color:green"></div>
+        </th>
+        <th class="sel" id="5">
+          <div class="se" style="background-color:pink"></div>
+        </th>
+        <th class="sel" id="6">
+          <div class="se" style="background-color:purple"></div>
+        </th>
+      </tr>
+      <tr>
+        <th class="s" id="7" style="text-decoration: underline" colspan="3">おまかせ</th>
+      </tr>
+    </table>
+
+    <button class="start">start</button>
+  </div>
+  <div class="info">
+    <span>最新の状況</span>
+    <div>待っている人はいません</div>
+  </div>
+</body>
+<script>
+
+  var color = 0;
+
+  function d(e) {
+    return document.getElementById(e);
+  }
+
+  for (let i = 0; i < 6; i++) {
+    document.getElementsByClassName('sel')[i].onclick = () => { select(i + 1) }
+  }
+  d(7).onclick = () => { select(7) }
+  function select(c) {
+    for (let i = 0; i < 6; i++) {
+      d(i + 1).className = "sel";
+    }
+    d(7).style = "";
+    if (c !== 7) {
+      color = c;
+      d(c).className = "selo";
+    } else {
+      d(7).style = "text-decoration: underline";
+      color = 0;
+    }
+    document.getElementsByTagName('style')[1].innerHTML = `.start:hover{border: 1.8px 
+    ${c === 1 ? "red" : c === 2 ? "blue" : c === 3 ? "yellow" : c === 4 ? "green" : c === 5 ? "pink" : c === 6 ? "purple" : "black"}
+     solid}`;
+  }
+</script>
+
+</html>
