@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>７並べ</title>
+</head>
+<body>
+  <style id="style">
+  body{
+    background-color: lightblue;
+  }
+  #start{
+    width: 300px;
+    height: 50px;
+    font-size: 30px;
+    margin: 20px auto 0 auto;
+    display: block;
+    background: linear-gradient(0deg, gray, #ffff00c0);
+    border: outset lightgray;
+    cursor: pointer;
+  }
+  #start:hover{
+    background: linear-gradient(0deg, #ffff00c0 , gray);
+  }
+  th>div{
+    background-color: white;
+    border: solid 1px black;
+    transition: top 1s, left 1s;
+  }
+  th{
+    padding: 0;
+  }
+  .m0,.m2{
+    color: black;
+  }
+  .m1,.m3{
+    color: red;
+  }
+  #opponent2{
+    margin: auto;
+  }
+  .card_ura{
+    background-color: orange;
+    color: orange;
+  }
+  #pass{
+    display: inline-block;
+    background: linear-gradient(0deg, gray, white);
+    cursor: pointer;
+  }
+
+
+  </style>
+
+  <div class="player" id="opponent1" style="border-bottom-color:lightblue;">手札<span id="t1">-</span>枚[ パス<span id="p1">・・・</span> ]</div>
+  <div class="player" id="opponent2" style="border-bottom-color:lightblue;">手札<span id="t2">-</span>枚[ パス<span id="p2">・・・</span> ]</div>
+  <div class="player" id="opponent3" style="border-bottom-color:lightblue;">手札<span id="t3">-</span>枚[ パス<span id="p3">・・・</span> ]</div>
+  <div class="player" id="I" style="border-bottom-color:lightblue;">手札<span id="t4">-</span>枚[ <span id="pass">パス</span><span id="p4">・・・</span> ]</div>
+  <table id="table"></table>
+  <button id="start">START</button>
+
+  <script src="shichinarabe2.js"></script>
+</body>
+</html>
