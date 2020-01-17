@@ -28,6 +28,12 @@ th>div{
 table{
   margin:${one_card * 1.3}px auto 0 auto;
 }
+#start{
+  width: ${one_card*3}px;
+  height: ${one_card/2}px;
+  font-size: ${one_card/3}px;
+  margin: ${one_card/5}px auto 0 auto;
+}
 `;
 
 //カード作成
@@ -64,6 +70,13 @@ d('style').innerHTML += `
   position:absolute;
   left:0;
   top:${one_card * 7}px;
+}
+[class^="confetti"]{
+  width:${one_card / 4}px;
+  height:${one_card / 4}px;
+  display:inline-block;
+  position:absolute;
+  z-index:2;
 }`;
 
 let ranking = [1, 4];
@@ -122,7 +135,7 @@ d('start').onclick = () => {
       return a - b;
     });
   }
-  //console.log(card, card_data)
+  console.log(card, card_data)
 
   //カード配り演出
   for (let i = 0; i < 4; i++) {
@@ -189,7 +202,7 @@ d('start').onclick = () => {
     }
   }, 4200);
 
-  //t のターンになる
+  //Do のターンになる
   let players = [1, 2, 3, 4];
   let Do;
   function turn() {
@@ -203,8 +216,11 @@ d('start').onclick = () => {
         play[Do](Do);
       }, Do == 4 ? 0 : 1100);
     } else {
-
+      if(d('I').innerText[0]==1){
+      first();
+      }
     }
+    finish();
   }
 
   //NPC思考設定
@@ -224,17 +240,14 @@ d('start').onclick = () => {
     (n) => {
       let can = can_card(n);
       if (can.length) {
-        if (can.length == 1) {
-          put(can[0], n);
-          return;
-        }
         let edge = biggest_space(n);
         let put_card = for_me(can, edge);
-        if (put_card.length == 1) {
-          put(put_card[0], n);
+        put_card = dont_help(put_card, n);
+        put_card = think_pass(n,put_card,can.length);
+        if(!put_card.length){
+          pass(n);console.log('!!!'+Mchange(can[0])+Nchange(can[0])+'!!!')
           return;
         }
-        put_card = dont_help(put_card, n);
         put(put_card[Math.floor(Math.random() * put_card.length)], n);
       } else {
         pass(n);
@@ -349,12 +362,33 @@ d('start').onclick = () => {
     let most = [[], o[0][0]];
     for (let i = 0; i < o.length; i++) {
       if (o[i][0] == most[1]) {
-        most[0].push(o[i][1]);
+        most[0].push(o[i]);
       } else {
         break;
       }
     }
     return most[0];
+  }
+
+  //パスするか考える
+  function think_pass(n,c,l){
+
+    let co = [];
+    if(pass_data[n][0]>=pass_data[n][1]||card[n].length==l){
+      for(let i=0;i<c.length;i++){
+        co.push(c[i][1]);
+      }
+      return co;
+    }
+
+    for(let i=0;i<c.length;i++){
+      let cn = Number(Nchange(c[i][1]));
+      cn=cn>7?14-cn:cn;
+      let s =cn-c[i][0];
+      if(!(s==1&&5-pass_data[n][2]<cn))co.push(c[i][1]);
+
+    }
+      return co;
   }
 
   let play = {
@@ -368,7 +402,17 @@ d('start').onclick = () => {
   for (let i = 1; i < 4; i++) {
     let random = Math.floor(Math.random() * think_data.length); random = 1;
     play[i] = think_data[random];
-  } 
+  }
+
+  let pass_data = {
+    1:null,
+    2:null,
+    3:null,
+    4:[0]
+  };
+  for(let i=1;i<4;i++){
+    pass_data[i]=[0,Math.floor(Math.random()*4),Math.random()>0.3?1:0];
+  }console.log(pass_data)
 
   //クリックに反応
   let I = false;
@@ -383,8 +427,8 @@ d('start').onclick = () => {
   }
   d('pass').onclick = () => {
     if (I) {
-      pass(4);
       I = false;
+      pass(4);
     }
   }
 
@@ -434,19 +478,25 @@ d('start').onclick = () => {
 
   //パス
   function pass(w) {
-    switch (d(`p${w}`).innerText) {
-      case '●●●':
+    if(pass_data[w][0]==3&& can_card(w).length){
+      alert('出せるカードがあります');
+      I=true;
+      return;
+    }
+    pass_data[w][0]++;
+    switch (pass_data[w][0]) {
+      case 4:
         end(w);
         break;
-      case '●●・':
+      case 3:
         d(`p${w}`).innerText = '●●●';
         setTimeout(turn, 200);
         break;
-      case '●・・':
+      case 2:
         d(`p${w}`).innerText = '●●・';
         setTimeout(turn, 200);
         break;
-      case '・・・':
+      case 1:
         d(`p${w}`).innerText = '●・・';
         setTimeout(turn, 200);
         break;
@@ -477,6 +527,49 @@ d('start').onclick = () => {
     }, 1050);
   }
 
+//1位演出
+function first() {
+  let n = innerWidth / 60;
+  let a = d('area');
+  let w = innerWidth;
+  let h =innerHeight;
+  function create() {
+    let e = document.createElement('span');
+    e.className = `confetti${Math.floor(Math.random() * 5)}`;
+    e.style = `transform:rotate3d(${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 360)}deg);
+    top:-${one_card / 3}px;left:${Math.random() * w}px;`;
+    a.appendChild(e);
+  }
 
+  for (let i = 0; i < n; i++) {
+    create();
+  }
+
+  let c = a.getElementsByTagName('span');
+  let roop = () => {
+    create();
+    for(let i=c.length-1;i>0;i--){
+    let co = c[Math.floor(Math.random() * c.length)];
+
+    let t = co.style.top;
+    let tt = Number(t.slice(0, t.length - 2));
+    if(tt>h){
+      co.remove();
+      continue;
+    }
+    co.style.top = tt + 7 + 'px';
+    let l = co.style.left;
+    co.style.left = Number(l.slice(0, l.length - 2)) + (Math.random() > 0.5 ? 3 : -3) + 'px';
+    let r = co.style.transform;
+    let d = (Number(r.slice(18, r.length - 4)));
+    co.style.transform = r.slice(0, 17) + (d + 10) % 360 + 'deg)';
+  }
+
+  };
+  setInterval(roop, 30);
 }
 
+}
+function finish(){
+  
+}
