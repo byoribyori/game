@@ -135,7 +135,7 @@ d('start').onclick = () => {
       return a - b;
     });
   }
-  console.log(card, card_data)
+ 
 
   //カード配り演出
   for (let i = 0; i < 4; i++) {
@@ -245,7 +245,7 @@ d('start').onclick = () => {
         put_card = dont_help(put_card, n);
         put_card = think_pass(n,put_card,can.length);
         if(!put_card.length){
-          pass(n);console.log('!!!'+Mchange(can[0])+Nchange(can[0])+'!!!')
+          pass(n);
           return;
         }
         put(put_card[Math.floor(Math.random() * put_card.length)], n);
@@ -412,7 +412,7 @@ d('start').onclick = () => {
   };
   for(let i=1;i<4;i++){
     pass_data[i]=[0,Math.floor(Math.random()*4),Math.random()>0.3?1:0];
-  }console.log(pass_data)
+  }
 
   //クリックに反応
   let I = false;
