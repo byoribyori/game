@@ -6,15 +6,16 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>７並べ</title>
 </head>
-<body>
+<body id="body">
   <style id="style">
   body{
     background-color: lightblue;
+    overflow: hidden;
   }
   #start{
     display: block;
     background: linear-gradient(0deg, gray, #ffff00c0);
-    border: outset lightgray;
+    border: outset lightgray 2px;
     cursor: pointer;
   }
   #start:hover{
@@ -46,7 +47,21 @@
     background: linear-gradient(0deg, gray, white);
     cursor: pointer;
   }
-
+  .confetti0{
+    background-color: yellow;
+  }
+  .confetti1{
+    background-color: pink;
+  }
+  .confetti2{
+    background-color: lightgreen;
+  }
+  .confetti3{
+    background-color: royalblue;
+  }
+  .confetti4{
+    background-color: mediumpurple;
+  }
 
   </style>
 
@@ -56,7 +71,7 @@
   <div class="player" id="I" style="border-bottom-color:lightblue;">手札<span id="t4">-</span>枚[ <span id="pass">パス</span><span id="p4">・・・</span> ]</div>
   <table id="table"></table>
   <button id="start">START</button>
-  <div id="area"></div>
-  <script src="shichinarabe.js"></script>
+  <div id="area">  </div>
+  <script src="shichinarabe2.js"></script>
 </body>
 </html>
