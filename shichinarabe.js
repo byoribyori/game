@@ -114,7 +114,7 @@ for (let i = 1; i < 4; i++) {
   let n = '';
   for (let j = 0; j < l; j++) {
     let char = r > 0.5 ? hiragana : katakana;
-    if (n[0] && n[0] != 'ん' && n[0] != 'っ' && n[0] != 'ー' && n[0] != 'ン' && n[0] != 'ッ') {
+    if (n[0] && n[n.length-1] != 'ん' && n[n.length-1] != 'っ' && n[n.length-1] != 'ー' && n[n.length-1] != 'ン' && n[n.length-1] != 'ッ') {
       char = char.concat(r > 0.5 ? ['ん', 'っ'] : ['ン', 'ッ', 'ー']);
     }
     n += char[Math.floor(Math.random() * char.length)];
