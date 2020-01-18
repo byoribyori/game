@@ -6,20 +6,32 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>７並べ</title>
 </head>
-<body id="body">
+<body id="body"><div class="body">
   <style id="style">
   body{
     background-color: lightblue;
     overflow: hidden;
+    margin: 0 auto;
   }
-  #start{
+  [id^='r']{
+    display: inline-block;
+  }
+  button{
     display: block;
-    background: linear-gradient(0deg, gray, #ffff00c0);
     border: outset lightgray 2px;
     cursor: pointer;
   }
+  #start{
+    background: linear-gradient(0deg, gray, #ffff00c0);
+  }
+  #again{
+    background: linear-gradient(0deg, gray, #d5fc83);
+  }
   #start:hover{
     background: linear-gradient(0deg, #ffff00c0 , gray);
+  }
+  #again:hover{
+    background: linear-gradient(0deg, #d5fc83 , gray);
   }
   th>div{
     background-color: white;
@@ -65,13 +77,13 @@
 
   </style>
 
-  <div class="player" id="opponent1" style="border-bottom-color:lightblue;">手札<span id="t1">-</span>枚[ パス<span id="p1">・・・</span> ]</div>
-  <div class="player" id="opponent2" style="border-bottom-color:lightblue;">手札<span id="t2">-</span>枚[ パス<span id="p2">・・・</span> ]</div>
-  <div class="player" id="opponent3" style="border-bottom-color:lightblue;">手札<span id="t3">-</span>枚[ パス<span id="p3">・・・</span> ]</div>
+  <div class="player" id="opponent1" style="border-bottom-color:lightblue;"><span id="n1">----</span><br><div id="r1">手札<span id="t1">-</span>枚[ パス<span id="p1">・・・</span> ]</div></div>
+  <div class="player" id="opponent2" style="border-bottom-color:lightblue;"><span id="n2">----</span><br><div id="r2">手札<span id="t2">-</span>枚[ パス<span id="p2">・・・</span> ]</div></div>
+  <div class="player" id="opponent3" style="border-bottom-color:lightblue;"><span id="n3">----</span><br><div id="r3">手札<span id="t3">-</span>枚[ パス<span id="p3">・・・</span> ]</div></div>
   <div class="player" id="I" style="border-bottom-color:lightblue;">手札<span id="t4">-</span>枚[ <span id="pass">パス</span><span id="p4">・・・</span> ]</div>
   <table id="table"></table>
   <button id="start">START</button>
   <div id="area">  </div>
-  <script src="shichinarabe.js"></script>
+  <script src="shichinarabe.js"></script></div>
 </body>
 </html>
