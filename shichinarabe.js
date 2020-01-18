@@ -28,11 +28,20 @@ th>div{
 table{
   margin:${one_card * 1.3}px auto 0 auto;
 }
+#start,#again{
+  width: ${one_card * 3}px;
+  height: ${one_card / 2}px;
+  font-size: ${one_card / 3}px;
+}
 #start{
-  width: ${one_card*3}px;
-  height: ${one_card/2}px;
-  font-size: ${one_card/3}px;
-  margin: ${one_card/5}px auto 0 auto;
+  margin: ${one_card / 5}px auto 0 auto;
+}
+#again{
+  margin: ${one_card * 5}px auto 0 auto;
+}
+body{
+  width:${one_card * 15}px;
+  height:${one_card * 9}px;
 }
 `;
 
@@ -51,8 +60,8 @@ d('table').innerHTML = table;
 //css設定2
 d('style').innerHTML += `
 .player{
-  width: ${(innerWidth - d('table').getClientRects()[0].width) / 2.5}px;
-  font-size:${(innerWidth - d('table').getClientRects()[0].width) / 29}px;
+  width: ${(one_card * 15 - d('table').getClientRects()[0].width) / 2.5}px;
+  font-size:${(one_card * 15 - d('table').getClientRects()[0].width) / 29}px;
   text-align:center;
   border-bottom:solid 2px;
 }
@@ -69,7 +78,7 @@ d('style').innerHTML += `
 #I{
   position:absolute;
   left:0;
-  top:${one_card * 7}px;
+  top:${one_card * 6.6}px;
 }
 [class^="confetti"]{
   width:${one_card / 4}px;
@@ -85,6 +94,34 @@ let ranking = [1, 4];
 d('start').onclick = () => {
   d('start').remove();
 
+  //名前を作る
+let hiragana = [
+  "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た", "ち", "つ", "て", "と",
+  "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", "ま", "み", "む", "め", "も", "や", "ゆ", "よ",
+  "ら", "り", "る", "れ", "ろ", "わ", "が", "ぎ", "ぐ", "げ", "ご", "ざ", "じ", "ず", "ぜ", "ぞ", "だ", "ぢ", "づ", "で", "ど",
+  "ば", "び", "ぶ", "べ", "ぼ", "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"
+];
+let katakana = [
+  "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト",
+  "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ",
+  "ラ", "リ", "ル", "レ", "ロ", "ワ", "ガ", "ギ", "グ", "ゲ", "ゴ", "ザ", "ジ", "ズ", "ゼ", "ゾ", "ダ", "ヂ", "ヅ", "デ", "ド",
+  "バ", "ビ", "ブ", "ベ", "ボ", "パ", "ピ", "プ", "ペ", "ポ"
+];
+
+for (let i = 1; i < 4; i++) {
+  let l = Math.floor(Math.random() * 5) + 2;
+  let r = Math.random();
+  let n = '';
+  for (let j = 0; j < l; j++) {
+    let char = r > 0.5 ? hiragana : katakana;
+    if (n[0] && n[0] != 'ん' && n[0] != 'っ' && n[0] != 'ー' && n[0] != 'ン' && n[0] != 'ッ') {
+      char = char.concat(r > 0.5 ? ['ん', 'っ'] : ['ン', 'ッ', 'ー']);
+    }
+    n += char[Math.floor(Math.random() * char.length)];
+  }
+  d(`n${i}`).innerText=n;
+}
+
   //位置のデータ
   let position_data = {};
   for (let i = 0; i < 4; i++) {
@@ -98,7 +135,7 @@ d('start').onclick = () => {
     }
   }
   for (let i = 1; i < 14; i++) {
-    position_data[`m${i}`] = [position_data[`3${i}`][0] + one_card * 2.5, position_data[`3${i}`][1]];
+    position_data[`m${i}`] = [position_data[`3${i}`][0] + one_card * 2, position_data[`3${i}`][1]];
   }
   position_data['o1'] = [d('opponent1').getClientRects()[0].top + d('opponent1').getClientRects()[0].height * 1.2,
   d('opponent1').getClientRects()[0].left + (d('opponent1').getClientRects()[0].width - one_card / 1.5) / 2];
@@ -135,7 +172,6 @@ d('start').onclick = () => {
       return a - b;
     });
   }
- 
 
   //カード配り演出
   for (let i = 0; i < 4; i++) {
@@ -216,11 +252,11 @@ d('start').onclick = () => {
         play[Do](Do);
       }, Do == 4 ? 0 : 1100);
     } else {
-      if(d('I').innerText[0]==1){
-      first();
+      if (d('I').innerText[0] == 1) {
+        first();
       }
+      finish();
     }
-    finish();
   }
 
   //NPC思考設定
@@ -243,8 +279,8 @@ d('start').onclick = () => {
         let edge = biggest_space(n);
         let put_card = for_me(can, edge);
         put_card = dont_help(put_card, n);
-        put_card = think_pass(n,put_card,can.length);
-        if(!put_card.length){
+        put_card = think_pass(n, put_card, can.length);
+        if (!put_card.length) {
           pass(n);
           return;
         }
@@ -371,24 +407,24 @@ d('start').onclick = () => {
   }
 
   //パスするか考える
-  function think_pass(n,c,l){
+  function think_pass(n, c, l) {
 
     let co = [];
-    if(pass_data[n][0]>=pass_data[n][1]||card[n].length==l){
-      for(let i=0;i<c.length;i++){
+    if (pass_data[n][0] >= pass_data[n][1] || card[n].length == l) {
+      for (let i = 0; i < c.length; i++) {
         co.push(c[i][1]);
       }
       return co;
     }
 
-    for(let i=0;i<c.length;i++){
+    for (let i = 0; i < c.length; i++) {
       let cn = Number(Nchange(c[i][1]));
-      cn=cn>7?14-cn:cn;
-      let s =cn-c[i][0];
-      if(!(s==1&&5-pass_data[n][2]<cn))co.push(c[i][1]);
+      cn = cn > 7 ? 14 - cn : cn;
+      let s = cn - c[i][0];
+      if (!(s == 1 && 5 - pass_data[n][2] < cn)) co.push(c[i][1]);
 
     }
-      return co;
+    return co;
   }
 
   let play = {
@@ -405,13 +441,13 @@ d('start').onclick = () => {
   }
 
   let pass_data = {
-    1:null,
-    2:null,
-    3:null,
-    4:[0]
+    1: null,
+    2: null,
+    3: null,
+    4: [0]
   };
-  for(let i=1;i<4;i++){
-    pass_data[i]=[0,Math.floor(Math.random()*4),Math.random()>0.3?1:0];
+  for (let i = 1; i < 4; i++) {
+    pass_data[i] = [0, Math.floor(Math.random() * 4), Math.random() > 0.3 ? 1 : 0];
   }
 
   //クリックに反応
@@ -467,7 +503,7 @@ d('start').onclick = () => {
       turn();
     }, 1200);
     if (!card[w].length) {
-      document.getElementsByClassName('player')[w - 1].innerText = `${ranking[0]}位`;
+      d(w==4?'I':`r${w}`).innerText = `${ranking[0]}位`;
       d(w == 4 ? 'I' : `opponent${w}`).style = `border:solid 2px ${ranking[0] == 1 ? 'gold' : ranking[0] == 2 ? 'whitesmoke' : ranking[0] == 3 ? 'brown' : 'lightblue'};`;
       ranking[0]++;
       setTimeout(() => {
@@ -478,9 +514,9 @@ d('start').onclick = () => {
 
   //パス
   function pass(w) {
-    if(pass_data[w][0]==3&& can_card(w).length){
+    if (pass_data[w][0] == 3 && can_card(w).length) {
       alert('出せるカードがあります');
-      I=true;
+      I = true;
       return;
     }
     pass_data[w][0]++;
@@ -506,7 +542,7 @@ d('start').onclick = () => {
   //パス4
   function end(w) {
     players.splice(players.indexOf(w), 1);
-    document.getElementsByClassName('player')[w - 1].innerText = `${ranking[1]}位`;
+    d(w==4?'I':`r${w}`).innerText = `${ranking[1]}位`;
     d(w == 4 ? 'I' : `opponent${w}`).style = `border:solid 2px ${ranking[1] == 1 ? 'gold' : ranking[1] == 2 ? 'whitesmoke' : ranking[1] == 3 ? 'brown' : 'lightblue'};`;
     ranking[1]--;
     for (let i = 0; i < card[w].length; i++) {
@@ -527,49 +563,59 @@ d('start').onclick = () => {
     }, 1050);
   }
 
-//1位演出
-function first() {
-  let n = innerWidth / 60;
-  let a = d('area');
-  let w = innerWidth;
-  let h =innerHeight;
-  function create() {
-    let e = document.createElement('span');
-    e.className = `confetti${Math.floor(Math.random() * 5)}`;
-    e.style = `transform:rotate3d(${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 360)}deg);
+  //1位演出
+  function first() {
+    let n = innerWidth / 60;
+    let a = d('area');
+    let w = innerWidth;
+    let h = innerHeight;
+    function create() {
+      let e = document.createElement('span');
+      e.className = `confetti${Math.floor(Math.random() * 5)}`;
+      e.style = `transform:rotate3d(${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 2)},${Math.floor(Math.random() * 360)}deg);
     top:-${one_card / 3}px;left:${Math.random() * w}px;`;
-    a.appendChild(e);
-  }
-
-  for (let i = 0; i < n; i++) {
-    create();
-  }
-
-  let c = a.getElementsByTagName('span');
-  let roop = () => {
-    create();
-    for(let i=c.length-1;i>0;i--){
-    let co = c[Math.floor(Math.random() * c.length)];
-
-    let t = co.style.top;
-    let tt = Number(t.slice(0, t.length - 2));
-    if(tt>h){
-      co.remove();
-      continue;
+      a.appendChild(e);
     }
-    co.style.top = tt + 7 + 'px';
-    let l = co.style.left;
-    co.style.left = Number(l.slice(0, l.length - 2)) + (Math.random() > 0.5 ? 3 : -3) + 'px';
-    let r = co.style.transform;
-    let d = (Number(r.slice(18, r.length - 4)));
-    co.style.transform = r.slice(0, 17) + (d + 10) % 360 + 'deg)';
+
+    for (let i = 0; i < n; i++) {
+      create();
+    }
+
+    let c = a.getElementsByTagName('span');
+    let roop = () => {
+      create();
+      for (let i = c.length - 1; i > 0; i--) {
+        let co = c[Math.floor(Math.random() * c.length)];
+
+        let t = co.style.top;
+        let tt = Number(t.slice(0, t.length - 2));
+        if (tt > h) {
+          co.remove();
+          continue;
+        }
+        co.style.top = tt + 7 + 'px';
+        let l = co.style.left;
+        co.style.left = Number(l.slice(0, l.length - 2)) + (Math.random() > 0.5 ? 3 : -3) + 'px';
+        let r = co.style.transform;
+        let d = (Number(r.slice(18, r.length - 4)));
+        co.style.transform = r.slice(0, 17) + (d + 10) % 360 + 'deg)';
+      }
+
+    };
+    setInterval(roop, 30);
   }
 
-  };
-  setInterval(roop, 30);
-}
+  //ゲーム終了時
+  function finish() {
+    let r = document.createElement('button');
+    r.id = 'again';
+    r.innerText = 'もう一度!';
+    r.onclick = () => {
+      location.reload();
+    }
+    d('body').appendChild(r);
+  }
 
 }
-function finish(){
-  
-}
+
+
