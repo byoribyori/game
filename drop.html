@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>ちょりちょりゲーム</title>
+</head>
+
+<body>
+  <style id="style">
+    body {
+      margin: 0;
+      background-color: white;
+      ;
+    }
+
+    [class^="block"] {
+      display: inline-block;
+    }
+
+    [class^="block"]:not(#bloc) {
+      z-index: 1;
+      transition: top 0.5s;
+    }
+
+    .block1 {
+      background-color: lightblue;
+    }
+
+    .block2 {
+      background-color: lightgreen;
+    }
+
+    .block3 {
+      background-color: lightyellow;
+    }
+
+    .block4 {
+      background-color: pink;
+    }
+
+    .block5 {
+      background-color: rgb(178, 150, 178);
+    }
+
+    .block0 {
+      background-color: gray;
+    }
+
+    #bloc {
+      display: inline-block;
+      z-index: -1;
+    }
+  </style>
+  <div id="kakusi"></div>
+  <div id="area">
+    <div id="display"></div>
+    <div id="score">
+      <h2>遊び方</h2>
+      <div id="description">
+        同じ色のブロックを縦か横に３つつなげるとそのブロックが消えるぞ<br><br>
+        ブロックを１つタッチするとそのブロックは消えて、上のブロックが落ちてくるぞ<br><br>
+        1回のタッチでなるべく多くのブロックをつなげよう<br><br>
+        1分でたくさん消そう
+      </div>
+      <select id="select">
+        <option value="1234" selected>初級</option>
+        <option value="12345">上級</option>
+      </select>
+      <button id="start">START</button>
+    </div>
+  </div>
+  <div id="block"></div>
+
+  <script>
+    function d(e) {
+      return document.getElementById(e);
+    }
+
+    let can = false;
+
+    ///css設定
+    const width = innerWidth * 0.95 / 1.5;
+    const height = innerHeight * 0.95;
+    const long = Math.floor(Math.min(width, height) / 10) * 10;
+    const one = long / 10;
+    const border = Math.floor(long / 30);
+    d('style').innerHTML += `
+    #kakusi {
+      width: 100%;
+      height: ${(innerHeight - (long + border)) / 2}px;
+      z-index: 2;
+      background-color: white;
+      position: absolute;
+      top: 0;
+    }
+    #area {
+      width: ${long * 1.5}px;
+      margin: ${(innerHeight - (long + border)) / 2}px auto;
+      background-color: orange;
+    }
+    #display {
+      width: ${long}px;
+      height: ${long}px;
+      border-left: ${border}px solid brown;
+      border-right: ${border}px solid brown;
+      border-bottom: ${border}px solid brown;
+      display: inline-block;
+    }
+    #score {
+      width: ${long * 1.5 - long - border * 2}px;
+      height: ${long}px;
+      display: inline-block;
+      float: right;
+    }
+    .retu {
+      height: ${one}px;
+    }
+    [class^="block"] {
+      width: ${one}px;
+      height: ${one}px;
+      border-radius: ${one / 5}px;
+    }
+    h2 {
+      text-align: center;
+      font-size: ${one / 2.5}px;
+      margin-top: 2em;
+    }
+    #description {
+      font-size: ${Math.floor((long * 1.5 - long - border * 2) / 22)}px;
+      width: 90%;
+      margin: auto;
+    }
+    select {
+      font-size: ${one / 4}px;
+      margin: 1.5em auto;
+      display: block;
+      height: 1.5em;
+    }
+    #start {
+      font-size: ${long / 30}px;
+      margin: 1.3em auto;
+      display: block;
+      background-color: white;
+      border: outset lightgray ${long / 300}px;
+      color: black;
+    }
+    #score0 {
+      margin-top: ${one * 2}px;
+      text-align: center;
+    }
+    #score1 {
+      color: blue;
+      display: inline-block;
+      font-size: ${one / 1.5}px;
+    }
+    #score2 {
+      font-size: ${one / 3}px;
+      width: 30%;
+      height: 1em;
+      margin-left: 50%;
+      transform: rotate(25deg);
+    }
+    #time {
+      margin: ${one * 4}px auto 0 auto ;
+      font-size: ${one / 2}px;
+      text-align: center;
+      width: 80%;
+      border: dashed orangered ${one / 20}px;
+    }
+    `;
+
+    //あらかじめ位置データ
+    let display = '';
+    let position = {};
+    for (let i = 0; i < 10; i++) {
+      display += '<div class="retu">';
+      for (let j = 0; j < 10; j++) {
+        display += `<div class="block"></div>`;
+      }
+      display += '</div>';
+    }
+    d('display').innerHTML = display;
+    const block = document.getElementsByClassName('block');
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        let b = block[i * 10 + j];
+        position['' + i + j] = [b.getClientRects()[0].top, b.getClientRects()[0].left];
+        b.id = `${'' + i + j}`;
+      }
+    }
+
+    d('start').onclick = () => {
+      const number = d('select').value;
+      d('score').innerHTML =
+        '<div id="score0"><div id="score2"></div><div id="score1">0</div></div><div id="time">0<span id="m">1</span>:<span id="s">00</span></div>';
+
+      //初めからつながらないようにする
+      function dont_connect(i, j) {
+        let n = number.split('');
+        if (i > 1 && Data[i - 1][j] == Data[i - 2][j]) {
+          n.splice(n.indexOf(Data[i - 1][j]), 1);
+        }
+        if (j > 1 && Data[i][j - 1] == Data[i][j - 2]) {
+          n.splice(n.indexOf(Data[i][j - 1]), 1);
+        }
+        return n[Math.floor(Math.random() * n.length)];
+      }
+
+      //ディスプレイ表示
+      let Data = [];
+      let data = [];
+      display = '';
+      for (let i = 0; i < 10; i++) {
+        Data.push([]);
+        data.push([]);
+        for (let j = 0; j < 10; j++) {
+          setTimeout(() => {
+            let r = dont_connect(i, j);
+            let e = document.createElement('div');
+            let ij = '' + (9 - i) + (9 - j);
+            e.id = ij;
+            e.className = `block${r}`;
+            e.style = `position:absolute;top:${position[ij][0]}px;left:${position[ij][1]}px;`;
+            d('block').appendChild(e);
+            Data[i].push(r);
+            data[9 - i][9 - j] = r;
+          }, 15 * (i * 10 + j));
+        }
+      }
+      for (let i = 0; i < 9; i++) {
+        document.getElementsByClassName('retu')[0].remove();
+        d('9' + i).remove();
+      }
+      d('99').id = 'bloc';
+
+      let time = 59;
+      setTimeout(() => {
+        can = true;
+        Data = null;
+        //console.log(data)
+        const s = setInterval(() => {
+          d('s').innerText = time > 9 ? time : '0' + time;
+          if (!time) clearInterval(s);
+          time--;
+        }, 1000);
+        setTimeout(() => { d('m').innerText = '0'; }, 1000);
+      }, 1490);
+
+      //タッチにされたときの処理
+      let score = 0;
+      let combo;
+      d('block').onclick = (e) => {
+        let id = e.target.id;
+        if (!can || isNaN(id)) return;
+        can = false;
+        combo = 0;
+        erase([id]);
+      }
+
+      //ブロックを消す スコア加算
+      function erase(id) {
+        for (let i = 0; i < id.length; i++) {
+          d(id[i]).className = 'block0';
+          setTimeout(() => {
+            d(id[i]).remove();
+          }, 200);
+        }
+        setTimeout(() => {
+          drop(id);
+          if (id.length > 1) {
+            let point = Math.round(10 * id.length * (1 + id.length / 20) * (1 + combo / 5));
+            d('score2').innerText = '+' + point;
+            d('score1').innerText = Number(d('score1').innerText) + point;
+            combo++;
+          }
+        }, 200);
+      }
+
+      //ブロックを落とす
+      function drop(id) {
+        let block = {};
+        for (let i = 0; i < id.length; i++) { //縦におなじものを集める
+          if (!block[id[i][1]]) {
+            block[id[i][1]] = [id[i]];
+          } else {
+            block[id[i][1]].unshift(id[i]);
+          }
+        }
+        for (let k in block) { //落とす
+          let v = block[k].sort()[block[k].length - 1];
+          let n = v[0];
+          let m = v[1];
+          let c = 0;
+          for (let i = 0; i < n; i++) {
+            if (!d(n - i - 1 + '' + m)) continue;
+            d(n - i - 1 + '' + m).style.top = position[n - c + '' + m][0] + 'px';
+            d(n - i - 1 + '' + m).id = n - c + '' + m;
+            data[n - c][m] = data[n - i - 1][m];
+            c++;
+          }
+          a: for (let i = 0; i < 10; i++) {
+            if (data[i][m]) {
+              for (let j = 0; j < block[k].length; j++) {
+                data[i + j][m] = 0;
+              }
+              break a;
+            }
+          }
+        }
+        check();
+      }
+
+      //つながってるか確認
+      function check() {
+        let k = [];
+        for (let i = 0; i < 10; i++) {
+          for (let j = 0; j < 10; j++) {
+            let ij = data[i][j];
+            if (!ij) continue;
+            if (j < 8 && ij == data[i][j + 1] && ij == data[i][j + 2]) {
+              if (k.indexOf(i + '' + j) == -1) k.push(i + '' + j);
+              if (k.indexOf(i + '' + (j + 1)) == -1) k.push(i + '' + (j + 1));
+              if (k.indexOf(i + '' + (j + 2)) == -1) k.push(i + '' + (j + 2));
+            }
+            if (i < 8 && ij == data[i + 1][j] && ij == data[i + 2][j]) {
+              if (k.indexOf(i + '' + j) == -1) k.push(i + '' + j);
+              if (k.indexOf(i + 1 + '' + j) == -1) k.push(i + 1 + '' + j);
+              if (k.indexOf(i + 2 + '' + j) == -1) k.push(i + 2 + '' + j);
+            }
+          }
+        }
+
+        if (k.length) {
+          setTimeout(() => { erase(k); }, 800);
+        }else if(time>-1){
+          if (d('block').getElementsByTagName('div').length == 100) {
+            setTimeout(() => { can = true; }, 600);
+          }else {
+            setTimeout(create, 400);
+          }
+        }else{
+          end();
+        }
+      }
+
+      //新しいブロックを作って落とす
+      function create() {
+        for (let i = 0; i < 10; i++) {
+          let no = 1;
+          for (let j = 9; j > -1; j--) {
+            if (!data[j][i]) {
+              let e = document.createElement('div');
+              let r = number[Math.floor(Math.random() * number.length)];
+              e.className = `block${r}`;
+              e.id = '' + j + i;
+              e.style = `position:absolute;top:${position['0' + i][0] - one * no}px;left:${position['' + j + i][1]}px;`;
+              d('block').appendChild(e);
+              data[j][i] = r;
+              setTimeout(() => {
+                e.style.top = position['' + j + i][0] + 'px';
+              }, 200);
+              no++;
+            }
+          }
+        }
+        setTimeout(check, 200);
+      }
+
+      //終了
+      function end() {
+
+      }
+    }
+  </script>
+
+
+</body>
+
+</html>
