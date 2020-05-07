@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>time</title>
+  <style>
+    body {
+      background-color: lightblue;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 50px 0 40px 0;
+    }
+
+    #byou {
+      font-size: 27px;
+      text-align: center;
+    }
+
+    [type="number"] {
+      font-size: 1em;
+      width: 2.4em;
+      text-align: center;
+    }
+
+    button{
+      cursor: pointer;
+    }
+
+    #button {
+      font-size: 26px;
+      text-align: center;
+      display: block;
+      margin: 30px auto;
+      width: 150px;
+      transition: color 0.4s, background-color 0.4s;
+      border-radius: 10px;
+    }
+
+    .start {
+      border: blue solid 1.5px;
+      background-color: white;
+      color: blue;
+    }
+
+    .start:hover {
+      background-color: blue;
+      color: white;
+    }
+
+    .stop {
+      border: red solid 1.5px;
+      background-color: white;
+      color: red;
+    }
+
+    .stop:hover {
+      background-color: red;
+      color: white;
+    }
+
+    #result {
+      text-align: center;
+      font-size: 25px;
+    }
+
+    #re{
+      font-size: 20px;
+      border: solid 1px black;
+      background-color: lightgray;
+      color: black;
+      border-radius: 5px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>時間あてゲーム</h1>
+  <div id="byou"><input type="number" value="10" id="time">秒</div>
+  <button id="button" class="start">スタート!!</button>
+
+  <script>
+    const b = document.getElementById('button');
+    const t = document.getElementById('time');
+    b.onclick = () => {
+      const time = Date.now();
+      const ti = t.value;
+      b.onclick = () => {
+        const n = Math.round((Date.now() - time) / 10) / 100;
+        b.remove();
+        let r = document.createElement('div');
+        r.innerHTML = `<div>今のタイムは${n}秒</div>`;
+        r.id = 'result';
+        let bu = document.createElement('button');
+        bu.innerText = 'もう一度';
+        bu.id='re';
+        bu.onclick = () => {
+          location.reload();
+        }
+        r.appendChild(bu);
+        document.getElementsByTagName('body')[0].appendChild(r);
+      }
+      const num = t.value;
+      t.remove();
+      document.getElementById('byou').innerText = num + '秒';
+      b.innerText = 'ストップ!!';
+      b.className = 'stop';
+    }
+
+   
+
+  </script>
+</body>
+
+</html>
