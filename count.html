@@ -30,22 +30,23 @@
       transition: background-color 1s;
     }
 
-    #nanido{
+    #nanido {
       display: inline-block;
     }
 
-    [id^="select"]{
+    .select {
       width: 4em;
       display: inline-block;
-    text-align: center;
-    border-radius: 0.5em;
+      text-align: center;
+      border-radius: 0.5em;
+      transition: box-shadow .4s;
     }
 
-    .o{
+    [data-s="o"] {
       border: 2px solid red;
     }
 
-    .x{
+    .select:not([data-s="o"]) {
       border: 2px solid #009aff;
     }
 
@@ -65,10 +66,10 @@
   <div id="area">
     <div id="house">
       <div id="nanido">
-        <span id="select0" class="o">初級</span>
-        <span id="select1" class="x">中級</span>
-        <span id="select2" class="x">上級</span>
-        <span id="select3" class="x">超上級</span>
+        <span class="select" id="s0" data-s="o">初級</span>
+        <span class="select" id="s1">中級</span>
+        <span class="select" id="s2">上級</span>
+        <span class="select" id="s3">超上級</span>
       </div>
     </div>
     <button>START</button>
@@ -83,26 +84,41 @@
 
     document.getElementById('style').innerHTML = `
     #area {
-      width: ${l*10}px;
-      height: ${l*15}px;
+      width: ${l * 10}px;
+      height: ${l * 15}px;
       margin: ${(height - l * 15) / 2}px auto 0 auto;
       outline: black dotted ${l / 10}px;
       outline-offset: -${l / 10}px;
     }
     
     #nanido {
-      font-size: ${l/2}px;
+      font-size: ${l / 2}px;
     }
 
-    .o {
-      box-shadow: orange ${l/15}px ${l/15}px ${l/15}px 0px;
+    [data-s="o"] {
+      box-shadow: orange ${l / 15}px ${l / 15}px ${l / 15}px 0px;
     }
     
     `;
     document.getElementById('style').innerHTML += `
     #nanido {
-      margin: ${l}px ${(l*10-document.getElementById('nanido').getClientRects()[0].width)/2}px;
-      }`
+      margin: ${l}px ${(l * 10 - document.getElementById('nanido').getClientRects()[0].width) / 2}px;
+    }`;
+
+    const select = document.getElementsByClassName('select');
+    const selected = (e) => {
+      for (let i = 0; i < 4; i++) {
+        select[i].dataset.s = "";
+      }
+      document.getElementById(e).dataset.s = "o";
+    }
+    for (let i = 0; i < 4; i++) {
+      select[i].onclick = (e) => {
+        let s = e.target.dataset.s;
+        if (s) return;
+        selected(e.target.id)
+      }
+    }
 
 
   </script>
