@@ -21,30 +21,50 @@
       background-color: aliceblue;
     }
 
-    #house{
-      background-color: black;
+    #house {
+      background-color: transparent;
       width: 100%;
       height: 20%;
       position: relative;
       top: 40%;
+      transition: background-color 1s;
     }
 
-      button{
-        width: 70%;
-    height: 8%;
-    margin: auto;
-    display: block;
-    position: relative;
-    top: 56%;
-      }
-    
+    #nanido{
+      display: inline-block;
+    }
+
+    #nanido>span{
+      width: 4em;
+      display: inline-block;
+    text-align: center;
+    border: 2px solid #009aff;
+    border-radius: 0.5em;
+
+    }
+
+    button {
+      width: 70%;
+      height: 8%;
+      margin: auto;
+      display: block;
+      position: relative;
+      top: 56%;
+    }
   </style>
 </head>
 
 <body>
   <style id="style"></style>
   <div id="area">
-    <div id="house"></div>
+    <div id="house">
+      <div id="nanido">
+        <span>初級</span>
+        <span>中級</span>
+        <span>上級</span>
+        <span>超上級</span>
+      </div>
+    </div>
     <button>START</button>
   </div>
 
@@ -53,20 +73,25 @@
     let width = document.getElementsByTagName('html')[0].getClientRects()[0].width;
     let height = document.getElementsByTagName('html')[0].getClientRects()[0].height;
     let l = Math.floor(Math.min(width, height / 1.5) / 20) * 20;
-    document.getElementById('area').style.width = l + 'px';
-    document.getElementById('area').style.height = l * 1.5 + 'px';
     l /= 10;
 
     document.getElementById('style').innerHTML = `
     #area {
+      width: ${l*10}px;
+      height: ${l*15}px;
       margin: ${(height - l * 15) / 2}px auto 0 auto;
       outline: black dotted ${l / 10}px;
       outline-offset: -${l / 10}px;
     }
     
+    #nanido {
+      font-size: ${l/2}px;
+    }
     `;
-
-
+    document.getElementById('style').innerHTML += `
+    #nanido {
+      margin: ${l}px ${(l*10-document.getElementById('nanido').getClientRects()[0].width)/2}px;
+      }`
 
 
   </script>
