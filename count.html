@@ -19,6 +19,24 @@
 
     #area {
       background-color: aliceblue;
+      z-index: 0;
+    }
+
+    .kakusi{
+      width: 90%;
+      height: 7%;
+      position: relative;
+      left: 5%;
+      background-color: aliceblue;
+      z-index: 2;
+    }
+
+    #k1{
+      top: -19%;
+    }
+
+    #k2{
+      top: 65%;
     }
 
     #house {
@@ -28,6 +46,7 @@
       position: relative;
       top: 40%;
       transition: background-color 1s;
+      z-index: 2;
     }
 
     #nanido {
@@ -50,13 +69,23 @@
       border: 2px solid #009aff;
     }
 
-    button {
+    #start {
       width: 70%;
       height: 8%;
       margin: auto;
       display: block;
       position: relative;
-      top: 56%;
+      top: 50%;
+    }
+
+    .maru{
+      display: inline-block;
+    background-color: red;
+    z-index: 1;
+    position: relative;
+    top: -33%;
+    left: 20%;
+    transition: top 1.5s;
     }
   </style>
 </head>
@@ -72,7 +101,10 @@
         <span class="select" id="s3">超上級</span>
       </div>
     </div>
-    <button>START</button>
+    <button id="start">START</button>
+    <div class="kakusi" id="k1" style="display: none;"></div>
+    <div class="kakusi" id="k2" style="display: none;"></div>
+    <span class="maru"></span>
   </div>
 
   <script>
@@ -99,26 +131,98 @@
       box-shadow: orange ${l / 15}px ${l / 15}px ${l / 15}px 0px;
     }
     
+    .maru {
+      width: ${l}px;
+      height: ${l}px;
+    }
     `;
     document.getElementById('style').innerHTML += `
     #nanido {
-      margin: ${l}px ${(l * 10 - document.getElementById('nanido').getClientRects()[0].width) / 2}px;
+      margin: 0 ${(l * 10 - document.getElementById('nanido').getClientRects()[0].width) / 2}px;
     }`;
 
+    let nanido = '0';
     const select = document.getElementsByClassName('select');
     const selected = (e) => {
       for (let i = 0; i < 4; i++) {
         select[i].dataset.s = "";
       }
       document.getElementById(e).dataset.s = "o";
+      nanido = e[1];
     }
     for (let i = 0; i < 4; i++) {
       select[i].onclick = (e) => {
         let s = e.target.dataset.s;
         if (s) return;
-        selected(e.target.id)
+        selected(e.target.id);
       }
     }
+
+    document.getElementById('start').onclick = () => { //1 2 3 3速
+      document.getElementById('start').remove();
+      document.getElementById('house').innerHTML = "";
+      document.getElementById('house').style.backgroundColor = "black";
+      document.getElementById('k1').style="";
+      document.getElementById('k2').style="";
+      document.getElementsByClassName('maru')[0].style.top="7%";
+
+      const color = [[1], [1, 2], [1, 2, 3], [1, 2, 3]];
+      let time = 0;
+      let plus;
+
+      const Plus = (c) => {
+        console.log(c);
+
+      }
+
+      switch (nanido) {
+        case '0':
+          plus = () => {
+            let c = [];
+            const num = Math.random() * (time < 20 ? 2 : 3);
+            for (let i = 0; i < num; i++) {
+              c.push(0);
+            }
+            Plus(c);
+          };
+          break;
+        case '1':
+          plus = () => {
+            let c = [];
+            const num = Math.random() * (time < 20 ? 2 : 3);
+            for (let i = 0; i < num; i++) {
+              c.push(Math.floor(Math.random() * 2));
+            }
+            Plus(c);
+          };
+          break;
+        case '2':
+          plus = () => {
+            let c = [];
+            const num = Math.random() * (time < 20 ? 2 : 3);
+            for (let i = 0; i < num; i++) {
+              c.push(Math.floor(Math.random() * 3));
+            }
+            Plus(c);
+          };
+          break;
+        case '3':
+          plus = () => {
+            let c = [];
+            const num = Math.random() * 3;
+            for (let i = 0; i < num; i++) {
+              c.push(Math.floor(Math.random() * 3));
+            }
+            Plus(c);
+          };
+          break;
+      }
+      plus();
+      plus();
+
+    }
+
+
 
 
   </script>
