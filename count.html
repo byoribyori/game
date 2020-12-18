@@ -26,8 +26,8 @@
       height: 7%;
       position: relative;
       left: 5%;
-      background-color: aliceblue;
-      background-color: blue;
+      /* background-color: aliceblue; */
+      /* background-color: blue; */
       z-index: 2;
     }
 
@@ -82,9 +82,7 @@
       display: inline-block;
     background-color: red;
     z-index: 1;
-    position: relative;
-    top: -33%;
-    left: 20%;
+    position: absolute;
     transition: top 1.5s;
     }
   </style>
@@ -104,6 +102,9 @@
     <button id="start">START</button>
     <div class="kakusi" id="k1" style="display: none;"></div>
     <div class="kakusi" id="k2" style="display: none;"></div>
+    <span class="maru" style="display: none;"></span>
+    <span class="maru" style="display: none;"></span>
+    <span class="maru" style="display: none;"></span>
     <span class="maru" style="display: none;"></span>
   </div>
 
@@ -162,10 +163,32 @@
       document.getElementById('start').remove();
       document.getElementById('house').innerHTML = "";
       document.getElementById('house').style.backgroundColor = "black";
-      document.getElementById('k1').style="";
-      document.getElementById('k2').style="";
-      document.getElementsByClassName('maru')[0].style.display="";
-      setTimeout(()=>{  document.getElementsByClassName('maru')[0].style.top=`${l}px`;},300)
+      const k1 = document.getElementById('k1');
+      const k2 = document.getElementById('k2');
+      k1.style="";
+      k2.style="";
+      const kp = [k1.getClientRects()[0].top,k2.getClientRects()[0].top,k1.getClientRects()[0].left];
+      for(let i=0;i<4;i++){
+        document.getElementsByClassName('maru')[i].style.display=``;
+      }
+      document.getElementsByClassName('maru')[0].style.top=`${kp[0]}px`;
+      document.getElementsByClassName('maru')[0].style.left=`${kp[2]+l*1.5}px`;
+      document.getElementsByClassName('maru')[1].style.top=`${kp[0]}px`;
+      document.getElementsByClassName('maru')[1].style.left=`${kp[2]+l*6.5}px`;
+      document.getElementsByClassName('maru')[2].style.top=`${kp[1]}px`;
+      document.getElementsByClassName('maru')[2].style.left=`${kp[2]+l*1.5}px`;
+      document.getElementsByClassName('maru')[3].style.top=`${kp[1]}px`;
+      document.getElementsByClassName('maru')[3].style.left=`${kp[2]+l*6.5}px`;
+      setTimeout(() => {
+        for(let i=0;i<4;i++){
+        document.getElementsByClassName('maru')[i].style.top=`${kp[0]-l/10+l*7}px`;
+      }
+      setTimeout(() => {
+        document.getElementById('house').style.backgroundColor = "";
+      }, 1800);
+      }, 200);
+      
+  
     
 
 
