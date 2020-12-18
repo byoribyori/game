@@ -9,7 +9,6 @@
     html {
       width: 100%;
       height: 100%;
-      border: d;
     }
 
     body {
@@ -27,6 +26,7 @@
       height: 7%;
       position: relative;
       left: 5%;
+      background-color: aliceblue;
       background-color: blue;
       z-index: 2;
     }
@@ -104,7 +104,7 @@
     <button id="start">START</button>
     <div class="kakusi" id="k1" style="display: none;"></div>
     <div class="kakusi" id="k2" style="display: none;"></div>
-    <span class="maru"></span>
+    <span class="maru" style="display: none;"></span>
   </div>
 
   <script>
@@ -164,7 +164,10 @@
       document.getElementById('house').style.backgroundColor = "black";
       document.getElementById('k1').style="";
       document.getElementById('k2').style="";
-      document.getElementsByClassName('maru')[0].style.top="7%";
+      document.getElementsByClassName('maru')[0].style.display="";
+      setTimeout(()=>{  document.getElementsByClassName('maru')[0].style.top=`${l}px`;},300)
+    
+
 
       const color = [[1], [1, 2], [1, 2, 3], [1, 2, 3]];
       let time = 0;
