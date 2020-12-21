@@ -21,21 +21,21 @@
       z-index: 0;
     }
 
-    .kakusi{
+    .kakusi {
       width: 90%;
       height: 7%;
       position: relative;
       left: 5%;
-      /* background-color: aliceblue; */
-      /* background-color: blue; */
+      background-color: aliceblue;
+      /* background-color: transparent; */
       z-index: 2;
     }
 
-    #k1{
+    #k1 {
       top: -19%;
     }
 
-    #k2{
+    #k2 {
       top: 65%;
     }
 
@@ -78,12 +78,24 @@
       top: 50%;
     }
 
-    .maru{
+    .maru {
       display: inline-block;
-    background-color: red;
-    z-index: 1;
-    position: absolute;
-    transition: top 1.5s;
+      border-radius: 50%;
+      z-index: 1;
+      position: absolute;
+      transition: top 3s;
+    }
+
+    [id^="red"] {
+      background-color: red;
+    }
+
+    [id^="blue"] {
+      background-color: blue;
+    }
+
+    [id^="green"] {
+      background-color: green;
     }
   </style>
 </head>
@@ -102,10 +114,6 @@
     <button id="start">START</button>
     <div class="kakusi" id="k1" style="display: none;"></div>
     <div class="kakusi" id="k2" style="display: none;"></div>
-    <span class="maru" style="display: none;"></span>
-    <span class="maru" style="display: none;"></span>
-    <span class="maru" style="display: none;"></span>
-    <span class="maru" style="display: none;"></span>
   </div>
 
   <script>
@@ -165,57 +173,99 @@
       document.getElementById('house').style.backgroundColor = "black";
       const k1 = document.getElementById('k1');
       const k2 = document.getElementById('k2');
-      k1.style="";
-      k2.style="";
-      const kp = [k1.getClientRects()[0].top,k2.getClientRects()[0].top,k1.getClientRects()[0].left];
-      for(let i=0;i<4;i++){
-        document.getElementsByClassName('maru')[i].style.display=``;
-      }
-      document.getElementsByClassName('maru')[0].style.top=`${kp[0]}px`;
-      document.getElementsByClassName('maru')[0].style.left=`${kp[2]+l*1.5}px`;
-      document.getElementsByClassName('maru')[1].style.top=`${kp[0]}px`;
-      document.getElementsByClassName('maru')[1].style.left=`${kp[2]+l*6.5}px`;
-      document.getElementsByClassName('maru')[2].style.top=`${kp[1]}px`;
-      document.getElementsByClassName('maru')[2].style.left=`${kp[2]+l*1.5}px`;
-      document.getElementsByClassName('maru')[3].style.top=`${kp[1]}px`;
-      document.getElementsByClassName('maru')[3].style.left=`${kp[2]+l*6.5}px`;
-      setTimeout(() => {
-        for(let i=0;i<4;i++){
-        document.getElementsByClassName('maru')[i].style.top=`${kp[0]-l/10+l*7}px`;
-      }
-      setTimeout(() => {
-        document.getElementById('house').style.backgroundColor = "";
-      }, 1800);
-      }, 200);
-      
-  
-    
-
+      k1.style = "";
+      k2.style = "";
+      const kp = [k1.getClientRects()[0].top, k2.getClientRects()[0].top, k1.getClientRects()[0].left];
 
       const color = [[1], [1, 2], [1, 2, 3], [1, 2, 3]];
+      let anser = [0, 0, 0];
       let time = 0;
-      let plus;
+      let place_data = [[kp[0], kp[2] + l * 1.5], [kp[0], kp[2] + l * 6.5], [kp[1], kp[2] + l * 1.5], [kp[1], kp[2] + l * 6.5]];
+      let place = place_data.concat();
+      let center = kp[0] - l / 10 + l * 7;
+      let count = [[0, 0, 0], [0, 0, 0]];
+      const area = document.getElementById('area');
 
       const Plus = (c) => {
-        console.log(c);
+        let random = Math.floor(Math.random() * place.length);
+        let pd = place[random];
+        for (let i = 0; i < c.length; i++) {
+          count[0][c[i]]++;
+          anser[c[i]]++;
+          let id = (c[i] == 0 ? "red" : c[i] == 1 ? "blue" : "green") + count[0][c[i]];
+          area.innerHTML += `<span id="${id}" class="maru"
+          style="posisition:absolute;top:${pd[0]}px;left:${pd[1]}px;"></span>`;
+          setTimeout(() => {
+            document.getElementById(id).style.top = center + 'px';
+          }, 100 + 400 * i);
+        }
+        place.splice(random, 1);
+      }
+
+      const Minus = (c) => {
+        let random = Math.floor(Math.random() * place.length);
+        let pd = place[random];
+        let cnt = 0;
+        for (let i = 0; i < c.length; i++) {
+          if (anser[c[i]]) {
+            count[1][c[i]]++;
+            anser[c[i]]--;
+            cnt++;
+            let id = (c[i] == 0 ? "red" : c[i] == 1 ? "blue" : "green") + count[1][c[i]];
+            setTimeout(() => {
+              let maru = document.getElementById(id);
+              maru.style.top = `${pd[0]}px`;
+              maru.style.left = `${pd[1]}px`;
+              setTimeout(() => {
+                maru.remove();
+              }, 3200);
+            }, 100 + 400 * cnt);
+          }
+        }
+        place.splice(random, 1);
 
       }
 
+      let plus, minus, s;
       switch (nanido) {
         case '0':
           plus = () => {
             let c = [];
-            const num = Math.random() * (time < 20 ? 2 : 3);
+            const num = Math.random() * (time < 12 ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(0);
             }
             Plus(c);
           };
+
+          minus = () => {
+            let c = [];
+            const num = Math.random() * (time < 12 ? 2 : 3);
+            for (let i = 0; i < num; i++) {
+              c.push(0);
+            }
+            Minus(c);
+          }
+
+          plus();
+          plus();
+          place = place_data.concat();
+
+          s = setInterval(() => {
+            minus();
+            plus();
+            plus();
+            place = place_data.concat();
+            time++;
+            if (time > 14) {
+              end();
+            }
+          }, 3800);
           break;
         case '1':
           plus = () => {
             let c = [];
-            const num = Math.random() * (time < 20 ? 2 : 3);
+            const num = Math.random() * (time < 10 ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(Math.floor(Math.random() * 2));
             }
@@ -225,7 +275,7 @@
         case '2':
           plus = () => {
             let c = [];
-            const num = Math.random() * (time < 20 ? 2 : 3);
+            const num = Math.random() * (time < 10 ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(Math.floor(Math.random() * 3));
             }
@@ -243,8 +293,19 @@
           };
           break;
       }
-      plus();
-      plus();
+
+      const end = () => {
+        clearInterval(s);
+        setTimeout(() => {
+          let r = prompt('赤は何個?');
+          alert(r == anser[0] ? '正解!' : '正解は' + anser[0]);
+        }, 4000);
+      }
+      // setInterval(() => {
+      //   plus(); plus(); console.log(anser)
+      //   place = place_data.concat();
+      // }, 2500);
+
 
     }
 
