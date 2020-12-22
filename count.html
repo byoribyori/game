@@ -167,22 +167,22 @@
       }
     }
 
-    document.getElementById('start').onclick = () => { //1 2 3 3速
+    document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
       document.getElementById('house').innerHTML = "";
-      document.getElementById('house').style.backgroundColor = "black";
+      //document.getElementById('house').style.backgroundColor = "black";
       const k1 = document.getElementById('k1');
       const k2 = document.getElementById('k2');
       k1.style = "";
       k2.style = "";
-      const kp = [k1.getClientRects()[0].top, k2.getClientRects()[0].top, k1.getClientRects()[0].left];
+      const kp = [k1.getClientRects()[0].top, k2.getClientRects()[0].top, k1.getClientRects()[0].left];//[上,下,横]
 
-      const color = [[1], [1, 2], [1, 2, 3], [1, 2, 3]];
       let anser = [0, 0, 0];
       let time = 0;
-      let place_data = [[kp[0], kp[2] + l * 1.5], [kp[0], kp[2] + l * 6.5], [kp[1], kp[2] + l * 1.5], [kp[1], kp[2] + l * 6.5]];
+      const center = kp[0] - l * 0.15 + l * 6;
+      const place_data = [[kp[0], kp[2] + l * 1.5, center], [kp[0], kp[2] + l * 6.5, center],
+      [kp[1], kp[2] + l * 1.5, center + l * 2], [kp[1], kp[2] + l * 6.5, center + l * 2]];
       let place = place_data.concat();
-      let center = kp[0] - l / 10 + l * 7;
       let count = [[0, 0, 0], [0, 0, 0]];
       const area = document.getElementById('area');
 
@@ -196,8 +196,8 @@
           area.innerHTML += `<span id="${id}" class="maru"
           style="posisition:absolute;top:${pd[0]}px;left:${pd[1]}px;"></span>`;
           setTimeout(() => {
-            document.getElementById(id).style.top = center + 'px';
-          }, 100 + 400 * i);
+            document.getElementById(id).style.top = pd[2] + 'px';
+          }, 100 + 500 * i);
         }
         place.splice(random, 1);
       }
@@ -210,16 +210,21 @@
           if (anser[c[i]]) {
             count[1][c[i]]++;
             anser[c[i]]--;
-            cnt++;
+
             let id = (c[i] == 0 ? "red" : c[i] == 1 ? "blue" : "green") + count[1][c[i]];
+            let maru = document.getElementById(id);
+            maru.style.transition = 'top 0s';
+            maru.style.top = `${pd[2]}px`;
+            maru.style.transition = 'top 3s';
             setTimeout(() => {
-              let maru = document.getElementById(id);
+              maru = document.getElementById(id);
               maru.style.top = `${pd[0]}px`;
               maru.style.left = `${pd[1]}px`;
               setTimeout(() => {
-                maru.remove();
+                document.getElementById(id).remove();
               }, 3200);
-            }, 100 + 400 * cnt);
+            }, 100 + 500 * cnt);
+            cnt++;
           }
         }
         place.splice(random, 1);
@@ -229,9 +234,10 @@
       let plus, minus, s;
       switch (nanido) {
         case '0':
+        case '1':
           plus = () => {
             let c = [];
-            const num = Math.random() * (time < 12 ? 2 : 3);
+            const num = Math.random() * (time < (nanido == '0' ? 12 : 10) ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(0);
             }
@@ -240,7 +246,7 @@
 
           minus = () => {
             let c = [];
-            const num = Math.random() * (time < 12 ? 2 : 3);
+            const num = Math.random() * (time < (nanido == '0' ? 12 : 10) ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(0);
             }
@@ -252,17 +258,18 @@
           place = place_data.concat();
 
           s = setInterval(() => {
+            if (nanido = '1' && Math.random() > 0.6) minus();
             minus();
-            plus();
+            if (Math.random() > 0.8) plus();
             plus();
             place = place_data.concat();
             time++;
             if (time > 14) {
               end();
             }
-          }, 3800);
+          }, 3900);
           break;
-        case '1':
+        case '2':
           plus = () => {
             let c = [];
             const num = Math.random() * (time < 10 ? 2 : 3);
@@ -271,35 +278,76 @@
             }
             Plus(c);
           };
-          break;
-        case '2':
-          plus = () => {
+
+          minus = () => {
             let c = [];
             const num = Math.random() * (time < 10 ? 2 : 3);
             for (let i = 0; i < num; i++) {
-              c.push(Math.floor(Math.random() * 3));
+              c.push(Math.floor(Math.random() * 2));
             }
-            Plus(c);
-          };
+            Minus(c);
+          }
+
+          plus();
+          plus();
+          place = place_data.concat();
+
+          s = setInterval(() => {
+            if (Math.random() > 0.8) minus();
+            if (Math.random() > 0.3) minus();
+            if (Math.random() > 0.3) plus();
+            plus();
+            place = place_data.concat();
+            time++;
+            if (time > 11) {
+              end();
+            }
+          }, 4100);
           break;
         case '3':
           plus = () => {
             let c = [];
-            const num = Math.random() * 3;
+            const num = Math.random() * (time < 8 ? 2 : 3);
             for (let i = 0; i < num; i++) {
               c.push(Math.floor(Math.random() * 3));
             }
             Plus(c);
           };
+
+          minus = () => {
+            let c = [];
+            const num = Math.random() * (time < 8 ? 2 : 3);
+            for (let i = 0; i < num; i++) {
+              c.push(Math.floor(Math.random() * 3));
+            }
+            Minus(c);
+          }
+
+          plus();
+          plus();
+          place = place_data.concat();
+
+          s = setInterval(() => {
+            if (Math.random() > 0.8) minus();
+            minus();
+            if (Math.random() > 0.8) plus();
+            plus();
+            place = place_data.concat();
+            time++;
+            if (time > 9) {
+              end();
+            }
+          }, 4500);
           break;
       }
 
       const end = () => {
         clearInterval(s);
         setTimeout(() => {
-          let r = prompt('赤は何個?');
-          alert(r == anser[0] ? '正解!' : '正解は' + anser[0]);
-        }, 4000);
+          // let r = prompt('赤は何個?');
+          // alert(r == anser[0] ? '正解!' : '正解は' + anser[0]);
+          alert('赤' + anser[0] + ' 青' + anser[1] + ' 緑' + anser[2])
+        }, 4300);
       }
       // setInterval(() => {
       //   plus(); plus(); console.log(anser)
