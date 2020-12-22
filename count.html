@@ -43,6 +43,7 @@
       background-color: transparent;
       width: 100%;
       height: 20%;
+      margin: auto;
       position: relative;
       top: 40%;
       transition: background-color 1s;
@@ -83,7 +84,7 @@
       border-radius: 50%;
       z-index: 1;
       position: absolute;
-      transition: top 3s;
+      transition: top 2.5s linear;
     }
 
     [id^="red"] {
@@ -144,6 +145,7 @@
       width: ${l}px;
       height: ${l}px;
     }
+
     `;
     document.getElementById('style').innerHTML += `
     #nanido {
@@ -169,8 +171,11 @@
 
     document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
-      document.getElementById('house').innerHTML = "";
-      document.getElementById('house').style.backgroundColor = "black";
+      const house = document.getElementById('house');
+      house.innerHTML = "";
+      house.style.backgroundColor = "black";
+      house.style.boxShadow = `gray 0 0 ${l/3}px ${l/5}px`;
+      house.style.width = '90%';
       const k1 = document.getElementById('k1');
       const k2 = document.getElementById('k2');
       k1.style = "";
@@ -197,7 +202,7 @@
           style="posisition:absolute;top:${pd[0]}px;left:${pd[1]}px;"></span>`;
           setTimeout(() => {
             document.getElementById(id).style.top = pd[2] + 'px';
-          }, 100 + 500 * i);
+          }, 100 + 600 * i);
         }
         place.splice(random, 1);
       }
@@ -215,7 +220,7 @@
             let maru = document.getElementById(id);
             maru.style.transition = 'top 0s';
             maru.style.top = `${pd[2]}px`;
-            maru.style.transition = 'top 3s';
+            maru.style.transition = '';
             setTimeout(() => {
               maru = document.getElementById(id);
               maru.style.top = `${pd[0]}px`;
@@ -223,7 +228,7 @@
               setTimeout(() => {
                 document.getElementById(id).remove();
               }, 3200);
-            }, 100 + 500 * cnt);
+            }, 100 + 600 * cnt);
             cnt++;
           }
         }
@@ -260,7 +265,7 @@
           s = setInterval(() => {
             if (nanido = '1' && Math.random() > 0.6) minus();
             minus();
-            if (Math.random() > 0.8) plus();
+            if (Math.random() > 0.4) plus();
             plus();
             place = place_data.concat();
             time++;
@@ -349,12 +354,8 @@
           alert('赤' + anser[0] + ' 青' + anser[1] + ' 緑' + anser[2])
         }, 4300);
       }
-      // setInterval(() => {
-      //   plus(); plus(); console.log(anser)
-      //   place = place_data.concat();
-      // }, 2500);
 
-
+      
     }
 
 
