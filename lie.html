@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #cccccc;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #des{
+      width: 19em;
+      margin: 1em auto;
+    }
+
+    #start {
+      background-color: white;
+      border: black solid 2px;
+      color: black;
+      border-radius: 0.5em;
+      width: 6em;
+      margin: auto;
+      display: block;
+    }
+
+    .s {
+      width: 13em;
+      margin: auto;
+    }
+
+    span.A {
+      color: red;
+    }
+
+    span.B {
+      color: blue;
+    }
+
+    span.C {
+      color: yellow;
+    }
+
+    span.D {
+      color: green;
+    }
+
+    span.E {
+      color: hotpink;
+    }
+
+    table {
+      margin: auto;
+    }
+
+    th {
+      color: black;
+      border: solid 2px;
+    }
+
+    @media screen and (max-width:500px) {
+      h1 {
+        font-size: 8vw;
+        margin: 4vw;
+      }
+
+      #des{
+        font-size: 4vw;
+      }
+
+      #start {
+        font-size: 5vw;
+      }
+
+      .s {
+        font-size: 6vw;
+      }
+
+      table {
+        margin: 5vw auto;
+      }
+
+      select {
+        font-size: 4vw;
+        width: 7em;
+      }
+
+      .o {
+        height: 2vw;
+      }
+
+      th {
+        font-size: 5vw;
+        border-radius: 2vw;
+        padding: 1vw;
+      }
+    }
+  </style>
+  <title>噓つきと犯人</title>
+</head>
+
+<body>
+  <h1>嘘つきと犯人</h1>
+  <div id="des"><span class="A">A</span>, <span class="B">B</span>, <span class="C">C</span>, <span class="D">D</span>, <span class="E">E</span> の５人の中に<br>
+  嘘つきと犯人が1人ずついる<br>
+  ５人の証言をもとに嘘つきと犯人をあてろ</div>
+  <button id="start">START</button>
+  <div id="area">
+  </div>
+  <table></table>
+
+
+  <script>
+
+    let start = document.getElementById('start');
+    start.onclick = () => {
+      start.remove();
+      document.getElementById('des').remove();
+
+      document.getElementsByTagName('table')[0].innerHTML = `
+<tr><td>
+  <select id="s1">
+    <option value="" hidden>嘘つきは?</option>
+    <option value="0">Aが嘘つき</option>
+    <option value="1">Bが嘘つき</option>
+    <option value="2">Cが嘘つき</option>
+    <option value="3">Dが嘘つき</option>
+    <option value="4">Eが嘘つき</option>
+  </select>
+</td>
+<td><select id="s2">
+    <option value="" hidden>犯人は?</option>
+    <option value="0">Aが犯人</option>
+    <option value="1">Bが犯人</option>
+    <option value="2">Cが犯人</option>
+    <option value="3">Dが犯人</option>
+    <option value="4">Eが犯人</option>
+  </select>
+</td>
+</tr>
+<tr><td class="o"></td></tr>
+<tr><th id="anser" colspan="2">答え合わせ</th></tr>`;
+
+      const l = Math.floor(Math.random() * 4);
+      let s = {};//証言 AかBが犯人　Aは犯人ではない　Dは嘘つき　Cは嘘つきか犯人　Dと私は嘘つきではない
+      let t = [0, 1, 2, 3, 4];//証言タイプ
+      let honto = [0, 1, 2, 3, 4];
+      let a = ['A', 'B', 'C', 'D', 'E'];
+      let uso = honto[l];//嘘
+      honto.splice(l, 1);//本当
+      let hannin = honto[Math.floor(Math.random() * 4)];//犯人
+      let type, h, c, co, anser = 0;
+
+      function ab(abc, i) {
+        return `<span class="${i === undefined ? abc : a[i]}">${abc}</span>`;
+      }
+
+      function check(i, n) {
+        if (n == 2 && h[i] != 2 && h.indexOf(2) > -1) {
+          return true;
+        } else if (!h[i]) {
+          h[i] = n;
+        } else if (h[i] != n) {
+          return true;
+        }
+      }
+
+      a: do {
+        console.clear();
+        t = [0, 1, 2, 3, 4];
+        type = {};
+        for (let i = 0; i < 4; i++) {
+          let ty = t[Math.floor(Math.random() * t.length)];//証言タイプ決め
+          t.splice(t.indexOf(ty), 1);
+          switch (ty) {//本当
+            case 0:
+              do {
+                c = honto[Math.floor(Math.random() * 4)];
+              } while (honto[i] == c)
+              type[honto[i]] = [ty, c];
+              break;
+
+            case 1:
+              do {
+                c = honto[Math.floor(Math.random() * 4)];
+              } while (honto[i] == c || hannin == c)
+              type[honto[i]] = [ty, c];
+              break;
+
+            case 2:
+              if (honto[i] == hannin) continue a;
+              do {
+                c = Math.floor(Math.random() * 5);
+              } while (honto[i] == c || hannin == c)
+              type[honto[i]] = Math.random() > 0.5 ? [ty, c, hannin] : [ty, hannin, c];
+              break;
+
+            case 3:
+              do {
+                c = honto[Math.floor(Math.random() * 4)];
+              } while (honto[i] == c)
+              type[honto[i]] = Math.random() > 0.5 ? [ty, c, uso] : [ty, uso, c];
+              break;
+
+            case 4:
+              let uh = honto[i] == hannin ? uso : Math.random() > 0.5 ? uso : hannin;
+              type[honto[i]] = [ty, uh];
+              break;
+          }
+        }
+
+        switch (t[0]) {//嘘
+          case 0:
+            c = honto[Math.floor(Math.random() * 4)];
+            type[uso] = [t[0], c];
+            break;
+
+          case 1:
+            type[uso] = [t[0], hannin];
+            break;
+
+          case 2:
+            do{
+            c = honto[Math.floor(Math.random() * 4)];
+            }while(c == hannin)
+            do {
+              co = honto[Math.floor(Math.random() * 4)];
+            } while (c == co || co == hannin)
+            type[uso] = [t[0], c, co];
+            break;
+
+          case 3:
+            c = honto[Math.floor(Math.random() * 4)];
+            do {
+              co = honto[Math.floor(Math.random() * 4)];
+            } while (c == co)
+            type[uso] = [t[0], c, co];
+            break;
+
+          case 4:
+            do {
+              c = honto[Math.floor(Math.random() * 4)];
+            } while (c == hannin)
+            type[uso] = [t[0], c];
+        }
+
+        anser = 0;  //問題チェック
+        b: for (let i = 0; i < 5; i++) {//iを嘘つきとすると
+          h = [0, 0, 0, 0, 0];//犯人　まだ不明0 違う1 確定2
+          h[i] = 1;
+          console.log(a[i], 'をうそとする')
+          for (let j = 0; j < 5; j++) {
+            let jt = type[j];
+            switch (jt[0]) {
+              case 0:
+                console.log(0)
+                if (jt[1] == i) continue b;
+                break;
+
+              case 1:
+                console.log(1)
+                if (i == j) {
+                  check(jt[1], 2);
+                } else if (check(jt[1], 1)) continue b;
+                break;
+
+              case 2:
+                console.log(2)
+                if (i == j) {
+                  if (check(jt[1], 1) || check(jt[2], 1)) continue b;
+                } else {
+                  for (let m = 0; m < 5; m++) {
+                    if (m != jt[1] && m != jt[2]) {
+                      if (check(m, 1)) continue b;
+                    }
+                  }
+                }
+                break;
+
+              case 3:
+                console.log(3)
+                if (j != i && jt[1] != i && jt[2] != i) continue b;
+                break;
+
+              case 4:
+                console.log(4)
+                if (i == j) {
+                  if (check(jt[1], 1)) continue b;
+                } else if (jt[1] != i) {
+                  if (check(jt[1], 2)) continue b;
+                }
+                break;
+            }
+          }
+
+          let c1 = 0;
+          for (let o = 0; o < 5; o++) {
+            if (h[o] == 1) c1++;
+          }
+          if (c1 < 4 && h.indexOf(2) == -1) {
+            anser = 0;
+            continue a;
+          }
+          if (c1 == 4 || h.indexOf(2) > -1) {
+            anser++; console.log(h);
+            if (i != uso) {
+              anser = 0;
+              continue a;
+            }
+          }
+        }
+
+      } while (anser == 0)
+
+
+      const area = document.getElementById('area'); //console.log(a[uso],a[hannin])
+      for (let i = 0; i < 5; i++) {
+        let s, ti = type[i];
+        switch (ti[0]) {
+          case 0:
+            s = `${ab('私', i)}と${ab(a[ti[1]])}は嘘つきではない`;
+            break;
+          case 1:
+            s = `${ab(a[ti[1]])}は犯人ではない`;
+            break;
+          case 2:
+            s = `${ab(a[ti[1]])}か${ab(a[ti[2]])}が犯人`;
+            break;
+          case 3:
+            s = `${ab(a[ti[1]])}か${ab(a[ti[2]])}が嘘つき`;
+            break;
+          case 4:
+            s = `${ab(a[ti[1]])}は嘘つきか犯人`
+        }
+        area.innerHTML += `<div class="s">${ab(a[i])}　${s}</div>`;
+      }
+
+      function end() {
+        ans.innerText = 'もう一度';
+        ans.onclick = () => {
+          window.location.reload();
+        }
+      }
+
+      const ans = document.getElementById('anser');
+      ans.onclick = () => {
+        let an = [document.getElementById('s1').value, document.getElementById('s2').value];
+        if (!an[0] || !an[1]) return;
+        if (uso == an[0] && hannin == an[1]) {
+          alert('正解!');
+          end();
+        } else {
+          //if (confirm('不正解\n答えを見ますか')) end();
+          alert('不正解');
+        }
+      }
+    }
+
+
+
+
+    //start.onclick();
+  </script>
+</body>
+
+</html>
