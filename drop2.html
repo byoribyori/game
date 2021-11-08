@@ -21,6 +21,18 @@
      position: absolute;
     bottom: 0;
     }
+
+    #display>div{
+      height: 10vw;
+    }
+
+    .drop{
+      display: inline-block;
+      width: 10vw;
+      height: 10vw;
+      border-radius: 50%;
+      background-color: aqua;
+    }
   </style>
 </head>
 <body>
@@ -28,7 +40,20 @@
 
 
   <script>
-    document.getElementById('display').innerText=innerHeight/innerWidth
+    // document.getElementById('display').innerText=innerHeight/innerWidth
+    const display = document.getElementById('display');
+    for(let i=0;i<10;i++){
+      let div = document.createElement('div');
+      for(let j=0;j<10;j++){
+        let div2 = document.createElement('div');
+        div2.className="drop";
+        div2.id=`${i}${j}`;
+        div.appendChild(div2);
+      }
+      display.appendChild(div)
+    }
+    
+
   </script>
 </body>
 </html>
