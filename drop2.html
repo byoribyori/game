@@ -21,8 +21,8 @@
       }
     }
 
-    @media(orientation: landscape){
-      body>:not(#x){
+    @media(orientation: landscape) {
+      body>:not(#x) {
         display: none;
       }
     }
@@ -32,11 +32,48 @@
       background-color: beige;
       width: 100vw;
       height: 100vh;
-      
+      overflow: hidden;
     }
 
-    #area{
+    #area {
       height: calc(100vh - 100vw);
+    }
+
+    #score {
+      display: inline-block;
+      width: 40vw;
+    }
+
+    #destroy {
+      display: inline-block;
+      width: 50vw;
+      margin-top: 7vw;
+      float: right;
+    }
+
+    #des>div{
+      height: 10vw;
+    }
+
+    .drop[data-touch="o"]::before ,.drop[data-touch="o"]::after{
+      display: inline-block;
+      border-radius: 50%;
+      content: '';
+      position: absolute;
+    }
+
+    .drop[data-touch="o"]::before{
+      width: 4vw;
+      height: 4vw;
+      margin: 3vw;
+      background-color: white;
+    }
+
+    .drop[data-touch="o"]::after{
+      width: 3vw;
+      height: 3vw;
+      margin: 3.5vw;
+      background-color: black;
     }
 
     #display {
@@ -56,21 +93,30 @@
       border-radius: 50%;
     }
 
-    .drop[data-color="1"]{
+    .drop[data-color="1"] {
       background-color: coral;
     }
 
-    .drop[data-color="2"]{
+    .drop[data-color="2"] {
       background-color: deepskyblue;
     }
 
-    .drop[data-color="3"]{
+    .drop[data-color="3"] {
       background-color: yellowgreen
     }
 
-    .drop[data-color="4"]{
-      background-color: gray;
+    .drop[data-color="4"] {
+      background-color: silver;
     }
+
+    .drop[data-color="5"] {
+      background-color: transparent;
+    }
+
+    .drop[data-color="6"] {
+      background-color: black;
+    }
+
   </style>
 </head>
 
@@ -78,7 +124,7 @@
   <div id="x">縦のスマホ</div>
   <div id="area">
     <button id="start">SATRT</button>
-    <div>a</div>
+      <div id="score" style="display: none;">123</div><div id="destroy" style="display: none;"><div id="des"></div></div></div>
   </div>
   <div id="display"></div>
 
@@ -87,51 +133,91 @@
     // document.getElementById('display').innerText=innerHeight/innerWidth
     const display = document.getElementById('display');
 
-    document.getElementById('start').onclick=()=>{
+    document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
 
       //初期盤面
       let data = [];
-    for (let i = 0; i < 10; i++) {
-      let div = document.createElement('div');
+      for (let i = 0; i < 10; i++) {
+        let div = document.createElement('div');
 
-      let d = [];
-      for (let j = 0; j < 10; j++) {
-        let c;
-        do{
-          c = Math.floor(Math.random()*4)+1;
-        }while(c==d[j-1]&&c==d[j-2]||i>1&&c==data[i-1][j]&&c==data[i-1][j])
+        let d = [];
+        for (let j = 0; j < 10; j++) {
+          let c;
+          do {
+            c = Math.floor(Math.random() * 4) + 1;
+          } while (c == d[j - 1] && c == d[j - 2] || i > 1 && c == data[i - 1][j] && c == data[i - 1][j])
 
-        let div2 = document.createElement('div');
-        div2.className = "drop";
-        div2.id = `${i}${j}`;
-        div2.dataset.color = c;
-        div.appendChild(div2);
-        d.push(c);
+          let div2 = document.createElement('div');
+          div2.className = "drop";
+          div2.id = `${i}${j}`;
+          div2.dataset.color = c;
+          div.appendChild(div2);
+          d.push(c);
+        }
+        display.appendChild(div);
+        data.push(d);
       }
-      display.appendChild(div);
-      data.push(d);
+      console.log(data)
+
+      document.getElementById('score').style = "";
+      document.getElementById('destroy').style = "";
+
+      //消す形
+      for(let i=0;i<2;i++){
+        let div = document.createElement('div');
+        for (let j = 0; j < 3; j++) {
+          let div2 = document.createElement('div');
+          div2.className = "drop";
+          div2.id=`d${i}${j}`;
+          //div2.dataset.color=5;
+          div.appendChild(div2);
+        }
+        document.getElementById('des').appendChild(div);
+      }
+
+      //消す形決める
+      let shape = [[[1,1,1],[0,0,0]] , [[1,1,0],[1,0,0]] , [[1,0,0],[1,1,0]] , [[1,1,0],[0,1,0]] , [[0,1,0],[1,1,0]]];
+      const set_shape=()=>{
+        let n = Math.floor(Math.random()*shape.length);
+        let s = shape[n];
+        shape.splice(n,1);
+        console.log(s);
+        for(let i=0;i<2;i++){
+        for (let j = 0; j < 3; j++) {
+          document.getElementById(`d${i}${j}`).dataset.color=5+s[i][j];
+        }
+      }
+      if(s[0][0]){
+        document.getElementById('d00').dataset.touch="o";
+      }else{
+        document.getElementById('d01').dataset.touch="o";
+      }
+      }
+
+      set_shape();
+
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
-    console.log(data)
 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  }
-  //document.getElementById('start').onclick()
+    document.getElementById('start').onclick()
 
   </script>
 </body>
