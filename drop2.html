@@ -32,15 +32,17 @@
       background-color: beige;
       width: 100vw;
       height: 100vh;
-      overflow:hidden;
+      overflow: hidden;
+    }
+
+    #area{
+      height: calc(100vh - 100vw);
     }
 
     #display {
       width: 100vw;
       height: 100vw;
       background-color: white;
-      position: absolute;
-      bottom: 0;
     }
 
     #display>div {
@@ -74,7 +76,10 @@
 
 <body>
   <div id="x">縦のスマホ</div>
-  <button id="start">start</button>
+  <div id="area">
+    <button id="start">SATRT</button>
+    <div>a</div>
+  </div>
   <div id="display"></div>
 
 
@@ -109,7 +114,8 @@
     }
     console.log(data)
 
-    
+  
+
 
 
 
@@ -125,7 +131,7 @@
 
 
   }
-  document.getElementById('start').onclick()
+  //document.getElementById('start').onclick()
 
   </script>
 </body>
