@@ -51,7 +51,22 @@
       width: 10vw;
       height: 10vw;
       border-radius: 50%;
-      background-color: aqua;
+    }
+
+    .drop[data-color="1"]{
+      background-color: coral;
+    }
+
+    .drop[data-color="2"]{
+      background-color: deepskyblue;
+    }
+
+    .drop[data-color="3"]{
+      background-color: yellowgreen
+    }
+
+    .drop[data-color="4"]{
+      background-color: gray;
     }
   </style>
 </head>
@@ -67,18 +82,49 @@
     const display = document.getElementById('display');
 
     document.getElementById('start').onclick=()=>{
+      document.getElementById('start').remove();
+
+      //初期盤面
+      let data = [];
     for (let i = 0; i < 10; i++) {
       let div = document.createElement('div');
+
+      let d = [];
       for (let j = 0; j < 10; j++) {
+        let c;
+        do{
+          c = Math.floor(Math.random()*4)+1;
+        }while(c==d[j-1]&&c==d[j-2]||i>1&&c==data[i-1][j]&&c==data[i-1][j])
+
         let div2 = document.createElement('div');
         div2.className = "drop";
         div2.id = `${i}${j}`;
+        div2.dataset.color = c;
         div.appendChild(div2);
+        d.push(c);
       }
-      display.appendChild(div)
+      display.appendChild(div);
+      data.push(d);
     }
-  }
+    console.log(data)
 
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+  document.getElementById('start').onclick()
 
   </script>
 </body>
