@@ -51,25 +51,31 @@
       float: right;
     }
 
-    #des>div{
+    #des {
+      transition: top 1s, left 1s;
+      z-index: 2;
+    }
+
+    #des>div {
       height: 10vw;
     }
 
-    .drop[data-touch="o"]::before ,.drop[data-touch="o"]::after{
+    .drop[data-touch="o"]::before,
+    .drop[data-touch="o"]::after {
       display: inline-block;
       border-radius: 50%;
       content: '';
       position: absolute;
     }
 
-    .drop[data-touch="o"]::before{
+    .drop[data-touch="o"]::before {
       width: 4vw;
       height: 4vw;
       margin: 3vw;
       background-color: white;
     }
 
-    .drop[data-touch="o"]::after{
+    .drop[data-touch="o"]::after {
       width: 3vw;
       height: 3vw;
       margin: 3.5vw;
@@ -91,6 +97,8 @@
       width: 10vw;
       height: 10vw;
       border-radius: 50%;
+      transition: top 0.8s, left 0.8s;
+      transition-timing-function: ease-out;
     }
 
     .drop[data-color="1"] {
@@ -116,7 +124,6 @@
     .drop[data-color="6"] {
       background-color: black;
     }
-
   </style>
 </head>
 
@@ -124,7 +131,11 @@
   <div id="x">縦のスマホ</div>
   <div id="area">
     <button id="start">SATRT</button>
-      <div id="score" style="display: none;">123</div><div id="destroy" style="display: none;"><div id="des"></div></div></div>
+    <div id="score" style="display: none;">123</div>
+    <div id="destroy" style="display: none;">
+      <div id="des"></div>
+    </div>
+  </div>
   </div>
   <div id="display"></div>
 
@@ -132,6 +143,7 @@
   <script>
     // document.getElementById('display').innerText=innerHeight/innerWidth
     const display = document.getElementById('display');
+    const des = document.getElementById('des');
 
     document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
@@ -158,48 +170,132 @@
         display.appendChild(div);
         data.push(d);
       }
-      console.log(data)
+
+      let data2 = {};
+      for (let i = 9; i > -1; i--) {
+        for (let j = 9; j > -1; j--) {
+          let dr = document.getElementById(`${i}${j}`);
+          let d = dr.getClientRects()[0];
+          data2[`${i}${j}`] = [d.top, d.left];
+          dr.style.position = "absolute";
+          dr.style.top = d.top + 'px';
+          dr.style.left = d.left + 'px';
+        }
+      }
 
       document.getElementById('score').style = "";
       document.getElementById('destroy').style = "";
+      data2['des'] = [des.getClientRects()[0].top, des.getClientRects()[0].left];
+      des.style.top = `${data2['des'][0]}px`;
+      des.style.left = `${data2['des'][1]}px`;
 
       //消す形
-      for(let i=0;i<2;i++){
+      for (let i = 0; i < 2; i++) {
         let div = document.createElement('div');
         for (let j = 0; j < 3; j++) {
           let div2 = document.createElement('div');
           div2.className = "drop";
-          div2.id=`d${i}${j}`;
-          //div2.dataset.color=5;
+          div2.id = `d${i}${j}`;
           div.appendChild(div2);
         }
         document.getElementById('des').appendChild(div);
       }
 
       //消す形決める
-      let shape = [[[1,1,1],[0,0,0]] , [[1,1,0],[1,0,0]] , [[1,0,0],[1,1,0]] , [[1,1,0],[0,1,0]] , [[0,1,0],[1,1,0]]];
-      const set_shape=()=>{
-        let n = Math.floor(Math.random()*shape.length);
-        let s = shape[n];
-        shape.splice(n,1);
+      let s, shape = [[[1, 1, 1], [0, 0, 0]], [[1, 1, 0], [1, 0, 0]], [[1, 0, 0], [1, 1, 0]], [[1, 1, 0], [0, 1, 0]], [[0, 1, 0], [1, 1, 0]]];
+      const set_shape = () => {
+        let n = Math.floor(Math.random() * shape.length);
+        s = shape[n];
+        shape.splice(n, 1);
         console.log(s);
-        for(let i=0;i<2;i++){
-        for (let j = 0; j < 3; j++) {
-          document.getElementById(`d${i}${j}`).dataset.color=5+s[i][j];
+        for (let i = 0; i < 2; i++) {
+          for (let j = 0; j < 3; j++) {
+            document.getElementById(`d${i}${j}`).dataset.color = 5 + s[i][j];
+          }
+        }
+        if (s[0][0]) {
+          document.getElementById('d00').dataset.touch = "o";
+        } else {
+          document.getElementById('d01').dataset.touch = "o";
         }
       }
-      if(s[0][0]){
-        document.getElementById('d00').dataset.touch="o";
-      }else{
-        document.getElementById('d01').dataset.touch="o";
+
+      //消す
+      let drop_data = [];
+      const destroy = (t, y) => {
+        console.log(t, y, data[t][y])
+        document.getElementById(`${t}${y}`).remove();
+        data[t][y] = 0;
+        if (drop_data.indexOf(y) == -1) drop_data.push(y);
       }
+
+      //落とす
+      const drop = () => {
+        console.log(drop_data)
+        for (let i = 0; i < drop_data.length; i++) {
+          let z, dd = drop_data[i];
+          for (let j = 9; j > -1; j--) {
+            if (z) {
+              if (data[j][dd]) {
+                console.log(j, dd)
+                data[z][dd] = data[j][dd];
+                data[j][dd] = 0;
+                let dro = document.getElementById(`${j}${dd}`);
+                dro.style.top = `${data2[`${z}${dd}`][0]}px`;
+                dro.style.left = `${data2[`${z}${dd}`][1]}px`;
+                dro.id = `${z}${dd}`;
+                z--;
+              }
+
+
+            } else if (!data[j][dd]) {
+              z = j;
+            }
+
+          }
+        }
+      }
+
+      //タッチされたとき
+      document.getElementById('display').onclick = (e) => {
+        let id = e.target.id;
+        if (!id) return;
+        let I = Number(id[0]);
+        let D = s[0][0] ? Number(id[1]) : Number(id[1]) - 1;
+        id = `${I}${D}`;
+        if (s[0][2]) {
+          if (D > 7) return;
+        } else if (s[0][0]) {
+          if (I == 9 || D == 9) return;
+        } else {
+          if (I == 9 || D == -1) return;
+        }
+        let des = document.getElementById('des');
+        des.style.position = "absolute";
+        des.style.top = `${data2[id][0]}px`;
+        des.style.left = `${data2[id][1]}px`;
+
+        setTimeout(() => {
+          for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 3; j++) {
+              if (s[i][j]) destroy(I + i, D + j);
+            }
+          }
+          setTimeout(() => {
+            des.style.display = "none";
+            setTimeout(() => {
+              drop();
+            }, 50);
+          }, 100)
+        }, 1010);
+
       }
 
       set_shape();
 
 
+      console.log(data, data2)
 
-      
 
 
 
