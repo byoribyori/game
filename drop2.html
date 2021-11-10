@@ -52,7 +52,7 @@
       display: inline-block;
       width: 50vw;
       margin-top: 7vw;
-      float: right;
+      margin-left: 7vw;
     }
 
     #des {
@@ -304,14 +304,24 @@
             if (ind > -1) {
               for (let j = ind; j < 10; j++) {
                 if (!data[i][j]) {
+                  console.log(i,j)
+                  let c;
+                  do {
+                    c = Math.floor(Math.random() * 4) + 1;
+                  } while (i<8&&c==data[i+1][j]&&c==data[i+2][j]||j<8&&c==data[i][j-1]&&c==data[i][j-2])
+                  data[i][j]=c;
                   let d = document.createElement('div');
                   d.className = "drop";
                   d.id = `${i}${j}`;
-                  d.dataset.color = 6
+                  d.dataset.color = c;
                   d.style.position = "absolute";
-                  d.style.bottom = 90 - 10 * i + 'vw';
+                  d.style.bottom = '100vw';
                   d.style.left = 10 * j + 'vw';
                   display.appendChild(d);
+                  setTimeout(() => {
+                    d.style.bottom = 90 - 10 * i + 'vw';
+                  }, 50);
+                  
                 }
               }
             }
@@ -337,7 +347,7 @@
         touch = false;
         document.getElementById('k').style.height = '';
         des.style.position = "absolute";
-        des.style.top = document.getElementById(id).getClientRects()[0].top+'px';
+        des.style.top = document.getElementById(id).getClientRects()[0].top + 'px';
         des.style.left = 10 * D + 'vw';
 
         setTimeout(() => {
