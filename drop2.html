@@ -31,16 +31,8 @@
       margin: 0;
       width: 100vw;
       height: 100vh;
-      overflow: hidden;
-    }
-
-    #area {
-      height: calc(100vh - 100vw);
-      width: 100vw;
-      z-index: 1;
-      position: absolute;
-      top: 0;
       background-color: beige;
+      overflow: hidden;
     }
 
     #score {
@@ -51,12 +43,13 @@
     #destroy {
       display: inline-block;
       width: 50vw;
-      margin-top: 7vw;
+      margin-top: calc(100vh - 130vw);
       margin-left: 7vw;
     }
 
     #des {
       transition: top 1s, left 1s;
+      z-index: 2;
     }
 
     #des>div {
@@ -100,7 +93,8 @@
       width: 100vw;
       height: 100vw;
       background-color: white;
-      margin-top: calc(100vh - 100vw);
+      position: absolute;
+      bottom: 0;
     }
 
     #display>div:not(.drop) {
@@ -144,14 +138,14 @@
 
 <body>
   <div id="x">縦のスマホ</div>
-  <div id="area">
-    <button id="start">SATRT</button>
-    <div id="score" style="display: none;">123</div>
-    <div id="destroy" style="display: none;">
-      <div id="des"></div>
-      <div id="k"></div>
-    </div>
+  <!-- <div id="area"> -->
+  <button id="start">SATRT</button>
+  <div id="destroy" style="display: none;">
+    <div id="des"></div>
+    <div id="k"></div>
   </div>
+  <span id="score" style="display: none;">123</span>
+  <!-- </div> -->
   <div id="display"></div>
 
 
@@ -211,10 +205,12 @@
         document.getElementById('des').appendChild(div);
       }
       let place = [des.getClientRects()[0].top, des.getClientRects()[0].left];
+      des.style.position = "absolute";
       des.style.top = `${place[0]}px`;
-      des.style.left = `${place[1]}px`;
+      des.style.left = '60vw';
+      document.getElementById('k').style.position = "absolute";
       document.getElementById('k').style.top = `${place[0]}px`;
-      document.getElementById('k').style.left = `${place[1]}px`;
+      document.getElementById('k').style.left = '60vw';
 
       //消す形決める
       let s, shape = [[[1, 1, 1], [0, 0, 0]], [[1, 1, 0], [1, 0, 0]], [[1, 0, 0], [1, 1, 0]], [[1, 1, 0], [0, 1, 0]], [[0, 1, 0], [1, 1, 0]]];
@@ -236,7 +232,7 @@
         }
 
         des.style.top = `${place[0]}px`;
-        des.style.left = `${place[1]}px`;
+        des.style.left = '60vw';
         des.style.display = "";
         document.getElementById('k').style.height = 0;
         setTimeout(() => { touch = true; }, 1100)
@@ -304,12 +300,12 @@
             if (ind > -1) {
               for (let j = ind; j < 10; j++) {
                 if (!data[i][j]) {
-                  console.log(i,j)
                   let c;
                   do {
                     c = Math.floor(Math.random() * 4) + 1;
-                  } while (i<8&&c==data[i+1][j]&&c==data[i+2][j]||j<8&&c==data[i][j-1]&&c==data[i][j-2])
-                  data[i][j]=c;
+                  } while (i < 8 && c == data[i + 1][j] && c == data[i + 2][j] || c == data[i][j - 1] && c == data[i][j - 2] ||
+                  j < 8 && c == data[i][j + 1] && c == data[i][j + 2] || j != 0 && j != 9 && c == data[i][j - 1] && c == data[i][j + 1])
+                  data[i][j] = c;
                   let d = document.createElement('div');
                   d.className = "drop";
                   d.id = `${i}${j}`;
@@ -321,7 +317,7 @@
                   setTimeout(() => {
                     d.style.bottom = 90 - 10 * i + 'vw';
                   }, 50);
-                  
+
                 }
               }
             }
@@ -346,7 +342,6 @@
         }
         touch = false;
         document.getElementById('k').style.height = '';
-        des.style.position = "absolute";
         des.style.top = document.getElementById(id).getClientRects()[0].top + 'px';
         des.style.left = 10 * D + 'vw';
 
@@ -388,7 +383,7 @@
 
     }
 
-    document.getElementById('start').onclick()
+    //document.getElementById('start').onclick()
 
   </script>
 </body>
