@@ -29,7 +29,6 @@
 
     body {
       margin: 0;
-      background-color: beige;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
@@ -37,6 +36,11 @@
 
     #area {
       height: calc(100vh - 100vw);
+      width: 100vw;
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      background-color: beige;
     }
 
     #score {
@@ -53,11 +57,21 @@
 
     #des {
       transition: top 1s, left 1s;
-      z-index: 2;
     }
 
     #des>div {
       height: 10vw;
+    }
+
+    #k {
+      position: absolute;
+      display: inline-block;
+      width: 50vw;
+      height: 20vw;
+      z-index: 4;
+      background-color: beige;
+      transition: height 1s;
+      transition-timing-function: linear;
     }
 
     .drop[data-touch="o"]::before,
@@ -86,9 +100,10 @@
       width: 100vw;
       height: 100vw;
       background-color: white;
+      margin-top: calc(100vh - 100vw);
     }
 
-    #display>div {
+    #display>div:not(.drop) {
       height: 10vw;
     }
 
@@ -97,7 +112,7 @@
       width: 10vw;
       height: 10vw;
       border-radius: 50%;
-      transition: top 0.8s, left 0.8s;
+      transition: bottom 0.8s, left 0.8s;
       transition-timing-function: ease-out;
     }
 
@@ -134,8 +149,8 @@
     <div id="score" style="display: none;">123</div>
     <div id="destroy" style="display: none;">
       <div id="des"></div>
+      <div id="k"></div>
     </div>
-  </div>
   </div>
   <div id="display"></div>
 
@@ -147,6 +162,7 @@
 
     document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
+      let touch = false;
 
       //初期盤面
       let data = [];
@@ -171,23 +187,17 @@
         data.push(d);
       }
 
-      let data2 = {};
       for (let i = 9; i > -1; i--) {
         for (let j = 9; j > -1; j--) {
           let dr = document.getElementById(`${i}${j}`);
-          let d = dr.getClientRects()[0];
-          data2[`${i}${j}`] = [d.top, d.left];
           dr.style.position = "absolute";
-          dr.style.top = d.top + 'px';
-          dr.style.left = d.left + 'px';
+          dr.style.bottom = 90 - 10 * i + 'vw';
+          dr.style.left = 10 * j + 'vw';
         }
       }
 
       document.getElementById('score').style = "";
       document.getElementById('destroy').style = "";
-      data2['des'] = [des.getClientRects()[0].top, des.getClientRects()[0].left];
-      des.style.top = `${data2['des'][0]}px`;
-      des.style.left = `${data2['des'][1]}px`;
 
       //消す形
       for (let i = 0; i < 2; i++) {
@@ -200,6 +210,11 @@
         }
         document.getElementById('des').appendChild(div);
       }
+      let place = [des.getClientRects()[0].top, des.getClientRects()[0].left];
+      des.style.top = `${place[0]}px`;
+      des.style.left = `${place[1]}px`;
+      document.getElementById('k').style.top = `${place[0]}px`;
+      document.getElementById('k').style.left = `${place[1]}px`;
 
       //消す形決める
       let s, shape = [[[1, 1, 1], [0, 0, 0]], [[1, 1, 0], [1, 0, 0]], [[1, 0, 0], [1, 1, 0]], [[1, 1, 0], [0, 1, 0]], [[0, 1, 0], [1, 1, 0]]];
@@ -207,7 +222,6 @@
         let n = Math.floor(Math.random() * shape.length);
         s = shape[n];
         shape.splice(n, 1);
-        console.log(s);
         for (let i = 0; i < 2; i++) {
           for (let j = 0; j < 3; j++) {
             document.getElementById(`d${i}${j}`).dataset.color = 5 + s[i][j];
@@ -215,15 +229,22 @@
         }
         if (s[0][0]) {
           document.getElementById('d00').dataset.touch = "o";
+          document.getElementById('d01').dataset.touch = "";
         } else {
           document.getElementById('d01').dataset.touch = "o";
+          document.getElementById('d00').dataset.touch = "";
         }
+
+        des.style.top = `${place[0]}px`;
+        des.style.left = `${place[1]}px`;
+        des.style.display = "";
+        document.getElementById('k').style.height = 0;
+        setTimeout(() => { touch = true; }, 1100)
       }
 
       //消す
       let drop_data = [];
       const destroy = (t, y) => {
-        console.log(t, y, data[t][y])
         document.getElementById(`${t}${y}`).remove();
         data[t][y] = 0;
         if (drop_data.indexOf(y) == -1) drop_data.push(y);
@@ -231,35 +252,78 @@
 
       //落とす
       const drop = () => {
-        console.log(drop_data)
         for (let i = 0; i < drop_data.length; i++) {
           let z, dd = drop_data[i];
           for (let j = 9; j > -1; j--) {
             if (z) {
               if (data[j][dd]) {
-                console.log(j, dd)
                 data[z][dd] = data[j][dd];
                 data[j][dd] = 0;
                 let dro = document.getElementById(`${j}${dd}`);
-                dro.style.top = `${data2[`${z}${dd}`][0]}px`;
-                dro.style.left = `${data2[`${z}${dd}`][1]}px`;
+                dro.style.bottom = 90 - 10 * z + 'vw';
+                dro.style.left = 10 * dd + 'vw';
                 dro.id = `${z}${dd}`;
                 z--;
               }
-
-
             } else if (!data[j][dd]) {
               z = j;
             }
-
           }
+        }
+        setTimeout(() => { check(); }, 1000);
+      }
+
+      const check = () => {
+        drop_data = [];
+        let destroy_data = [];
+        for (let i = 0; i < 10; i++) {
+          for (let j = 0; j < 10; j++) {
+            let d = data[i][j];
+            if (i < 8 && d && d == data[i + 1][j] && d == data[i + 2][j]) {
+              if (destroy_data.indexOf(`${i}${j}`) == -1) destroy_data.push(`${i}${j}`);
+              if (destroy_data.indexOf(`${i + 1}${j}`) == -1) destroy_data.push(`${i + 1}${j}`);
+              if (destroy_data.indexOf(`${i + 2}${j}`) == -1) destroy_data.push(`${i + 2}${j}`);
+            }
+
+            if (j < 8 && d && d == data[i][j + 1] && d == data[i][j + 2]) {
+              if (destroy_data.indexOf(`${i}${j}`) == -1) destroy_data.push(`${i}${j}`);
+              if (destroy_data.indexOf(`${i}${j + 1}`) == -1) destroy_data.push(`${i}${j + 1}`);
+              if (destroy_data.indexOf(`${i}${j + 2}`) == -1) destroy_data.push(`${i}${j + 2}`);
+            }
+          }
+        }
+        if (destroy_data.length) {
+          for (let i = 0; i < destroy_data.length; i++) {
+            destroy(destroy_data[i][0], destroy_data[i][1]);
+          }
+          setTimeout(() => { drop(); }, 100);
+        } else {
+          //新しいドロップ
+          for (let i = 9; i > -1; i--) {
+            let ind = data[i].indexOf(0);
+            if (ind > -1) {
+              for (let j = ind; j < 10; j++) {
+                if (!data[i][j]) {
+                  let d = document.createElement('div');
+                  d.className = "drop";
+                  d.id = `${i}${j}`;
+                  d.dataset.color = 6
+                  d.style.position = "absolute";
+                  d.style.bottom = 90 - 10 * i + 'vw';
+                  d.style.left = 10 * j + 'vw';
+                  display.appendChild(d);
+                }
+              }
+            }
+          }
+          set_shape();
         }
       }
 
       //タッチされたとき
       document.getElementById('display').onclick = (e) => {
         let id = e.target.id;
-        if (!id) return;
+        if (!touch || !id) return;
         let I = Number(id[0]);
         let D = s[0][0] ? Number(id[1]) : Number(id[1]) - 1;
         id = `${I}${D}`;
@@ -270,10 +334,11 @@
         } else {
           if (I == 9 || D == -1) return;
         }
-        let des = document.getElementById('des');
+        touch = false;
+        document.getElementById('k').style.height = '';
         des.style.position = "absolute";
-        des.style.top = `${data2[id][0]}px`;
-        des.style.left = `${data2[id][1]}px`;
+        des.style.top = document.getElementById(id).getClientRects()[0].top+'px';
+        des.style.left = 10 * D + 'vw';
 
         setTimeout(() => {
           for (let i = 0; i < 2; i++) {
@@ -294,7 +359,7 @@
       set_shape();
 
 
-      console.log(data, data2)
+      console.log(data)
 
 
 
