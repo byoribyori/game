@@ -35,7 +35,7 @@
       overflow: hidden;
     }
 
-    #start{
+    #start {
       font-size: 5vw;
     }
 
@@ -88,14 +88,14 @@
       background-color: black;
     }
 
-    #score{
+    #score {
       font-size: 7vw;
       width: 4em;
       display: inline-block;
       text-align: center;
-    position: absolute;
-    top: 15vw;
-    left: 10vw;
+      position: absolute;
+      top: 15vw;
+      left: 10vw;
     }
 
     #display {
@@ -143,7 +143,7 @@
       background-color: black;
     }
 
-    .drop[data-not="1"]{
+    .drop[data-not="1"] {
       width: 0;
       height: 0;
       margin: 5vw;
@@ -170,7 +170,7 @@
     document.getElementById('start').onclick = () => {
       document.getElementById('start').remove();
       let touch = false;
-      let score = 0;
+      let place, score = 0;
 
       //初期盤面
       let data = [];
@@ -203,61 +203,66 @@
           dr.dataset.not = 1;
           setTimeout(() => {
             dr.dataset.not = "";
-          }, (9-i)*200+(9-j)*20);
+          }, (9 - i) * 200 + (9 - j) * 20);
         }
       }
 
-      document.getElementById('score').style = "";
-      document.getElementById('destroy').style = "";
+      setTimeout(() => {
 
-      //消す形
-      for (let i = 0; i < 2; i++) {
-        let div = document.createElement('div');
-        for (let j = 0; j < 3; j++) {
-          let div2 = document.createElement('div');
-          div2.className = "drop";
-          div2.id = `d${i}${j}`;
-          div.appendChild(div2);
+        document.getElementById('score').style = "";
+        document.getElementById('destroy').style = "";
+
+        //消す形
+        for (let i = 0; i < 2; i++) {
+          let div = document.createElement('div');
+          for (let j = 0; j < 3; j++) {
+            let div2 = document.createElement('div');
+            div2.className = "drop";
+            div2.id = `d${i}${j}`;
+            div.appendChild(div2);
+          }
+          document.getElementById('des').appendChild(div);
         }
-        document.getElementById('des').appendChild(div);
-      }
-      let place = [des.getClientRects()[0].top, des.getClientRects()[0].left];
-      des.style.position = "absolute";
-      des.style.top = `${place[0]}px`;
-      des.style.left = '60vw';
-      document.getElementById('k').style.position = "absolute";
-      document.getElementById('k').style.top = `${place[0]}px`;
-      document.getElementById('k').style.left = '60vw';
+        place = [des.getClientRects()[0].top, des.getClientRects()[0].left];
+        des.style.position = "absolute";
+        des.style.top = `${place[0]}px`;
+        des.style.left = '60vw';
+        document.getElementById('k').style.position = "absolute";
+        document.getElementById('k').style.top = `${place[0]}px`;
+        document.getElementById('k').style.left = '60vw';
+        set_shape();
+
+      }, 3000);
 
       //消す形決める
       let s, shape = [[[1, 1, 1], [0, 0, 0]], [[1, 1, 0], [1, 0, 0]], [[1, 0, 0], [1, 1, 0]], [[1, 1, 0], [0, 1, 0]], [[0, 1, 0], [1, 1, 0]]];
       const set_shape = () => {
-        if(shape.length){
-        let n = Math.floor(Math.random() * shape.length);
-        s = shape[n];
-        shape.splice(n, 1);
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < 3; j++) {
-            document.getElementById(`d${i}${j}`).dataset.color = 5 + s[i][j];
+        if (shape.length) {
+          let n = Math.floor(Math.random() * shape.length);
+          s = shape[n];
+          shape.splice(n, 1);
+          for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 3; j++) {
+              document.getElementById(`d${i}${j}`).dataset.color = 5 + s[i][j];
+            }
           }
-        }
-        if (s[0][0]) {
-          document.getElementById('d00').dataset.touch = "o";
-          document.getElementById('d01').dataset.touch = "";
-        } else {
-          document.getElementById('d01').dataset.touch = "o";
-          document.getElementById('d00').dataset.touch = "";
-        }
+          if (s[0][0]) {
+            document.getElementById('d00').dataset.touch = "o";
+            document.getElementById('d01').dataset.touch = "";
+          } else {
+            document.getElementById('d01').dataset.touch = "o";
+            document.getElementById('d00').dataset.touch = "";
+          }
 
-        des.style.top = `${place[0]}px`;
-        des.style.left = '60vw';
-        des.style.display = "";
-        document.getElementById('k').style.height = 0;
-        setTimeout(() => { touch = true; }, 1100)
-      }else{
-        alert()
+          des.style.top = `${place[0]}px`;
+          des.style.left = '60vw';
+          des.style.display = "";
+          document.getElementById('k').style.height = 0;
+          setTimeout(() => { touch = true; }, 1100)
+        } else {
+          alert('スコアは' + score);
+        }
       }
-    }
 
       //消す
       let drop_data = [];
@@ -313,9 +318,9 @@
           for (let i = 0; i < destroy_data.length; i++) {
             destroy(destroy_data[i][0], destroy_data[i][1]);
             setTimeout(() => {
-              score+=100;
-              document.getElementById('score').innerHTML=score;
-            }, 250*i);
+              score += 100;
+              document.getElementById('score').innerHTML = score;
+            }, 250 * i);
           }
           setTimeout(() => { drop(); }, 100);
         } else {
@@ -385,8 +390,6 @@
         }, 1010);
 
       }
-
-      set_shape();
 
 
       console.log(data)
