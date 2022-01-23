@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オセロ</title>
+  <style>
+    #osero {
+      background-color: black;
+      margin: 70px auto 0;
+    }
+
+    td {
+      width: 80px;
+      height: 80px;
+      background-color: green;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    td.x3 {
+      background-color: #b0b0b0;
+    }
+
+    td.x5 {
+      background-color: #e3d773;
+    }
+
+    td>span {
+      content: '';
+      display: block;
+      margin: auto;
+      width: 90%;
+      height: 90%;
+      border-radius: 50%;
+      transform: rotate3d(0, 1, 0, 0deg);
+      transition: transform .2s;
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    #x {
+      background-color: black;
+      margin: 40px auto 0;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="osero"></table>
+  <table id="x">
+    <tr>
+      <td class="x3">x3</td>
+      <td class="x5">x5</td>
+    </tr>
+  </table>
+
+  <script>
+
+
+    const osero = document.getElementById('osero');
+    let turn = 1, click = true;
+
+    //初期盤面
+    let table = '', data = [];
+    for (let i = 0; i < 8; i++) {
+      table += '<tr>';
+      data.push([]);
+      for (let j = 0; j < 8; j++) {
+        table += `<td id="t${i}${j}"></td>`;
+        data[i].push(0);
+      }
+      table += '</tr>';
+    }
+    osero.innerHTML = table;
+    document.getElementById('t33').innerHTML = '<span class="white" id="o33"></span>';
+    document.getElementById('t44').innerHTML = '<span class="white" id="o44"></span>';
+    document.getElementById('t34').innerHTML = '<span class="black" id="o34"></span>';
+    document.getElementById('t43').innerHTML = '<span class="black" id="o43"></span>';
+    data[3][3] = 2;
+    data[4][4] = 2;
+    data[3][4] = 1;
+    data[4][3] = 1;
+
+    //x3の場所
+    let place = ['23', '24', '32', '35', '42', '45', '53', '54', '22', '25', '52', '55',
+      '12', '13', '14', '15', '26', '36', '46', '56', '62', '63', '64', '65', '21', '31', '41', '51'];
+    for (let i = 0; i < 2; i++) {
+      let r = Math.floor(Math.random() * (place.length - i));
+      document.getElementById('t' + place[r]).className = `x${!i ? 3 : 5}`;
+      place.push(place[r]);
+      place.splice(r, 1);
+    }
+
+    //挟めるか
+    const way = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]];
+    const check = (id) => {
+      let c = [];
+      a: for (let i = 0; i < 8; i++) {
+        let w = way[i], a = id[0], b = id[1], o = [];
+        for (let j = 0; j < 7; j++) {
+          a += w[0];
+          b += w[1];
+          if (a < 0 || a > 7 || b < 0 || b > 7 || !data[a][b]) continue a;
+          if (data[a][b] != turn) {
+            o.push('' + a + b);
+          } else {
+            for (let l = 0; l < o.length; l++) {
+              c.push([o[l], l]);
+            }
+            continue a;
+          }
+        }
+      }
+      return c;
+    }
+
+    //パスチェック
+    const pass_check = () => {
+      b: for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (!data[i][j] && check([i, j]).length) {
+            return true;
+          }
+        }
+      }
+    }
+
+    //クリック
+    document.getElementById('osero').onclick = (e) => {
+      let id = e.target.id;
+      if (!click || e.target.localName != 'td' || data[id[1]][id[2]]) return;
+      click = false;
+      id = [Number(id[1]), Number(id[2])];
+      let ok = check(id);
+      //置く
+      if (ok.length) {
+        document.getElementById(`t${id[0]}${id[1]}`).innerHTML =
+          `<span class="${turn == 1 ? 'black' : 'white'}" id="o${`${id[0]}${id[1]}`}"></span>`;
+        data[id[0]][id[1]] = turn;
+        //返す
+        let max = 0;
+        for (let i = 0; i < ok.length; i++) {
+          max = Math.max(max, ok[i][1]);//次ターンまでの時間
+          setTimeout(() => {
+
+            data[ok[i][0][0]][ok[i][0][1]] = turn;
+            let change = document.getElementById(`o${ok[i][0]}`);
+            change.style.transform = 'rotate3d(0, 1, 0, 90deg)';
+            setTimeout(() => {
+              change.className = turn == 1 ? 'black' : 'white';
+              change.style.transform = '';
+            }, 200);
+
+          }, ok[i][1] * 80);
+        }
+
+        setTimeout(() => {
+
+          turn = turn == 1 ? 2 : 1;
+          if (pass_check()) {
+            click = true;
+            let f
+            d: for (let i = 0; i < 8; i++) {
+              for (let j = 0; j < 8; j++) {
+                if (!data[i][j] && check([i, j]).length) {
+                  f = [i, j];
+                  if (Math.random() > 0.3) break d;
+                }
+              }
+            }
+            document.getElementById(`t${f[0]}${f[1]}`).click();
+          } else {
+            turn = turn == 1 ? 2 : 1;
+            if (pass_check()) {
+              alert('パス');
+              click = true;
+            } else {
+              //終わり
+              let count = [0, 0];
+              for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                  switch (data[i][j]) {
+                    case 1:
+                      count[0]++;
+                      break;
+                    case 2:
+                      count[1]++;
+                      break;
+                  }
+                }
+              }
+              switch (data[place[26][0]][place[26][1]]) {
+                case 1:
+                  count[0] += 2;
+                  break;
+                case 2:
+                  count[1] += 2;
+                  break;
+              }
+              switch (data[place[27][0]][place[27][1]]) {
+                case 1:
+                  count[0] += 4;
+                  break;
+                case 2:
+                  count[1] += 4;
+                  break;
+              }
+              alert(`黒${count[0]}\n白${count[1]}`);
+            }
+          }
+        }, max * 80 + 600);
+
+      } else {
+        click = true;
+      }
+    }
+
+
+
+  </script>
+</body>
+
+</html>
