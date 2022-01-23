@@ -168,16 +168,16 @@
           turn = turn == 1 ? 2 : 1;
           if (pass_check()) {
             click = true;
-            let f
-            d: for (let i = 0; i < 8; i++) {
-              for (let j = 0; j < 8; j++) {
-                if (!data[i][j] && check([i, j]).length) {
-                  f = [i, j];
-                  if (Math.random() > 0.3) break d;
-                }
-              }
-            }
-            document.getElementById(`t${f[0]}${f[1]}`).click();
+            // let f
+            // d: for (let i = 0; i < 8; i++) {
+            //   for (let j = 0; j < 8; j++) {
+            //     if (!data[i][j] && check([i, j]).length) {
+            //       f = [i, j];
+            //       if (Math.random() > 0.3) break d;
+            //     }
+            //   }
+            // }
+            // document.getElementById(`t${f[0]}${f[1]}`).click();
           } else {
             turn = turn == 1 ? 2 : 1;
             if (pass_check()) {
