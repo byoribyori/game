@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スリザー</title>
+</head>
+
+<body>
+  <link rel="stylesheet" href="link.css">
+  <script>
+    let p = location.search; //パラメータ [縦,横,問題]の形
+    let s1, s2;
+    if (p && !p.indexOf('?p=') && p.length > 5) { //正規形か
+      p = p.split('?p=')[1].split(',');
+      if (p.length != 3 || isNaN(p[0]) || isNaN(p[1])) {
+        s1 = 10;
+        s2 = 10;
+      } else {
+        s1 = p[0] > 20 ? 10 : Number(p[0]); //上限は 20,35
+        s2 = p[1] > 35 ? 10 : Number(p[1]);
+      }
+    } else {
+      s1 = 10;
+      s2 = 10;
+    }
+
+    const body = document.getElementsByTagName('body')[0];//盤面作成
+
+    let area = '<table id="table">';
+    id = 0;
+    for (let i = 0; i < s1; i++) {
+      area += '<tr>';
+      for (let j = 0; j < s2; j++) {
+        area += `<td class="dot"></td><td class="space" data-way="y"></td>`;
+      }
+      area += `<td class="dot"></td></tr><tr>`;
+      for (let j = 0; j < s2; j++) {
+        area += `<td class="space" data-way="t"></td><td class="number"><input type="tel" id="n${id}" readonly="readonly"></td>`;
+        id++;
+      }
+      area += `<td class="space" data-way="t"></td>`;
+      area += '</tr>';
+    }
+    area += '<tr>';
+    for (let j = 0; j < s2; j++) {
+      area += `<td class="dot"></td><td class="space" data-way="y"></td>`;
+    }
+    area += `<td class="dot"></td>`;
+    body.innerHTML += area + '</tr></table>';
+
+    let n = '';//問題読み込み
+    let q = p[2];
+    let space = '';
+    let set = -1;
+    for (let i = 0; i < q.length; i++) {
+      let d = q[i];
+      if (isNaN(d)) {
+        n = d == 'a' ? 1 : d == 'b' ? 2 : d == 'c' ? 3 : 0;
+        set += Number(space) + 1;
+        document.getElementById('n' + set).value = n;
+        space = '';
+      } else {
+        space += d;
+      }
+    }
+
+  </script>
+</body>
+
+</html>
