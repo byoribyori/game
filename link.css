@@ -1,0 +1,94 @@
+table {
+  margin: auto;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background-color: black;
+}
+
+.space:hover {
+  cursor: pointer;
+}
+
+.line {
+  background-color: black;
+}
+
+.line::before {
+  content: '';
+  display: block;
+  background-color: black;
+}
+
+.X::before,
+.X::after {
+  content: '';
+  display: block;
+  background-color: black;
+  position: relative;
+}
+
+.X[data-way="t"]::before,
+.X[data-way="t"]::after {
+  width: 1px;
+  height: 30px;
+  left: 3px;
+}
+
+.X[data-way="t"]::before {
+  transform: rotate(45deg);
+  top: 15px;
+}
+
+.X[data-way="t"]::after {
+  transform: rotate(135deg);
+  top: -15px;
+}
+
+.X[data-way="y"]::before,
+.X[data-way="y"]::after {
+  width: 30px;
+  height: 1px;
+  left: 15px;
+}
+
+.X[data-way="y"]::before {
+  transform: rotate(45deg);
+  top: 1px;
+}
+
+.X[data-way="y"]::after {
+  transform: rotate(135deg);
+  top: 0px;
+}
+
+.number {
+  width: 60px;
+  height: 60px;
+}
+
+input[type="tel"] {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  text-align: center;
+  font-size: 48px;
+  border: 0;
+  outline: none;
+}
+
+#hide {
+  font-size: 20px;
+}
+
+.url{
+  text-align: center;
+  margin-top: 20px;
+}
