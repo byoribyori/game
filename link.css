@@ -1,5 +1,5 @@
-table {
-  margin: auto;
+#table {
+  margin: 40px auto ;
   border-collapse: collapse;
 }
 
@@ -84,11 +84,22 @@ input[type="tel"] {
   outline: none;
 }
 
-#hide {
-  font-size: 20px;
+ #b_area{
+  margin: auto;
+  font-size: 22px;
+  background-color: black;
 }
 
-.url{
+th{
+  background-color: white;
+  padding: 7px;
+  cursor: pointer;
+}
+
+a{
+  display: block;
   text-align: center;
-  margin-top: 20px;
+  font-size: 23px;
+  color: blue;
+  margin-top: 35px;
 }
