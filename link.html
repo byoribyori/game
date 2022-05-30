@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="link.css">
+  <style>
+    input[type="tel"]:hover {
+      outline: dotted 2px red;
+    }
+
+    input[type="tel"]:focus {
+      outline: dotted 2px blue;
+    }
+
+    .space:hover {
+      background-color: #cacaca;
+    }
+  </style>
+  <title>スリザー</title>
+</head>
+
+<body>
+  <style id="style"></style>
+  <script>
+    //'use strict';
+    let p = location.search; //パラメータ [縦,横]の形
+    let s1, s2;
+    if (p && !p.indexOf('?p=') && p.length > 5) { //正規形か
+      p = p.split('?p=')[1].split(',');
+      if (p.length != 2 || isNaN(p[0]) || isNaN(p[1])) {
+        s1 = 10;
+        s2 = 10;
+      } else {
+        s1 = p[0] > 15 ? 10 : Number(p[0]); //上限は 15,30
+        s2 = p[1] > 30 ? 10 : Number(p[1]);
+      }
+    } else {
+      s1 = 10;
+      s2 = 10;
+    }
+
+    const body = document.getElementsByTagName('body')[0];//盤面作成
+
+    let area = '<table id="table">';
+    for (let i = 0; i < s1; i++) {
+      area += '<tr>';
+      for (let j = 0; j < s2; j++) {
+        area += `<td class="dot" id="d${i + 1}d${j + 1}"></td><td class="space" id="L${i * 2 + 1}L${j + 1}" data-way="y"></td>`;
+      }
+      area += `<td class="dot" id="d${i + 1}d${s2 + 1}"></td></tr><tr>`;
+      for (let j = 0; j < s2; j++) {
+        area += `<td class="space" id="L${i * 2 + 2}L${j}" data-way="t"></td><td class="number"><input type="tel" id="n${i + 1}n${j + 1}" maxlength="1"></td>`;
+      }
+      area += `<td class="space" id="L${i * 2 + 2}L${s2}" data-way="t"></td>`;
+      area += '</tr>';
+    }
+    area += '<tr>';
+    for (let j = 0; j < s2; j++) {
+      area += `<td class="dot" id="d${s1 + 1}d${j + 1}"></td><td class="space" id="L${s1 * 2 + 1}L${j + 1}" data-way="y"></td>`;
+    }
+    area += `<td class="dot" id="d${s1 + 1}d${s2 + 1}"></td>`;
+    body.innerHTML += area + '</tr></table><table id="b_area"><tr><th id="hide">線を非表示(f,g)</th><th id="url">URLを表示</th><th id="size">大きさを変更</th></tr></table>'
+
+    const style = document.getElementById('style');
+    document.getElementById('hide').onclick = () => { //線を非表示
+      if (style.innerHTML) {
+        style.innerHTML = '';
+      } else {
+        style.innerHTML = `
+      .line,.line::before,.X::before,.X::after{
+      background-color: transparent;
+    }`;
+      }
+    }
+    let table = document.getElementById('table');
+
+    document.getElementById('url').onclick = () => { //urlを作成
+      let space = 0;
+      let url = `https://byoribyori.github.io/game/link_q.html?p=${s1},${s2},`
+      for (let i = 1; i < s1 + 1; i++) {
+        for (let j = 1; j < s2 + 1; j++) {
+          let n = ndata[i][j];
+          if (n == '-') {
+            space++;
+          } else {
+            url += space + (n == 1 ? 'a' : n == 2 ? 'b' : n == 3 ? 'c' : 'z');
+            space = 0;
+          }
+        }
+      }
+      let URL = document.createElement('a');
+      URL.href = url;
+      URL.innerText = url;
+      URL.className = 'url';
+      body.appendChild(URL);
+    }
+
+    document.getElementById('size').onclick = () => {
+      let t, y;
+      do {
+        t = prompt('縦は何マス?\n(1~15)\n※盤面はリセットされます');
+        if (!t) return;
+      } while (isNaN(t) || t < 1 || t > 15)
+      do {
+        y = prompt(`縦: ${t}マス\n横は何マス?\n(1~30)`);
+        if (!y) return;
+      } while (isNaN(t) || y < 1 || y > 30)
+      //window.location.href = `file:///C:/Users/hatenaqqq/workspace/link/link.html?p=${Math.floor(t)},${Math.floor(y)}`;
+      window.location.href = `https://byoribyori.github.io/game/link.html?p=${Math.floor(t)},${Math.floor(y)}`;
+    }
+
+    let ndata = []; //数字のデータ
+    for (let i = 0; i < s1 + 2; i++) {
+      ndata.push([]);
+      for (let j = 0; j < s2 + 2; j++) {
+        ndata[i].push('-');
+      }
+    }
+
+    let ldata = []; //線データ 0..なし 1..線 2..X
+    for (let i = 0; i < s1 + 2; i++) {
+      ldata.push([]); // 縦
+      if (i < s1 + 1) ldata.push([]); //横
+      for (let j = 0; j < s2 + 2; j++) {
+        if (j < s2 + 1) ldata[i * 2].push(!i || i == s1 + 1 ? 2 : 0); //端はX
+        if (i < s1 + 1) ldata[i * 2 + 1].push(!j || j == s2 + 1 ? 2 : 0);
+      }
+    }
+
+    let change = []; //決まったところ(あとで周りをチェック)
+    let copy = [null, null, null]; //HTML,数字,線
+
+    const input = (e) => { //数字入力
+      let id = e.id.split('n');
+      let value = e.value;
+      if (isNaN(value) || value < 0 || value > 3) { //0 1 2 3 以外は消す
+        e.value = '';
+        return;
+      }
+      e.blur();
+      e.readOnly = true; //変更不可
+
+      copy[0] = table.innerHTML; //後で戻せるようにコピー
+      copy[1] = ndata.concat(123);
+      copy[2] = ldata.concat(123);
+
+      let i1 = Number(id[1]), i2 = Number(id[2]);
+      ndata[i1][i2] = value; //数字データ更新
+      rule(value, i1, i2);
+      check_n(value, i1, i2);
+      check();
+    }
+
+    const check = () => {
+       while (change.length) { //決まったところは周りをチェック
+      if(change[0][0]=='n'){
+        let t = change[0].split('n');
+        let y = Number(t[2]);
+       t = Number(t[1]),
+      change.shift();
+      if(ndata[t][y]!='-'&&end.indexOf(t+'e'+y)==-1)check_n(ndata[t][y],t,y); //完成していない数字ならチェック
+      }
+      }
+    }
+
+    for (let i = 0; i < s1 * s2; i++) {
+      document.getElementsByTagName('input')[i].oninput = (e) => { //数字を入力したとき
+        input(e.target);
+      }
+    }
+
+    document.getElementById('table').onclick = (e) => { //自分で線を引く
+      e = e.target;
+      if (e.className != 'space') return;
+      let w;
+      do {
+        w = prompt(`線なら1\nXなら2`);
+        if (!w) return;
+      } while (w && w != 1 && w != 2);
+      if (w == 1) {
+        line([Number(e.id.split('L')[1]), Number(e.id.split('L')[2])]);
+      } else {
+        X([Number(e.id.split('L')[1]), Number(e.id.split('L')[2])]);
+      }
+      check();
+    }
+
+    const line = (l) => { //線を引く
+      if (!ldata[l[0]][l[1]]) {
+        document.getElementById(`L${l[0]}L${l[1]}`).className = "line";
+        ldata[l[0]][l[1]] = 1;
+        //change.push([l[0], l[1]]); //後で周りをチェック
+        check_d(l[0], l[1]);
+        changed(l[0], l[1]); //後で周りをチェック
+
+      } else if (ldata[l[0]][l[1]] == 2) {
+        error();
+      }
+    }
+
+    const X = (x) => { //Xをつける
+      if (!ldata[x[0]][x[1]]) {
+        document.getElementById(`L${x[0]}L${x[1]}`).className = "X";
+        ldata[x[0]][x[1]] = 2;
+        //change.push([x[0], x[1]]); //後で周りをチェック
+        check_d(x[0], x[1]);
+        changed(x[0], x[1]); //後で周りをチェック
+      } else if (ldata[x[0]][x[1]] == 1) {
+        error();
+      }
+    }
+
+    const changed = (t, y) => { //チェックし直す所リスト
+      let n_l; //チェックする 数字,線
+      if (t % 2) { //横線引いた
+        n_l = [`n${(t - 1) / 2}n${y}`, `n${(t + 1) / 2}n${y}`, `n${(t - 1) / 2}n${y - 1}`,
+        `n${(t - 1) / 2}n${y + 1}`, `n${(t + 1) / 2}n${y - 1}`, `n${(t + 1) / 2}n${y + 1}`]; //縦n横 周りの数字6つ
+
+      } else { //縦線引いた
+        n_l = [`n${t / 2}n${y}`, `n${t / 2}n${y + 1}`, `n${t / 2 - 1}n${y}`,
+        `n${t / 2 + 1}n${y}`, `n${t / 2 - 1}n${y + 1}`, `n${t / 2 + 1}n${y + 1}`]; //縦n横 周りの数字6つ
+      }
+      for (let i = 0; i < 6; i++) {
+        if (change.indexOf(n_l[i]) == -1) change.push(n_l[i]); //リストに入っていなければ追加
+      }
+
+      //線チェック
+    }
+
+    const rule = (n, p1, p2) => {
+      switch (n) {
+        case '1':
+          break;
+        case '2':
+          break;
+        case '3':
+          if (ndata[p1 - 1][p2] == 3 || ndata[p1 + 1][p2] == 3) { //上下に3があったら線
+            let p = p1 * 2 - (ndata[p1 - 1][p2] == 3 ? 3 : 1);
+            for (let i = 0; i < 3; i++) { //3本線
+              line([p + i * 2, p2]);
+            }
+          } else if (ndata[p1][p2 - 1] == 3 || ndata[p1][p2 + 1] == 3) { //左右に3があったら線
+            let p = p2 - (ndata[p1][p2 - 1] == 3 ? 2 : 1);
+            for (let i = 0; i < 3; i++) { //3本線
+              line([p1 * 2, p + i]);
+            }
+          } else if (ndata[p1 - 1][p2 - 1] == 3 || ndata[p1 - 1][p2 + 1] == 3 ||
+            ndata[p1 + 1][p2 + 1] == 3 || ndata[p1 + 1][p2 - 1] == 3) { //斜めに3があったら線
+            let ar = change_n_l(p1, p2);
+            if (ndata[p1 - 1][p2 - 1] == 3) {
+              let a = change_n_l(p1 - 1, p2 - 1); //もう1つの3の位置
+              ar = [a[0], ar[1], ar[2], a[3]]; //線を引く位置
+            } else if (ndata[p1 - 1][p2 + 1] == 3) {
+              let a = change_n_l(p1 - 1, p2 + 1);
+              ar = [a[0], a[1], ar[2], ar[3]];
+            } else if (ndata[p1 + 1][p2 + 1] == 3) {
+              let a = change_n_l(p1 + 1, p2 + 1);
+              ar = [ar[0], a[1], a[2], ar[3]];
+            } else if (ndata[p1 + 1][p2 - 1] == 3) {
+              let a = change_n_l(p1 + 1, p2 - 1);
+              ar = [ar[0], ar[1], a[2], a[3]];
+            }
+            for (let i = 0; i < 4; i++) { //4本線を引く
+              line(ar[i]);
+            }
+          }
+          break;
+      }
+    }
+
+    let end = []; //完成した数字リスト
+
+    const check_n = (n, p1, p2) => { //数字で決まるかチェック
+      let around = change_n_l(p1, p2); //数字の周り
+      let lx = L_X(around); //周りの線とXの個数
+      let outside = around_diagonal(p1, p2); //斜めの周り8本
+
+      switch (n) {
+        case '1':
+          if (lx[0] == 1) { //1つ線があれば他はX
+            for (let i = 0; i < 4; i++) {
+              if (!ldata[around[i][0]][around[i][1]]) X(around[i]);
+            }
+            end.push(`${p1}e${p2}`);
+            return;
+          } else if (lx[1] == 3) { //3つXがあれば残り線
+            for (let i = 0; i < 4; i++) {
+              if (!ldata[around[i][0]][around[i][1]]) line(around[i]);
+            }
+            end.push(`${p1}e${p2}`);
+            return;
+          } else if (lx[0]) { //2つ以上線があればエラー
+            error();
+            return;
+          } else if (outside.indexOf('22') > -1) { //X角があればX
+            X(around[outside.indexOf('22') < 2 ? 1 : 3]);
+          }
+
+          let xx = Math.max(outside.indexOf('12'), outside.indexOf('21')); //線とXのセット
+          if (xx > -1) { //線Xの対角線にX2つ
+            if (xx < 2) X(around[3]);
+            if (xx == 1 || xx == 2) X(around[0]);
+            if (xx > 1) X(around[1]);
+            if (xx == 3 || !xx) X(around[2]);
+          }
+          break;
+
+        case '2':
+          if (lx[0] == 2 || lx[1] == 2) { //線かXが2つなら
+            for (let i = 0; i < 4; i++) {
+              if (lx[0] == 2) {
+                if (!ldata[around[i][0]][around[i][1]]) X(around[i]); //線が2つならX
+              } else {
+                if (!ldata[around[i][0]][around[i][1]]) line(around[i]); //Xが2つなら線
+              }
+            }
+            end.push(`${p1}e${p2}`);
+          } else if (lx[0] > 2 || lx[1] > 2) { //3つ以上線かXがあればエラー
+            error();
+            return;
+          }
+          break;
+
+        case '3':
+          if (lx[1] == 1) { //1つXがあれば他は線
+            for (let i = 0; i < 4; i++) {
+              if (!ldata[around[i][0]][around[i][1]]) line(around[i]);
+            }
+            end.push(`${p1}e${p2}`);
+            return;
+          } else if (lx[0] == 3) { //3つ線があれば残りX
+            for (let i = 0; i < 4; i++) {
+              if (!ldata[around[i][0]][around[i][1]]) X(around[i]);
+            }
+            end.push(`${p1}e${p2}`);
+            return;
+          } else if (lx[1]) { //2つ以上Xがあればエラー
+            error();
+            return;
+          } else if (outside.indexOf('22') > -1) { //X角があれば線
+            line(around[outside.indexOf('22') < 2 ? 1 : 3]);
+          }
+
+          let L = Math.floor((outside + '').replace(/,/g, '').indexOf('1') / 2); //線がある方向を調べる
+          if (L != -1) { //斜めに線があればL型の線
+            if (L < 2) line(around[3]);
+            if (L == 1 || L == 2) line(around[0]);
+            if (L > 1) line(around[1]);
+            if (L == 3 || !L) line(around[2]);
+          }
+
+          break;
+
+        case '0':
+          if (lx[0]) { //線があればエラー
+            error();
+            return;
+          }
+          for (let i = 0; i < 4; i++) { //0の周りは全てX
+            X(around[i]);
+          }
+          end.push(`${p1}e${p2}`);
+          break;
+      }
+    }
+
+    const check_d = (t, y) => { //点の周りの4本チェック
+      let f;
+      if (t % 2) { //横線引いた
+        f = [[[t, y], [t - 1, y - 1], [t, y - 1], [t + 1, y - 1]], [[t, y], [t - 1, y], [t, y + 1], [t + 1, y]]]; //両端 4本ずつ
+      } else { //縦線引いた
+        f = [[[t, y], [t - 1, y], [t - 2, y], [t - 1, y + 1]], [[t, y], [t + 1, y], [t + 2, y], [t + 1, y + 1]]];
+      }
+      for (let i = 0; i < 2; i++) {
+        let lx = L_X(f[i]); //線とXの数
+        if (lx[0] == 2 || lx[1] == 3) { //線が2本かXが3つなら他はX
+          for (let j = 0; j < 4; j++)if (!ldata[f[i][j][0]][f[i][j][1]]) X(f[i][j]);
+        } else if (lx[0] == 1 && lx[1] == 2) { //線1本 X2つなら線を引く
+          for (let j = 0; j < 4; j++)if (!ldata[f[i][j][0]][f[i][j][1]]) line(f[i][j]);
+        }
+      }
+    }
+
+    const L_X = (l) => { //線とXが何個ずつあるか
+      let lx = [0, 0];
+      for (let i = 0; i < l.length; i++) {
+        switch (ldata[l[i][0]][l[i][1]]) {
+          case 1:
+            lx[0]++;
+            break;
+          case 2:
+            lx[1]++;
+        }
+      }
+      return lx;
+    }
+
+    const change_n_l = (n1, n2) => { //数字の位置 => 周りの線の位置
+      return [[n1 * 2 - 1, n2], [n1 * 2, n2], [n1 * 2 + 1, n2], [n1 * 2, n2 - 1]];
+    }
+
+    const around_diagonal = (n1, n2) => { //数字の位置 => 斜めの周り8本
+      return [`${ldata[n1 * 2 - 2][n2]}${ldata[n1 * 2 - 1][n2 + 1]}`, `${ldata[n1 * 2 + 1][n2 + 1]}${ldata[n1 * 2 + 2][n2]}`,
+      `${ldata[n1 * 2 + 2][n2 - 1]}${ldata[n1 * 2 + 1][n2 - 1]}`, `${ldata[n1 * 2 - 1][n2 - 1]}${ldata[n1 * 2 - 2][n2 - 1]}`];
+    }
+
+    const error = () => {
+      console.error('失敗');
+    }
+
+    let hide = false;
+
+    document.onkeydown = (e) => {
+      if (hide) return;
+      hide = true;
+      e = e.keyCode;
+      if (e == 70 || e == 71) {
+        style.innerHTML = `
+        .line,.line::before,.X::before,.X::after{
+        background-color: transparent;
+        }`;
+      }
+    }
+
+    document.onkeyup = (e) => {
+      hide = false;
+      e = e.keyCode;
+      if (e == 70 || e == 71) {
+        style.innerHTML = ``;
+      }
+    }
+
+//線から1つ間をあけて線があったら1周しないかチェック
+
+
+// const change_d_l = (d1,d2) => { //点の位置 => 周りの線の位置
+    //   return [[d1*2-2,d2-1],[d1*2-1,d2],[d1*2,d2-1],[d1*2-1,d2-1]];
+    // }
+
+
+  </script>
+
+
+</body>
+
+</html>
