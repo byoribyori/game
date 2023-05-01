@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #cbe7f0;
+    }
+
+    table {
+      margin: 150px auto 0 auto;
+      border: solid black 3px;
+      border-top: none;
+      border-spacing: 0;
+      background-color: rgb(202 202 202)
+    }
+
+    tr:nth-child(even)>td:nth-child(even) {
+      background-color: #ebebeb;
+    }
+
+    tr:nth-child(odd)>td:nth-child(odd) {
+      background-color: #ebebeb;
+    }
+
+    td {
+      width: 110px;
+      height: 110px;
+      border: black solid 1px;
+      border-bottom: none;
+      border-top: none;
+      padding: 0;
+    }
+
+    .piece {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background-color: red;
+      position: absolute;
+      transition: top 1s;
+    }
+
+    img {
+      position: absolute;
+      width: 60px;
+      height: 70px;
+      /* z-index: 3; */
+    }
+  </style>
+
+  <title>色並べ</title>
+</head>
+
+<body>
+  <div id="area">
+    <input type="radio" name="play" id="one">
+    <label for="one">一人プレイ(対COM)</label>
+    <input type="radio" name="play" id="two" checked>
+    <label for="two">二人プレイ</label>
+
+    <input type="radio" name="turn" id="senkou" checked>
+    <label for="senkou">先行</label>
+    <input type="radio" name="turn" id="koukou">
+    <label for="koukou">後行</label>
+
+    <button id="start">スタート</button>
+  </div>
+
+  <div id="arrow"></div>
+
+  <style id="opacity">
+    img {
+      opacity: 1;
+    }
+  </style>
+  <script>
+
+    const body = document.getElementsByTagName('body')[0];
+    const start = document.getElementById('start');
+    const area = document.getElementById('area');
+    let data = [];
+    let position = [];
+    let color = [null, 'red', 'yellow'];
+    let one, player, click = false;//一人プレイか,手番,クリック不可
+
+    start.onclick = () => {
+      one = document.getElementById('one').checked;//一人プレイか
+      player = one && document.getElementById('koukou').checked ? 2 : 1;
+
+      area.innerHTML = '';
+      let table = document.createElement('table');//盤面作成
+      for (let i = 5; i > -1; i--) {
+        data.push([]);
+        let tr = document.createElement('tr');
+        for (let j = 0; j < 7; j++) {
+          data[5 - i].push(0);
+          let td = document.createElement('td');
+          td.id = `_${i}_${j}`;
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      area.appendChild(table);
+
+      const arrow = document.getElementById('arrow');
+      for (let i = 0; i < 7; i++) {
+        let p = document.getElementById(`_0_${i}`);
+        p = p.getClientRects()[0];
+        position.push(p.left + 1);
+        if (i == 6) position.push(p.top)
+
+        arrow.innerHTML += `<img src="./矢印.png" alt="矢印" id="arrow${i}" style="top:${p.top - 660}px;left:${p.left + 25}px">`;
+      }
+
+      for (let i = 0; i < 7; i++) {
+        document.getElementById(`arrow${i}`).onclick = () => {
+          if (!click) return;
+          put(i, player);
+        }
+      }
+
+      if (player == 1) click = true;
+
+
+
+    }
+
+    let put_height = [0, 0, 0, 0, 0, 0, 0];//積んだ数
+    const put = (place) => {//コマを落とす(列,手番)
+      click = false;
+      let piece = document.createElement('div');
+      piece.className = 'piece';
+      piece.style.backgroundColor = color[player];
+      piece.style.top = position[7] - 660 + 'px';
+      piece.style.left = position[place] + 'px';
+      body.appendChild(piece);
+      setTimeout(() => {
+        piece.style.top = position[7] - put_height[place] * 110 + 'px';
+        put_height[place]++;
+        if (put_height[place] == 6) {//6個積んだら終わり
+          document.getElementById(`arrow${place}`).remove();
+        }
+        setTimeout(() => {
+          player = player == 1 ? 2 : 1;//手番交代
+          if (one) {
+
+          } else {
+            click = true;
+          }
+        }, 1200);
+      }, 100)
+    }
+
+    const Opacity = document.getElementById('opacity');
+    let o = true;
+    const opacity = () => {//矢印の透明度を変える
+      Opacity.innerHTML = `img{opacity:${o ? 0.2 : 1}}`;
+      o = !o;
+    }
+
+    //start.onclick();
+
+  </script>
+</body>
+
+</html>
