@@ -41,14 +41,30 @@
       border-radius: 50%;
       background-color: red;
       position: absolute;
-      transition: top 1s;
+      transition: top 0.5s;
     }
 
     img {
       position: absolute;
       width: 60px;
       height: 70px;
-      /* z-index: 3; */
+    }
+
+    @media screen and (max-width:800px) {
+      body {
+        background-color: lightpink;
+      }
+
+      td,
+      .piece {
+        width: 13vw;
+        height: 13vw;
+      }
+
+      img {
+        width: 7vw;
+        height: 9vw;
+      }
     }
   </style>
 
@@ -57,17 +73,17 @@
 
 <body>
   <div id="area">
-    <input type="radio" name="play" id="one">
+    <input type="radio" name="play" id="one" checked>
     <label for="one">一人プレイ(対COM)</label>
-    <input type="radio" name="play" id="two" checked>
+    <input type="radio" name="play" id="two">
     <label for="two">二人プレイ</label>
 
-    <input type="radio" name="turn" id="senkou" checked>
+    <input type="radio" name="turn" id="senkou">
     <label for="senkou">先行</label>
-    <input type="radio" name="turn" id="koukou">
+    <input type="radio" name="turn" id="koukou" checked>
     <label for="koukou">後行</label>
 
-    <button id="start">スタート</button>
+    <button id="start_button">スタート</button>
   </div>
 
   <div id="arrow"></div>
@@ -80,24 +96,25 @@
   <script>
 
     const body = document.getElementsByTagName('body')[0];
-    const start = document.getElementById('start');
+    const start_button = document.getElementById('start_button');
     const area = document.getElementById('area');
     let data = [];
     let position = [];
-    let color = [null, 'red', 'yellow'];
-    let one, player, click = false;//一人プレイか,手番,クリック不可
+    let color = [null, 'green', 'blue'];
+    const reach_pattern = ['1110', '1101', '1011', '0111', '2220', '2202', '2022', '0222'];//リーチのパターン
+    let one, player, click = false, size;//一人プレイか,手番,クリック不可
 
-    start.onclick = () => {
+    start_button.onclick = () => {
       one = document.getElementById('one').checked;//一人プレイか
       player = one && document.getElementById('koukou').checked ? 2 : 1;
 
       area.innerHTML = '';
       let table = document.createElement('table');//盤面作成
-      for (let i = 5; i > -1; i--) {
+      for (let i = 0; i < 6; i++) {
         data.push([]);
         let tr = document.createElement('tr');
         for (let j = 0; j < 7; j++) {
-          data[5 - i].push(0);
+          data[i].push(0);
           let td = document.createElement('td');
           td.id = `_${i}_${j}`;
           tr.appendChild(td);
@@ -106,14 +123,20 @@
       }
       area.appendChild(table);
 
+      size = document.getElementById('_0_0').getClientRects()[0].height; console.log(size)
+      const margin = size == 110 ? 25 : (size - document.getElementsByTagName('html')[0].getClientRects()[0].width * 0.07) / 2;
+      console.log(margin)
+
       const arrow = document.getElementById('arrow');
       for (let i = 0; i < 7; i++) {
-        let p = document.getElementById(`_0_${i}`);
+        let p = document.getElementById(`_5_${i}`);
         p = p.getClientRects()[0];
         position.push(p.left + 1);
         if (i == 6) position.push(p.top)
 
-        arrow.innerHTML += `<img src="https://user-images.githubusercontent.com/42292029/235413421-43811d5b-895c-4713-8013-1fb4082b5c31.png" alt="矢印" id="arrow${i}" style="top:${p.top - 660}px;left:${p.left + 25}px">`;
+        arrow.innerHTML += `<img src="https://user-images.githubusercontent.com/42292029/235413421-43811d5b-895c-4713-8013-1fb4082b5c31.png" 
+        alt="矢印" id="arrow${i}" style="top:${p.top - size * 6}px;
+        left:${p.left + margin}px">`;
       }
 
       for (let i = 0; i < 7; i++) {
@@ -123,36 +146,94 @@
         }
       }
 
-      if (player == 1) click = true;
+      if (player == 1) {
+        click = true
+      } else {
+        setTimeout(() => {
+          put(3, 2);
+        }, 1000);
+      }
 
 
 
     }
 
-    let put_height = [0, 0, 0, 0, 0, 0, 0];//積んだ数
+    let put_height = [5, 5, 5, 5, 5, 5, 5];//置かれる場所
     const put = (place) => {//コマを落とす(列,手番)
+      if (one && player == 2) console.log('----COM思考終了----');
+      console.log(`%c${put_height[place]}  ${place}`, `color:${color[player]};font-size:1.5em`)
       click = false;
-      let piece = document.createElement('div');
+      data[put_height[place]][place] = player;
+      let piece = document.createElement('div');//コマを作成
       piece.className = 'piece';
       piece.style.backgroundColor = color[player];
-      piece.style.top = position[7] - 660 + 'px';
+      piece.style.top = position[7] - size * 6 + 'px';
       piece.style.left = position[place] + 'px';
-      body.appendChild(piece);
+      body.appendChild(piece);//コマを表示
       setTimeout(() => {
-        piece.style.top = position[7] - put_height[place] * 110 + 'px';
-        put_height[place]++;
-        if (put_height[place] == 6) {//6個積んだら終わり
+        piece.style.top = position[7] - (5 - put_height[place]) * size + 'px';
+        if (put_height[place] == 0) {//6個積んだら終わり
           document.getElementById(`arrow${place}`).remove();
+          CAN.splice(CAN.indexOf(place), 1);
         }
         setTimeout(() => {
+          if (reach[player].indexOf(`${put_height[place]}${place}`) > -1) {//リーチしているところに置いたら勝利
+            win(player);
+            return;
+          } else if (reach[player % 2 + 1].indexOf(`${put_height[place]}${place}`) > -1) {//相手のリーチをなくす
+            reach[player % 2 + 1].splice(reach[player % 2 + 1].indexOf(`${put_height[place]}${place}`), 1);
+          }
+          check_reach(place);
+          put_height[place]--;
           player = player == 1 ? 2 : 1;//手番交代
-          if (one) {
-
+          if (one && player == 2) {
+            click = false;
+            setTimeout(com, 100);///300
           } else {
             click = true;
           }
-        }, 1200);
+        }, 500);/////////1200くらい
       }, 100)
+    }
+
+
+    let reach = [null, [], []];
+    const check_reach = (p) => {
+
+      let h = put_height[p];
+      if (0 < h && h < 4 && data[h + 1][p] == player && data[h + 2][p] == player //縦に3つあるか 
+        && reach[player].indexOf(`${h - 1}${p}`) == -1) {//被っていなければ追加
+        reach[player].push(`${h - 1}${p}`);
+      }
+
+      const way = [[0, 1], [1, 1], [-1, 1]];//横,斜め,斜め
+
+      a: for (let i = 0; i < 3; i++) {//3方向
+        let w = way[i];
+
+        b: for (let j = 0; j < 4; j++) {//1方向最大4パターン
+          let c = [h - w[0] * j, p - w[1] * j];//チェックする場所
+          if (c[0] > 5 || c[0] < 0 || c[1] < 0) continue a;//盤外なら終わり
+          let r = '';//空のマス
+
+          for (let l = 0; l < 4; l++) {//4つの内3つあればリーチ
+            if (c[0] > 5 || c[0] < 0 || c[1] > 6 || c[1] < 0 ||
+              data[c[0]][c[1]] == (player % 2 + 1)) continue b;//盤外か相手がいたら終わり
+            if (data[c[0]][c[1]] == 0) {//空きが1つならリーチ
+              if (r) {//2つ空きがあれば終わり
+                continue b;
+              } else {
+                r = [c[0], c[1]];
+              }
+            }
+            c[0] += w[0];
+            c[1] += w[1];
+          }
+          if (reach[player].indexOf(`${r[0]}${r[1]}`) == -1) {//被ってなければ追加
+            reach[player].push(`${r[0]}${r[1]}`);
+          }
+        }
+      }
     }
 
     const Opacity = document.getElementById('opacity');
@@ -162,7 +243,216 @@
       o = !o;
     }
 
-    //start.onclick();
+    const win = () => {
+      console.log('%cWIN!!', `color:${color[player]};font-size:23px`)
+      setTimeout(() => {
+        alert(`WIN\n${color[player]}`);
+      }, 300);
+    }
+
+    let CAN = [0, 1, 2, 3, 4, 5, 6];//置ける場所　置けない場所は消す
+    const com = () => {//COM思考　　2023/5/1~
+      console.log('-----COM思考-----')
+
+      let can = CAN.concat();//置ける場所をコピー　置いてはいけない場所も消す
+
+      for (let i in reach[2]) {//リーチがあれば勝ち
+        let r = reach[2][i].split('');
+        r[0] = Number(r[0]);
+        if (r[0] == 5 || data[r[0] + 1][r[1]]) {
+          console.log('勝ち');
+          put(Number(r[1]), 2);
+          return;
+        }
+      }
+
+      if (reach[1].length) console.log('相手のリーチ' + reach[1])
+      for (let i in reach[1]) {//相手にリーチされていたら対処
+        let r = reach[1][i].split('');
+        r[0] = Number(r[0]);
+        r[1] = Number(r[1]);
+        if (r[0] == 5 || data[r[0] + 1][r[1]]) {//相手にリーチされていたら対処
+          console.log('リーチつぶし');
+          put(r[1], 2);
+          return;
+        }
+        if (r[0] == 4 || data[r[0] + 2][r[1]]) {//1つ上が相手のリーチなら置かない
+          can.splice(can.indexOf(r[1]), 1);
+        }
+      }
+      if (can.length < 1) {//選択肢が1つ以下
+        console.log('消去法');
+        put(can[0] || CAN[0], 2);
+        return;
+      }
+
+      let max = [-10000000, null];//最高点,その場所
+      for (let i in can) {//選択肢(最大7)
+        let d = JSON.parse(JSON.stringify(data));
+        d[put_height[can[i]]][can[i]] = player;
+        console.log(`--------------------`);
+        console.log('もし', can[i], 'に置いたら')
+        let S = evaluate(d);
+        console.log(S, `点`)
+        if (S > max[0]) max = [S, can[i]];
+        console.log(`--------------------`);
+      }
+      if (max[0] != 0) {
+        console.log('最高点は', max)
+        put(max[1], 2);
+        return;
+      }
+
+
+
+
+
+      let r = Math.floor(Math.random() * can.length); console.log(can + 'の中から' + can[r])
+      put(can[r] || CAN[0], 2);
+
+    }
+
+    const three_way = [[0, 1], [1, 1], [-1, 1]];//行の方向
+    const start_place = [//3方向のチェックスタート位置
+      [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0]],
+      [[2, 0], [1, 0], [0, 0], [0, 1], [0, 2], [0, 3]],
+      [[3, 0], [4, 0], [5, 0], [5, 1], [5, 2], [5, 3]]
+    ];
+    const evaluate = (d) => {//盤面の評価(COM視点)
+      console.log('評価する\n', d);
+      let score = 0;
+      let v_reach = [null, [], []];//この盤面のリーチの場所
+      let des = ['横', '右下がり', '右上がり'];
+      let double_reach = [null, false, false];//置可ダブルリーチか上下リーチ
+
+      for (let w in three_way) {//3方向
+        let way = three_way[w];//console.log(`%c${des[w]}チェック`,"color:red;font-size:1.4em");
+
+        c: for (let i = 0; i < 6; i++) {//1行ずつチェック
+          let start = start_place[w][i];
+          //console.log(start,'からスタート')
+          let line = '';//チェックする行
+          for (let j = 0; j < 7; j++) {//1行最大7マス
+            let p = [start[0] + way[0] * j, start[1] + way[1] * j];
+            if (p[0] == 6 || p[0] == -1 || p[1] == 7) break;
+            line += d[p[0]][p[1]];
+          }
+          //console.log(des[w], 'の', line, 'をチェック')
+          if (line.indexOf(1) == -1 && line.indexOf(2) == -1) continue c;//どちらもなければノーカン
+
+
+
+          let v_reach2 = [];//この行のリーチ
+          for (let j = 0; j < line.length - 3; j++) {//リーチがあるか
+            let L = line.slice(j, j + 4);//並んだ4つ
+            if (reach_pattern.indexOf(L) != -1) {
+              let z = L.indexOf('0');
+              let p = `${start[0] + way[0] * (j + z)}${start[1] + way[1] * (j + z)}`;//リーチの場所
+              if (v_reach2.indexOf(p) == -1) {
+                v_reach2.push(p);//被りでなければ記録
+                v_reach2.push(L.indexOf('1') == -1 ? 2 : 1);
+                v_reach2.push(p[0] == 5 || !!d[Number(p[0]) + 1][p[1]]);
+              }
+            }
+          }
+
+          if (v_reach2.length) {
+            console.log(v_reach2)
+            for (let j = 0; j < v_reach2.length; j += 3) {
+              let vr = v_reach2[j];
+              if (v_reach[v_reach2[j + 1]].indexOf(vr) == -1) {
+                v_reach[v_reach2[j + 1]].push(vr);
+                v_reach[v_reach2[j + 1]].push(v_reach2[j + 2]);
+              }
+            }
+            continue;
+          }
+
+          for (let j = 0; j < line.length - 3; j++) {
+            L = line.slice(j, j + 4);//並んだ4つ
+            let iti = L.indexOf(1) != -1;
+            let ni = L.indexOf(2) != -1;
+            if ((iti && ni) || (!iti && !ni)) continue;//どちらもあってもノーカン
+            let chance = iti ? 1 : 2;
+            //console.log(L , 'を調べる',j)
+
+
+
+
+
+
+
+            //   let s = 0;//並んだ4つの評価
+            // if (L[0]) s++; if (L[1]) s++; if (L[2]) s++; if (L[3]) s++;
+
+            // score += ni ? s : -s;//COMのチャンスならプラス
+
+
+          }
+        }
+      }
+
+      console.log(v_reach)
+      for (let i = 1; i < 3; i++) {
+        let vr = v_reach[i];
+        let n = vr.indexOf(true);
+
+        if (n != -1) {//置可リーチがある
+          vr[n] = "TRUE";
+          if (vr.indexOf(true) != -1) {//置可リーチがもう1つある
+            console.log(i, 'のダブルリーチ');
+            score += i == 2 ? 1000 : -1000;
+          }
+        }
+
+        for (let j = 0; j < vr.length; j += 2) {
+          if (vr.indexOf(Number(vr[j][0]) - 1 + vr[j][1]) != -1) {//上下リーチがある
+            console.log(i, 'の上下リーチ', vr[j])
+            score += i == 2 ? 1000 : -1000;
+          }
+        }
+      }
+      return score;
+    }
+
+
+
+
+    function pu(pl, pla) {
+      if (pla == 2) player = 2;
+      else player = 1;
+      put(pl)
+    }
+
+    function v() {
+      console.log(evaluate(data));
+    }
+
+
+
+
+
+
+    //start_button.onclick();
+
+
+
+
+//     let c=0;
+// for(let i=0;i<128;i++){
+//     let t = i.toString(2);
+//     if(t.indexOf('1111')!=-1)continue;
+//     let l=t.length;
+//     for(let j=0;j<7-l;j++){
+//         t='0'+t;
+//     }
+//     if(t.indexOf('1110')!=-1||t.indexOf('1101')!=-1||t.indexOf('1011')!=-1||t.indexOf('0111')!=-1)continue;
+//     console.log(t);
+//     c++;
+// }
+// console.log(c+'通り')
+
+// 11 があるとないで評価法分ける
 
   </script>
 </body>
