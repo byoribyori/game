@@ -10,7 +10,91 @@
       background-color: #cbe7f0;
     }
 
-    table {
+    h1 {
+      text-align: center;
+      font-size: 60px;
+    }
+
+    .select {
+      display: flex;
+      width: 500px;
+      height: 60px;
+      margin: auto;
+      font-size: 30px;
+    }
+
+    .select>div {
+      display: inline-block;
+      width: 50%;
+      text-align: center;
+      line-height: 60px;
+    }
+
+    .select>div[data-check="T"] {
+      text-decoration: underline black double 2px;
+    }
+
+    form {
+      width: 360px;
+      margin: auto;
+      display: flex;
+    }
+
+    #player1 {
+      margin-top: 40px;
+    }
+
+    div[id^="player"] {
+      font-size: 30px;
+      text-align: center;
+    }
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    #form2 {
+      margin-top: 40px;
+    }
+
+    label {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: solid 10px #cbe7f0;
+    }
+
+    input[type="radio"]:checked+label {
+      width: 60px;
+      height: 60px;
+      border: none;
+    }
+
+    form>label:nth-child(2) {
+      background-color: red;
+    }
+
+    form>label:nth-child(4) {
+      background-color: #4040ff;
+    }
+
+    form>label:nth-child(6) {
+      background-color: yellow;
+    }
+
+    form>label:nth-child(8) {
+      background-color: green;
+    }
+
+    form>label:nth-child(10) {
+      background-color: #ff96cf;
+    }
+
+    form>label:nth-child(12) {
+      background-color: black;
+    }
+
+    #board {
       margin: 150px auto 0 auto;
       border: solid black 3px;
       border-top: none;
@@ -50,6 +134,37 @@
       height: 70px;
     }
 
+    @media screen and (max-width:700px) {
+      h1 {
+        font-size: 11vw;
+      }
+
+      .select {
+        width: 95%;
+        font-size: 5vw;
+      }
+
+      form {
+        width: 66vw;
+      }
+
+      label {
+        width: 7vw;
+        height: 7vw;
+        border: solid 2vw #cbe7f0;
+      }
+
+      input[type="radio"]:checked+label {
+        width: 11vw;
+        height: 11vw;
+        border: none;
+      }
+
+      div[id^="player"] {
+        font-size: 6vw;
+      }
+    }
+
     @media screen and (max-width:800px) {
 
       td,
@@ -70,15 +185,49 @@
 
 <body>
   <div id="area">
-    <input type="radio" name="play" id="one" checked>
-    <label for="one">一人プレイ(対COM)</label>
-    <input type="radio" name="play" id="two">
-    <label for="two">二人プレイ</label>
+    <h1>色並べ</h1>
 
-    <input type="radio" name="turn" id="senkou">
-    <label for="senkou">先行</label>
-    <input type="radio" name="turn" id="koukou" checked>
-    <label for="koukou">後行</label>
+
+    <div class="select">
+      <div class="num" data-check="T">1人で（対COM）</div>
+      <div class="num">2人で</div>
+    </div>
+    <div class="select" id="turn">
+      <div class="turn" data-check="T">先攻</div>
+      <div class="turn">後攻</div>
+    </div>
+
+    <div id="player1">1P</div>
+    <form id="form1">
+      <input type="radio" name="color1" id="red1" value="red" checked>
+      <label for="red1"></label>
+      <input type="radio" name="color1" id="blue1" value="#4040ff">
+      <label for="blue1"></label>
+      <input type="radio" name="color1" id="yellow1" value="yellow">
+      <label for="yellow1"></label>
+      <input type="radio" name="color1" id="green1" value="green">
+      <label for="green1"></label>
+      <input type="radio" name="color1" id="pink1" value="#ff96cf">
+      <label for="pink1"></label>
+      <input type="radio" name="color1" id="black1" value="black">
+      <label for="black1"></label>
+    </form>
+    <form id="form2">
+      <input type="radio" name="color2" id="red2" value="red">
+      <label for="red2"></label>
+      <input type="radio" name="color2" id="blue2" value="#4040ff" checked>
+      <label for="blue2"></label>
+      <input type="radio" name="color2" id="yellow2" value="yellow">
+      <label for="yellow2"></label>
+      <input type="radio" name="color2" id="green2" value="green">
+      <label for="green2"></label>
+      <input type="radio" name="color2" id="pink2" value="#ff96cf">
+      <label for="pink2"></label>
+      <input type="radio" name="color2" id="black2" value="black">
+      <label for="black2"></label>
+    </form>
+    <div id="player2">COM</div>
+
 
     <button id="start_button">スタート</button>
   </div>
@@ -86,7 +235,7 @@
   <div id="arrow"></div>
 
   <style id="opacity">
-    img {
+    #turn {
       opacity: 1;
     }
   </style>
@@ -95,18 +244,59 @@
     const body = document.getElementsByTagName('body')[0];
     const start_button = document.getElementById('start_button');
     const area = document.getElementById('area');
+    const num = area.getElementsByClassName('num');
+    const turn = area.getElementsByClassName('turn');
+    const opacity = document.getElementById('opacity');
     let data = [];
     let position = [];
-    let color = [null, 'green', 'blue'];
+    let color = [null, 'green', 'black'];
     const reach_pattern = ['1110', '1101', '1011', '0111', '2220', '2202', '2022', '0222'];//リーチのパターン
-    let one, player, click = false, size;//一人プレイか,手番,クリック不可
+    let one = true, player = 1, click = false, size;//一人プレイか,手番,クリック不可,1マスの大きさ
+
+    num[0].onclick = () => {
+      if (one) return;
+      num[0].dataset.check = "T";
+      num[1].dataset.check = "";
+      turn[0].dataset.check = "T";
+      opacity.innerHTML = `#turn {
+      opacity: 1;
+      }`;
+      one = true;
+      player = 1;
+    }
+    num[1].onclick = () => {
+      if (!one) return;
+      num[1].dataset.check = "T";
+      num[0].dataset.check = "";
+      turn[0].dataset.check = "";
+      turn[1].dataset.check = "";
+      opacity.innerHTML = `#turn {
+      opacity: 0.2;
+      }`;
+      one = false;
+    }
+    turn[0].onclick = () => {
+      if (!one || player == 1) return;
+      turn[0].dataset.check = "T";
+      turn[1].dataset.check = "";
+      player = 1;
+    }
+    turn[1].onclick = () => {
+      if (!one || player == 2) return;
+      turn[1].dataset.check = "T";
+      turn[0].dataset.check = "";
+      player = 2;
+    }
 
     start_button.onclick = () => {
-      one = document.getElementById('one').checked;//一人プレイか
-      player = one && document.getElementById('koukou').checked ? 2 : 1;
 
+      color[1] = document.getElementById('form1').elements['color1'].value;//選択された色
+      color[2] = document.getElementById('form2').elements['color2'].value;
+
+      if (!one) player = 1;
       area.innerHTML = '';
       let table = document.createElement('table');//盤面作成
+      table.id = "board";
       for (let i = 0; i < 6; i++) {
         data.push([]);
         let tr = document.createElement('tr');
@@ -120,9 +310,8 @@
       }
       area.appendChild(table);
 
-      size = document.getElementById('_0_0').getClientRects()[0].height; console.log(size)
+      size = document.getElementById('_0_0').getClientRects()[0].height;
       const margin = size == 110 ? 25 : (size - document.getElementsByTagName('html')[0].getClientRects()[0].width * 0.07) / 2;
-      console.log(margin)
 
       const arrow = document.getElementById('arrow');
       for (let i = 0; i < 7; i++) {
@@ -144,15 +333,12 @@
       }
 
       if (player == 1) {
-        click = true
+        click = true;
       } else {
         setTimeout(() => {
           put(3, 2);
         }, 1000);
       }
-
-
-
     }
 
     let put_height = [5, 5, 5, 5, 5, 5, 5];//置かれる場所
@@ -231,13 +417,6 @@
           }
         }
       }
-    }
-
-    const Opacity = document.getElementById('opacity');
-    let o = true;
-    const opacity = () => {//矢印の透明度を変える
-      Opacity.innerHTML = `img{opacity:${o ? 0.2 : 1}}`;
-      o = !o;
     }
 
     const win = () => {
@@ -354,7 +533,6 @@
           }
 
           if (v_reach2.length) {
-            console.log(v_reach2)
             for (let j = 0; j < v_reach2.length; j += 3) {
               let vr = v_reach2[j];
               if (v_reach[v_reach2[j + 1]].indexOf(vr) == -1) {
