@@ -98,6 +98,27 @@
       background-color: black;
     }
 
+    #start_button{
+      display: block;
+    border: none;
+    margin: auto;
+    margin-top: 40px;
+    width: 230px;
+    height: 70px;
+    border-radius: 45% 0;
+    background-color: #fffae8;
+    font-size: 45px;
+    cursor: pointer;
+    padding: 0;
+    }
+
+    #start{
+      display: inline-block;
+    background: linear-gradient(90deg, red 0%,#4040ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    }
+
     #board {
       margin: 150px auto 0 auto;
       border: solid black 3px;
@@ -174,6 +195,12 @@
       div[id^="player"] {
         font-size: 6vw;
       }
+
+      #start_button{
+        width: 40vw;
+    height: 12vw;
+    font-size: 8vw;
+      }
     }
 
     @media screen and (max-width:800px) {
@@ -240,7 +267,7 @@
     <div id="player2">COM</div>
 
 
-    <button id="start_button">スタート</button>
+    <button id="start_button"><span id="start">START</span></button>
   </div>
 
   <div id="arrow"></div>
@@ -263,7 +290,7 @@
     let color = [null, 'green', 'black'];
     const reach_pattern = ['1110', '1101', '1011', '0111', '2220', '2202', '2022', '0222'];//リーチのパターン
     let one = true, player = 1, click = false, size, game_speed = 600;
-    ///一人プレイか,手番,クリック不可,1マスの大きさ,ゲームのスピード
+    //一人プレイか,手番,クリック不可,1マスの大きさ,ゲームのスピード
 
     num[0].onclick = () => {
       if (one) return;
@@ -362,8 +389,8 @@
 
     let put_height = [5, 5, 5, 5, 5, 5, 5];//置かれる場所
     const put = (place) => {//コマを落とす(列,手番)
-      if (one && player == 2) console.log('----COM思考終了----');
-      console.log(`%c${put_height[place]}  ${place}`, `color:${color[player]};font-size:1.5em`)
+      if (one && player == 2) //('----COM思考終了----');
+      //(`%c${put_height[place]}  ${place}`, `color:${color[player]};font-size:1.5em`)
       click = false;
       data[put_height[place]][place] = player;
       let piece = document.createElement('div');//コマを作成
@@ -397,7 +424,6 @@
         }, game_speed);
       }, 100)
     }
-
 
     let reach = [null, [], []];
     const check_reach = (p) => {
@@ -439,7 +465,7 @@
     }
 
     const win = () => {
-      console.log('%cWIN!!', `color:${color[player]};font-size:23px`)
+      //('%cWIN!!', `color:${color[player]};font-size:23px`)
       setTimeout(() => {
         alert(`WIN\n${color[player]}`);
       }, 300);
@@ -448,7 +474,7 @@
     let CAN = [0, 1, 2, 3, 4, 5, 6];//置ける場所　置けない場所は消す
     const com = () => {//COM思考　　2023/5/1~
       console.clear();
-      console.log('-----COM思考-----')
+      //('-----COM思考-----')
 
       let can = CAN.concat();//置ける場所をコピー　置いてはいけない場所も消す
 
@@ -456,19 +482,19 @@
         let r = reach[2][i].split('');
         r[0] = Number(r[0]);
         if (r[0] == 5 || data[r[0] + 1][r[1]]) {
-          console.log('勝ち');
+          //('勝ち');
           put(Number(r[1]), 2);
           return;
         }
       }
 
-      if (reach[1].length) console.log('相手のリーチ' + reach[1])
+      if (reach[1].length) //('相手のリーチ' + reach[1])
       for (let i in reach[1]) {//相手にリーチされていたら対処
         let r = reach[1][i].split('');
         r[0] = Number(r[0]);
         r[1] = Number(r[1]);
         if (r[0] == 5 || data[r[0] + 1][r[1]]) {//相手にリーチされていたら対処
-          console.log('リーチつぶし');
+          //('リーチつぶし');
           put(r[1], 2);
           return;
         }
@@ -477,7 +503,7 @@
         }
       }
       if (can.length < 1) {//選択肢が1つ以下
-        console.log('消去法');
+        //('消去法');
         put(can[0] || CAN[0], 2);
         return;
       }
@@ -488,10 +514,9 @@
       //   r[1] = Number(r[1]);
       //   if (r[0] == 4 || data[r[0] + 2][r[1]]) {//相手はCOMのリーチの下に置かない
       //     can2.splice(can.indexOf(r[1]), 1);
-      //     console.log('相手は'+r[1]+'に置かない');
+      //     //('相手は'+r[1]+'に置かない');
       //   }
       // }
-
 
 
       let MIN = [];
@@ -503,18 +528,18 @@
         d[height_copy[can[i]]][can[i]] = player;
         height_copy[can[i]]--;
         if (height_copy[can[i]] < 0) can2.splice(can2.indexOf(can[i]), 1);
-        //console.log(`%cもしCOMが ${can[i]} に置いたら`, "font-size:1.4em")
+        //(`%cもしCOMが ${can[i]} に置いたら`, "font-size:1.4em")
         let min = [100000, CAN[0]];//最低点,その場所  相手は(COM視点の)点が1番低くなるところに置く
         for (let j in can2) {
           let d2 = JSON.parse(JSON.stringify(d));
           d2[height_copy[can2[j]]][can2[j]] = 1;
-          //console.log('もし相手が', can2[j], 'に置いたら')
+          //('もし相手が', can2[j], 'に置いたら')
           let S2 = evaluate(d2, 2);
-          //console.log(S2, '点')
+          //(S2, '点')
           if (S2 < min[0]) min = [S2, can2[j]];
-          //if (S2 == -1000) console.log('%cダブルリーチされる', "font-size:2em");
+          //if (S2 == -1000) //('%cダブルリーチされる', "font-size:2em");
         }
-        //console.log('COMが', can[i], 'に置いたら相手は', min);
+        //('COMが', can[i], 'に置いたら相手は', min);
         if (min[0] > max[0]) max = [min[0], can[i]];
         MIN.push(min[0]);
       }
@@ -525,13 +550,13 @@
       for (let i = 0; i < MIN.length; i++) {
         if (MIN[i] == m) M.push(can[i]);
       }
-     // console.log('それぞれの点数', MIN);
-      let r = Math.floor(Math.random() * M.length); //console.log(M + 'の中から' + M[r])
+      //('それぞれの点数', MIN);
+      let r = Math.floor(Math.random() * M.length); //(M + 'の中から' + M[r])
       put(M[r], 2);
 
 
 
-      // let r = Math.floor(Math.random() * can.length); console.log(can + 'の中から' + can[r])
+      // let r = Math.floor(Math.random() * can.length); //(can + 'の中から' + can[r])
       // put(can[r] || CAN[0], 2);
 
     }
@@ -543,7 +568,7 @@
       [[3, 0], [4, 0], [5, 0], [5, 1], [5, 2], [5, 3]]
     ];
     const evaluate = (d, e_player) => {//盤面の評価(COM視点)  e_playerは今の手番(置可リーチがあれば勝ち)
-      //console.log('評価する\n', d);
+      //('評価する\n', d);
       let score = 0;
       let v_reach = [null, [], []];//この盤面のリーチの場所
       let des = ['横', '右下がり', '右上がり'];
@@ -571,18 +596,18 @@
 
       for (let w in three_way) {//3方向
         let way = three_way[w];
-        //console.log(`%c${des[w]}チェック`,"color:red;font-size:1.4em");
+        ////(`%c${des[w]}チェック`,"color:red;font-size:1.4em");
 
         c: for (let i = 0; i < 6; i++) {//1行ずつチェック
           let start = start_place[w][i];
-          //console.log(start,'からスタート')
+          ////(start,'からスタート')
           let line = '';//チェックする行
           for (let j = 0; j < 7; j++) {//1行最大7マス
             let p = [start[0] + way[0] * j, start[1] + way[1] * j];
             if (p[0] == 6 || p[0] == -1 || p[1] == 7) break;
             line += d[p[0]][p[1]];
           }
-          //console.log(des[w], 'の', line, 'をチェック')
+          ////(des[w], 'の', line, 'をチェック')
           if (line.indexOf(1) == -1 && line.indexOf(2) == -1) continue c;//どちらもなければノーカン
 
 
@@ -607,7 +632,7 @@
             }
           }
 
-          //if(v_reach2)console.log('リーチがある')
+          //if(v_reach2)//('リーチがある')
           if (v_reach2) continue c;//この行にリーチがあったらもう次の行へ
 
           for (let j = 0; j < line.length - 3; j++) {
@@ -618,25 +643,18 @@
             let chance = iti ? 1 : 2;
 
 
-            //console.log(L , 'を調べる',j)
+            ////(L , 'を調べる',j)
 
+              let s = 0;//並んだ4つの評価
+            if (L[0]!='0') s++; if (L[1]!='0') s++; if (L[2]!='0') s++; if (L[3]!='0') s++;
 
-
-
-
-
-
-            //   let s = 0;//並んだ4つの評価
-            // if (L[0]) s++; if (L[1]) s++; if (L[2]) s++; if (L[3]) s++;
-
-            // score += ni ? s : -s;//COMのチャンスならプラス
-
+            score += ni ? s : -s;//COMのチャンスならプラス
 
           }
         }
       }
 
-      //console.log(v_reach)
+      //(v_reach)
       for (let i = 1; i < 3; i++) {
         let vr = v_reach[i];
         let n = vr.indexOf(true);
@@ -644,7 +662,7 @@
         if (n != -1) {//置可リーチがある
           vr[n] = "TRUE";
           if (vr.indexOf(true) != -1) {//置可リーチがもう1つある
-            //console.log(i, 'のダブルリーチ');
+            //(i, 'のダブルリーチ');
             score += i == 2 ? 1000 : -1000;
           }
           vr[n] = true;
@@ -652,7 +670,7 @@
 
         for (let j = 0; j < vr.length; j += 2) {
           if (vr.indexOf(Number(vr[j][0]) - 1 + vr[j][1]) != -1) {//上下リーチがある
-            //console.log(i, 'の上下リーチ', vr[j])
+            //(i, 'の上下リーチ', vr[j])
             score += i == 2 ? 1000 : -1000;
           }
           if (!vr[j + 1]) score += i == 2 ? 10 : -10;//リーチ1つごとに10点
@@ -672,7 +690,7 @@
     }
 
     function v() {
-      console.log(evaluate(data, player));
+      //(evaluate(data, player));
     }
 
 
@@ -694,10 +712,10 @@
 //         t='0'+t;
 //     }
 //     if(t.indexOf('1110')!=-1||t.indexOf('1101')!=-1||t.indexOf('1011')!=-1||t.indexOf('0111')!=-1)continue;
-//     console.log(t);
+//     //(t);
 //     c++;
 // }
-// console.log(c+'通り')
+// //(c+'通り')
 
 // 11 があるとないで評価法分ける
 
