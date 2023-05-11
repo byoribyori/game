@@ -98,6 +98,20 @@
       background-color: black;
     }
 
+    #link{
+      width: 360px;
+      margin: auto;
+      height: 30px;
+    }
+
+    a{
+      float: right;
+      font-size: 28px;
+      color: #03a2ff;
+      line-height: 30px;
+      height: 30px;
+    }
+
     #start_button{
       display: block;
     border: none;
@@ -196,6 +210,17 @@
         font-size: 6vw;
       }
 
+      #link{
+        width: 66vw;
+        height: 7vw;
+      }
+
+      a{
+        height: 7vw;
+        line-height: 7vw;
+        font-size: 5vw;
+      }
+
       #start_button{
         width: 40vw;
     height: 12vw;
@@ -224,7 +249,6 @@
 <body>
   <div id="area">
     <h1>色並べ</h1>
-
 
     <div class="select">
       <div class="num" data-check="T">1人で 対COM</div>
@@ -266,6 +290,9 @@
     </form>
     <div id="player2">COM</div>
 
+    <div id="link">
+      <a href="set_color.html" target="_blank" rel="noopener noreferrer">設定</a>
+    </div>
 
     <button id="start_button"><span id="start">START</span></button>
   </div>
@@ -537,7 +564,6 @@
           let S2 = evaluate(d2, 2);
           //(S2, '点')
           if (S2 < min[0]) min = [S2, can2[j]];
-          //if (S2 == -1000) //('%cダブルリーチされる', "font-size:2em");
         }
         //('COMが', can[i], 'に置いたら相手は', min);
         if (min[0] > max[0]) max = [min[0], can[i]];
