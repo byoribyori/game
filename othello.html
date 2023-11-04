@@ -12,10 +12,12 @@
     body {
       margin: 0;
       background-color: #d9eef5;
+      background: linear-gradient(0deg, rgba(0,0,0,1) 0%,rgba(255,255,255,1) 100%);
     }
 
     table {
       background-color: black;
+      margin: auto;
     }
 
     .cell {
@@ -49,9 +51,39 @@
     }
 
     .player{
-      width: 50vw;
-      height: 20vw;
-      border: 2px solid black;
+      width: 40vw;
+      height: 15vw;
+      border: solid 1vw black;
+      margin: 15px auto;
+    }
+
+    #playerB{
+      box-shadow: 0px 0px 3vw 1vw white;
+    }
+
+    #playerW{
+      border-color: white;
+      box-shadow: 0px 0px 3vw 1vw black;
+      /* transform: rotate(180deg); */
+    }
+
+    .player{
+      background-color: #a2a2a2;
+    }
+
+    .count{
+      display: inline-block;
+      width: 12vw;
+      height: 12vw;
+      border-radius: 50%;
+    }
+
+    #countB{
+      background-color: black;
+    }
+
+    #countW{
+      background-color: white;
     }
 
   }
@@ -59,9 +91,9 @@
 
 <body id="body">
   <button id="start">start</button>
-  <div id="playerW" class="player"></div>
+  <div id="playerW" class="player"><span id="countW" class="count"></span></div>
   <div id="T"></div>
-  <div id="playerB" class="player"></div>
+  <div id="playerB" class="player"><span id="countB" class="count"></span></div>
 
   <script>
     let data = [];
