@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オセロ</title>
+</head>
+<style>
+  @media screen and (max-width:500px) {
+
+    body {
+      margin: 0;
+      background-color: #d9eef5;
+    }
+
+    table {
+      background-color: black;
+    }
+
+    .cell {
+      width: 10vw;
+      height: 10vw;
+      background-color: #13ab13;
+    }
+
+    td>div {
+      width: 90%;
+      height: 90%;
+      margin: auto;
+      border-radius: 50%;
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .can {
+      width: 3vw;
+      height: 3vw;
+      background-color: #ea9700;
+      display: block;
+      border-radius: 50%;
+      margin: auto;
+    }
+
+    .player{
+      width: 50vw;
+      height: 20vw;
+      border: 2px solid black;
+    }
+
+  }
+</style>
+
+<body id="body">
+  <button id="start">start</button>
+  <div id="playerW" class="player"></div>
+  <div id="T"></div>
+  <div id="playerB" class="player"></div>
+
+  <script>
+    let data = [];
+    let put_position = ['33', '34', '35', '36', '46', '56', '66', '65', '64', '63', '53', '43'];//置けそうな場所
+    let turn = [false, 1];
+
+    document.getElementById('start').onclick = () => {//STARTボタン押したら
+      document.getElementById('start').remove();
+      let table = document.createElement('table');
+      for (let i = 1; i < 9; i++) {
+        let tr = document.createElement('tr');
+        for (let j = 1; j < 9; j++) {
+          let td = document.createElement('td');
+          td.classList = 'cell';
+          td.id = `c${i}${j}`;
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      document.getElementById('T').appendChild(table);
+
+      for (let i = 0; i < 10; i++) {
+        data.push([]);
+        for (let j = 0; j < 10; j++) {
+          data[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
+        }
+      }
+
+      document.getElementById('c45').innerHTML = '<div class="black" id="k45"></div>';
+      document.getElementById('c54').innerHTML = '<div class="black" id="k54"></div>';
+      document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
+      document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
+      [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
+
+      check(1);
+
+      document.getElementsByTagName('table')[0].onclick = (e) => {
+        if (!turn[0]) return;
+        e = e.target;
+        let p;
+        if (e.className == 'can') {
+          p = e.parentElement.id;
+        } else {
+          if (!e.children[0]) return;
+          if (e.children[0].className != 'can') return;
+          p = e.id;
+        }
+        put(p, turn[1]);
+      }
+    }
+
+    const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
+    const color = [null, 'black', 'white'];
+    const put = (p, c) => {
+      turn[0] = false; console.log(p, c)
+      let can = document.getElementsByClassName('can');
+      for (let i = 0; can.length; i++) {
+        can[0].remove();
+      }
+
+      document.getElementById(p).innerHTML = `<div class="${color[c]}" id="k${p.substr(1, 2)}"></div>`;
+
+      p = p.substr(1, 2);
+      let p0 = Number(p[0]);
+      let p1 = Number(p[1]);
+      op = c % 2 + 1;//相手の色
+      data[p0][p1] = c;
+      let LIST = [];
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        let list = [];
+        if (data[p0 + w0][p1 + w1] == op) {
+          list.push([p0 + w0, p1 + w1]);
+          for (let j = 2; j < 15; j++) {
+            if (data[p0 + w0 * j][p1 + w1 * j] == op) {
+              list.push([p0 + w0 * j, p1 + w1 * j]);
+              continue;
+            } else if (data[p0 + w0 * j][p1 + w1 * j] == 0 || data[p0 + w0 * j][p1 + w1 * j] == 3) {
+              break;
+            } else {
+              LIST.push(list);
+              break;
+            }
+          }
+        } else { continue; }
+      }
+
+      for (let i = 0; i < LIST.length; i++) {
+        for (let j = 0; j < LIST[i].length; j++) {
+          let l = LIST[i][j];
+          data[l[0]][l[1]] = c;
+          let k = document.getElementById('k' + l[0] + l[1]);
+          k.className = color[c];
+        }
+      }
+
+      put_position.splice(put_position.indexOf(p), 1);
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        let pu = p0 + w0 + '' + +(p1 + w1);
+        if (data[pu[0]][pu[1]] == 0 && put_position.indexOf(pu) == -1) put_position.push(pu);
+      }
+
+      turn[1] = op;
+      check(op);
+    }
+
+
+
+    const check = (c, pass) => {//置けるか
+      let can = [];
+      for (let i = 0; i < put_position.length; i++) {
+        let o = CHECK(put_position[i], c);//１つずつ調べる
+        if (o) can.push(put_position[i]);
+      }
+      if (!can.length) {//どこにも置けなければパス
+        if (pass) {
+          console.log('終了');
+          return;
+        }
+        console.log('パス')
+        turn[1] = c % 2 + 1;
+        check(c % 2 + 1, true);
+      } else {
+        for (let i = 0; i < can.length; i++) {
+          document.getElementById(`c${can[i][0]}${can[i][1]}`).innerHTML = '<span class="can"></span>';
+        }
+        turn[0] = true;
+      }
+    }
+
+    const CHECK = (p, c) => {//cがpに置けるか調べる
+      let p0 = Number(p[0]);
+      let p1 = Number(p[1]);
+      op = c % 2 + 1;//相手の色
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        if (data[p0 + w0][p1 + w1] == op) {
+          for (let j = 2; j < 15; j++) {
+            if (data[p0 + w0 * j][p1 + w1 * j] == op) {
+              continue;
+            } else if (data[p0 + w0 * j][p1 + w1 * j] == 0 || data[p0 + w0 * j][p1 + w1 * j] == 3) {
+              break;
+            } else {
+              return true;
+            }
+          }
+        } else { continue; }
+      }
+      return false;
+    }
+
+    document.getElementById('start').onclick();
+
+  </script>
+</body>
+
+</html>
