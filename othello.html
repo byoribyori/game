@@ -12,6 +12,7 @@
     html,body{
   overflow: hidden
 }
+
     html {
       width: 100%;
       height: 100%;
@@ -74,26 +75,45 @@
     #playerW {
       border-color: white;
       box-shadow: 0px 0px 3vw 1vw black;
-      /* transform: rotate(180deg); */
+      transform: rotate(180deg);
     }
 
     .player {
       background-color: #a2a2a2;
     }
 
-    .count {
+    .maru {
       display: inline-block;
-      width: 12vw;
-      height: 12vw;
+      width: 13vw;
+      height: 13vw;
       border-radius: 50%;
+      margin: 1vw;
     }
 
-    #countB {
+    #playerB>.maru {
       background-color: black;
     }
 
-    #countW {
+    #playerW >.maru {
       background-color: white;
+    }
+
+    .count{
+      display: inline-block;
+    width: 21vw;
+    height: 15vw;
+    position: absolute;
+    font-size: 13vw;
+    text-align: right;
+    line-height: 17vw;
+    }
+
+    #countW{
+      color: white;
+    }
+
+    #countB{
+      color: black;
     }
 
   }
@@ -101,14 +121,15 @@
 
 <body id="body">
   <button id="start">start</button>
-  <div id="playerW" class="player"><span id="countW" class="count"></span></div>
+  <div id="playerW" class="player"><span class="maru"></span><span id="countW" class="count">2</span></div>
   <div id="T"></div>
-  <div id="playerB" class="player"><span id="countB" class="count"></span></div>
+  <div id="playerB" class="player"><span class="maru"></span><span id="countB" class="count">2</span></div>
 
   <script>
     let data = [];
     let put_position = ['33', '34', '35', '36', '46', '56', '66', '65', '64', '63', '53', '43'];//置けそうな場所
     let turn = [false, 1];
+    let count = [null,2,2];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
       document.getElementById('start').remove();
@@ -165,6 +186,7 @@
 
     const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
     const color = [null, 'black', 'white'];
+    const counter = [null,document.getElementById('countB'),document.getElementById('countW')];
     const put = (p, c) => {
       turn[0] = false; console.log(p, c)
       let can = document.getElementsByClassName('can');
@@ -173,6 +195,7 @@
       }
 
       document.getElementById(p).innerHTML = `<div class="${color[c]}" id="k${p.substr(1, 2)}"></div>`;
+      count[c]++;
 
       p = p.substr(1, 2);
       let p0 = Number(p[0]);
@@ -206,6 +229,10 @@
           data[l[0]][l[1]] = c;
           let k = document.getElementById('k' + l[0] + l[1]);
           k.className = color[c];
+          count[c]++;
+          count[op]--;
+          counter[c].innerText=count[c];
+          counter[op].innerText=count[op];
         }
       }
 
