@@ -9,9 +9,10 @@
 <style>
   @media screen and (max-width:500px) {
 
-    html,body{
-  overflow: hidden
-}
+    html,
+    body {
+      overflow: hidden
+    }
 
     html {
       width: 100%;
@@ -94,28 +95,37 @@
       background-color: black;
     }
 
-    #playerW >.maru {
+    #playerW>.maru {
       background-color: white;
     }
 
-    .count{
+    .count {
       display: inline-block;
-    width: 21vw;
-    height: 15vw;
-    position: absolute;
-    font-size: 13vw;
-    text-align: right;
-    line-height: 17vw;
+      width: 20vw;
+      height: 15vw;
+      position: absolute;
+      font-size: 13vw;
+      text-align: right;
+      line-height: 16vw;
+      font-family: math;
     }
 
-    #countW{
+    #countW {
       color: white;
     }
 
-    #countB{
+    #countB {
       color: black;
     }
 
+    .maru[data-turn="t"] {
+	animation: blinking 0.6s ease-in-out infinite alternate;
+}
+ 
+@keyframes blinking {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
   }
 </style>
 
@@ -129,7 +139,9 @@
     let data = [];
     let put_position = ['33', '34', '35', '36', '46', '56', '66', '65', '64', '63', '53', '43'];//置けそうな場所
     let turn = [false, 1];
-    let count = [null,2,2];
+    let count = [null, 2, 2];
+    let blink = document.getElementsByClassName('maru');
+    blink=[null,blink[1],blink[0]];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
       document.getElementById('start').remove();
@@ -150,9 +162,8 @@
       const height1 = document.getElementById('playerW').getClientRects()[0].height;//css
       const height2 = document.getElementById('T').getClientRects()[0].height;
       const height3 = document.getElementById('body').getClientRects()[0].height;
-      document.getElementsByTagName('style')[0].innerHTML += `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`
-      console.log(height1, height2, height3)
-
+      document.getElementsByTagName('style')[0].innerHTML +=
+        `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`;
 
       for (let i = 0; i < 10; i++) {
         data.push([]);
@@ -166,6 +177,11 @@
       document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
       document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
       [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
+
+      blink[1].dataset.turn="t";
+      setTimeout(() => {
+        blink[1].dataset.turn=""; 
+      }, 10000);
 
       check(1);
 
@@ -186,7 +202,7 @@
 
     const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
     const color = [null, 'black', 'white'];
-    const counter = [null,document.getElementById('countB'),document.getElementById('countW')];
+    const counter = [null, document.getElementById('countB'), document.getElementById('countW')];
     const put = (p, c) => {
       turn[0] = false; console.log(p, c)
       let can = document.getElementsByClassName('can');
@@ -196,6 +212,7 @@
 
       document.getElementById(p).innerHTML = `<div class="${color[c]}" id="k${p.substr(1, 2)}"></div>`;
       count[c]++;
+      counter[c].innerText = count[c];
 
       p = p.substr(1, 2);
       let p0 = Number(p[0]);
@@ -223,16 +240,19 @@
         } else { continue; }
       }
 
+      let co = 0;
       for (let i = 0; i < LIST.length; i++) {
         for (let j = 0; j < LIST[i].length; j++) {
           let l = LIST[i][j];
           data[l[0]][l[1]] = c;
-          let k = document.getElementById('k' + l[0] + l[1]);
-          k.className = color[c];
-          count[c]++;
-          count[op]--;
-          counter[c].innerText=count[c];
-          counter[op].innerText=count[op];
+          co++;
+          setTimeout(() => {
+            document.getElementById('k' + l[0] + l[1]).className = color[c];
+            count[c]++;
+            count[op]--;
+            counter[c].innerText = count[c];
+            counter[op].innerText = count[op];
+          }, co * 300);
         }
       }
 
@@ -244,8 +264,11 @@
         if (data[pu[0]][pu[1]] == 0 && put_position.indexOf(pu) == -1) put_position.push(pu);
       }
 
-      turn[1] = op;
-      check(op);
+      setTimeout(() => {
+        turn[1] = op;
+        check(op);
+      }, (co + 1) * 300);
+
     }
 
 
