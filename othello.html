@@ -119,13 +119,18 @@
     }
 
     .maru[data-turn="t"] {
-	animation: blinking 0.6s ease-in-out infinite alternate;
-}
- 
-@keyframes blinking {
-	0% {opacity: 0;}
-	100% {opacity: 1;}
-}
+      animation: blinking 0.7s ease-in-out infinite alternate;
+    }
+
+    @keyframes blinking {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
   }
 </style>
 
@@ -141,7 +146,7 @@
     let turn = [false, 1];
     let count = [null, 2, 2];
     let blink = document.getElementsByClassName('maru');
-    blink=[null,blink[1],blink[0]];
+    blink = [null, blink[1], blink[0]];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
       document.getElementById('start').remove();
@@ -178,10 +183,7 @@
       document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
       [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
 
-      blink[1].dataset.turn="t";
-      setTimeout(() => {
-        blink[1].dataset.turn=""; 
-      }, 10000);
+      blink[1].dataset.turn = "t";
 
       check(1);
 
@@ -204,7 +206,9 @@
     const color = [null, 'black', 'white'];
     const counter = [null, document.getElementById('countB'), document.getElementById('countW')];
     const put = (p, c) => {
-      turn[0] = false; console.log(p, c)
+      turn[0] = false;
+      blink[1].dataset.turn = "";
+      blink[2].dataset.turn = "";
       let can = document.getElementsByClassName('can');
       for (let i = 0; can.length; i++) {
         can[0].remove();
@@ -282,16 +286,20 @@
       if (!can.length) {//どこにも置けなければパス
         if (pass) {
           console.log('終了');
+          blink[1].dataset.turn = "";
+          blink[2].dataset.turn = "";
           return;
         }
         console.log('パス')
         turn[1] = c % 2 + 1;
+        blink[c % 2 + 1].dataset.turn = "t";
         check(c % 2 + 1, true);
       } else {
         for (let i = 0; i < can.length; i++) {
           document.getElementById(`c${can[i][0]}${can[i][1]}`).innerHTML = '<span class="can"></span>';
         }
         turn[0] = true;
+        blink[c].dataset.turn = "t";
       }
     }
 
