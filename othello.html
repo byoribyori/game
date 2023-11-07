@@ -132,6 +132,16 @@
       }
     }
   }
+
+  #pass {
+    width: 100vw;
+    height: 30vw;
+    position: absolute;
+    font-size: 23vw;
+    text-align: center;
+    color: yellow;
+    text-shadow: 0px 0px 4vw black;
+  }
 </style>
 
 <body id="body">
@@ -139,6 +149,7 @@
   <div id="playerW" class="player"><span class="maru"></span><span id="countW" class="count">2</span></div>
   <div id="T"></div>
   <div id="playerB" class="player"><span class="maru"></span><span id="countB" class="count">2</span></div>
+  <div id="pass">PASS</div>
 
   <script>
     let data = [];
@@ -147,6 +158,9 @@
     let count = [null, 2, 2];
     let blink = document.getElementsByClassName('maru');
     blink = [null, blink[1], blink[0]];
+    let time = 300; time = 0;
+    let kiroku = [];
+    let passP = [null];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
       document.getElementById('start').remove();
@@ -169,7 +183,9 @@
       const height3 = document.getElementById('body').getClientRects()[0].height;
       document.getElementsByTagName('style')[0].innerHTML +=
         `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`;
-
+      passP.push(height3 / 2);
+      passP.push(height3 / 2 - document.getElementById('pass').getClientRects()[0].height);
+      document.getElementById('pass').style.display = "none";
       for (let i = 0; i < 10; i++) {
         data.push([]);
         for (let j = 0; j < 10; j++) {
@@ -256,7 +272,7 @@
             count[op]--;
             counter[c].innerText = count[c];
             counter[op].innerText = count[op];
-          }, co * 300);
+          }, co * time);
         }
       }
 
@@ -269,32 +285,35 @@
       }
 
       setTimeout(() => {
+
+        kiroku.push(document.getElementsByTagName('table')[0].innerHTML);
+
         turn[1] = op;
         check(op);
-      }, (co + 1) * 300);
+      }, (co + 1) * time);
 
     }
 
 
 
-    const check = (c, pass) => {//置けるか
+    const check = (c, pa) => {//置けるか
       let can = [];
       for (let i = 0; i < put_position.length; i++) {
         let o = CHECK(put_position[i], c);//１つずつ調べる
         if (o) can.push(put_position[i]);
       }
       if (!can.length) {//どこにも置けなければパス
-        if (pass) {
+        if (pa) {
           console.log('終了');
           blink[1].dataset.turn = "";
           blink[2].dataset.turn = "";
           return;
         }
-        console.log('パス')
         turn[1] = c % 2 + 1;
         blink[c % 2 + 1].dataset.turn = "t";
         check(c % 2 + 1, true);
       } else {
+        if (pa) pass(c % 2 + 1);
         for (let i = 0; i < can.length; i++) {
           document.getElementById(`c${can[i][0]}${can[i][1]}`).innerHTML = '<span class="can"></span>';
         }
@@ -325,7 +344,37 @@
       return false;
     }
 
+    const pass = (c) => {
+      let pa = document.getElementById('pass');
+      pa.style.top = `${passP[c]}px`;
+      pa.style.transform = c == 2 ? 'rotate(180deg)' : '';
+      pa.style.display = '';
+      setTimeout(() => {
+        pa.style.display = 'none';
+      }, 800);
+
+    }
+
     document.getElementById('start').onclick();
+
+    function auto(a, pa) {
+      a = pa ? 15 : isNaN(a) ? 60 : a;
+      for (let i = 0; i < a; i++) {
+        setTimeout(() => {
+          let can = document.getElementsByClassName('can');
+          let r = pa ? 0 : Math.floor(Math.random() * can.length)
+          can = (can[r].parentElement.id);
+          put(can, turn[1]);
+        }, 20 * i);
+      }
+
+
+    }
+
+    function kako(k) {
+      if (!kiroku[k]) return;
+      document.getElementsByTagName('table')[0].innerHTML = kiroku[k];
+    }
 
   </script>
 </body>
