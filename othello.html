@@ -24,8 +24,66 @@
       width: 100%;
       height: 100%;
       margin: 0;
-      background-color: #d9eef5;
       background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(255, 255, 255, 1) 100%);
+    }
+
+    #setting {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background-color: white;
+      transition: 1s;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 11vw;
+    }
+
+    #game_speed {
+      width: 50vw;
+      margin: auto;
+      font-size: 5vw;
+    }
+
+    #speed {
+      appearance: none;
+      width: 45vw;
+      height: 8vw;
+      background: transparent;
+      margin: auto;
+      display: block;
+    }
+
+    #speed::-webkit-slider-runnable-track {
+      background: black;
+      height: 2vw;
+    }
+
+    #speed::-webkit-slider-thumb {
+      appearance: none;
+      width: 2vw;
+      height: 2vw;
+      border-radius: 50%;
+      background-color: white;
+      transform: scale(3);
+      box-shadow: 0 0 1vw black;
+    }
+
+    #start{
+      display: block;
+    margin: auto;
+    width: 35vw;
+    font-size: 7vw;
+    padding: 3vw;
+    border-radius: 8vw;
+    color: black;
+    background-color: #efefef;
+    border: 2px solid black;
+    }
+
+    .s_w{
+      color: white;
     }
 
     table {
@@ -142,14 +200,32 @@
     color: yellow;
     text-shadow: 0px 0px 4vw black;
   }
+
+  #back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 </style>
 
 <body id="body">
-  <button id="start">start</button>
-  <div id="playerW" class="player"><span class="maru"></span><span id="countW" class="count">2</span></div>
+  <div id="setting">
+    <h1>オセロ</h1>
+    <div id="game_speed">
+      <div style="text-align: center;">ゲームスピード</div>
+      <input type="range" id="speed" value="50" step="25">
+      <div><span>遅い</span><span style="float: right;">速い</span></div>
+    </div>
+    <div id="canhyouji"></div>
+    <button id="start">START</button>
+  </div>
+  <div id="playerW" class="player" style="display: none;"><span class="maru"></span><span id="countW"
+      class="count">2</span></div>
   <div id="T"></div>
-  <div id="playerB" class="player"><span class="maru"></span><span id="countB" class="count">2</span></div>
-  <div id="pass">PASS</div>
+  <div id="playerB" class="player" style="display: none;"><span class="maru"></span><span id="countB"
+      class="count">2</span></div>
+  <div id="pass" style="display: none;">PASS</div>
+  <div id="back" style="display: none;"></div>
 
   <script>
     let data = [];
@@ -158,65 +234,88 @@
     let count = [null, 2, 2];
     let blink = document.getElementsByClassName('maru');
     blink = [null, blink[1], blink[0]];
-    let time = 300; time = 0;
+    let time
     let kiroku = [];
     let passP = [null];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
-      document.getElementById('start').remove();
 
-      let table = document.createElement('table');//盤面作成
-      for (let i = 1; i < 9; i++) {
-        let tr = document.createElement('tr');
-        for (let j = 1; j < 9; j++) {
-          let td = document.createElement('td');
-          td.classList = 'cell';
-          td.id = `c${i}${j}`;
-          tr.appendChild(td);
+      time = (100 - document.getElementById('speed').value) * 4;
+
+      let set = document.getElementById('setting');
+      set.innerHTML = '';
+      set.style.backgroundColor = 'transparent';
+
+      setTimeout(() => {
+        let b = document.getElementsByTagName('body')[0];
+        b.style.opacity = 0;
+        setTimeout(() => {
+          b.style.transition = 'opacity 2s';
+          b.style.opacity = 1;
+        }, 100);
+        set.remove();
+        let table = document.createElement('table');//盤面作成
+        for (let i = 1; i < 9; i++) {
+          let tr = document.createElement('tr');
+          for (let j = 1; j < 9; j++) {
+            let td = document.createElement('td');
+            td.classList = 'cell';
+            td.id = `c${i}${j}`;
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
         }
-        table.appendChild(tr);
-      }
-      document.getElementById('T').appendChild(table);
+        document.getElementById('T').appendChild(table);
 
-      const height1 = document.getElementById('playerW').getClientRects()[0].height;//css
-      const height2 = document.getElementById('T').getClientRects()[0].height;
-      const height3 = document.getElementById('body').getClientRects()[0].height;
-      document.getElementsByTagName('style')[0].innerHTML +=
-        `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`;
-      passP.push(height3 / 2);
-      passP.push(height3 / 2 - document.getElementById('pass').getClientRects()[0].height);
-      document.getElementById('pass').style.display = "none";
-      for (let i = 0; i < 10; i++) {
-        data.push([]);
-        for (let j = 0; j < 10; j++) {
-          data[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
+        document.getElementById('playerB').style = "";
+        document.getElementById('playerW').style = "";
+        document.getElementById('pass').style = "";
+
+        const height1 = document.getElementById('playerW').getClientRects()[0].height;//css
+        const height2 = document.getElementById('T').getClientRects()[0].height;
+        const height3 = document.getElementById('body').getClientRects()[0].height;
+        document.getElementsByTagName('style')[0].innerHTML +=
+          `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`;
+        passP.push(height3 / 2);
+        passP.push(height3 / 2 - document.getElementById('pass').getClientRects()[0].height);
+        document.getElementById('pass').style.display = "none";
+
+        for (let i = 0; i < 10; i++) {
+          data.push([]);
+          for (let j = 0; j < 10; j++) {
+            data[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
+          }
         }
-      }
 
-      document.getElementById('c45').innerHTML = '<div class="black" id="k45"></div>';
-      document.getElementById('c54').innerHTML = '<div class="black" id="k54"></div>';
-      document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
-      document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
-      [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
+        document.getElementById('c45').innerHTML = '<div class="black" id="k45"></div>';
+        document.getElementById('c54').innerHTML = '<div class="black" id="k54"></div>';
+        document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
+        document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
+        [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
 
-      blink[1].dataset.turn = "t";
+        blink[1].dataset.turn = "t";
 
-      check(1);
+        setTimeout(() => {
+          check(1);
+        }, 1000);
+        
 
-      document.getElementsByTagName('table')[0].onclick = (e) => {
-        if (!turn[0]) return;
-        e = e.target;
-        let p;
-        if (e.className == 'can') {
-          p = e.parentElement.id;
-        } else {
-          if (!e.children[0]) return;
-          if (e.children[0].className != 'can') return;
-          p = e.id;
+        document.getElementsByTagName('table')[0].onclick = (e) => {
+          if (!turn[0]) return;
+          e = e.target;
+          let p;
+          if (e.className == 'can') {
+            p = e.parentElement.id;
+          } else {
+            if (!e.children[0]) return;
+            if (e.children[0].className != 'can') return;
+            p = e.id;
+          }
+          put(p, turn[1]);
         }
-        put(p, turn[1]);
-      }
+      }, 900);
     }
+
 
     const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
     const color = [null, 'black', 'white'];
@@ -351,11 +450,11 @@
       pa.style.display = '';
       setTimeout(() => {
         pa.style.display = 'none';
-      }, 800);
+      }, 1000);
 
     }
 
-    document.getElementById('start').onclick();
+    // document.getElementById('start').onclick();
 
     function auto(a, pa) {
       a = pa ? 15 : isNaN(a) ? 60 : a;
