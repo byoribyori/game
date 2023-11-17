@@ -1,200 +1,532 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>色並べ</title>
-  <style>
+  <title>オセロ</title>
+</head>
+<style>
+  @media screen and (max-width:500px) {
+
+    html,
     body {
-      background-color: lightblue;
-      width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-      font-size: 1.3em;
+      overflow: hidden
     }
 
-    .area {
-      font-size: 1.4em;
+    html {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(255, 255, 255, 1) 100%);
+    }
+
+    #setting {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background-color: white;
+      transition: 1s;
     }
 
     h1 {
       text-align: center;
+      font-size: 11vw;
     }
 
-    .li {
-      width: 430px;
-      height: 160px;
+    #game_speed {
+      width: 50vw;
       margin: auto;
-      font-size: 1.1em;
+      font-size: 5vw;
     }
 
-    .input {
-      border-radius: 4px;
-      border: none;
+    #speed {
+      appearance: none;
+      width: 45vw;
+      height: 8vw;
+      background: transparent;
+      margin: auto;
+      display: block;
+    }
+
+    #speed::-webkit-slider-runnable-track {
+      background: black;
+      height: 2vw;
+    }
+
+    #speed::-webkit-slider-thumb {
+      appearance: none;
+      width: 2vw;
+      height: 2vw;
+      border-radius: 50%;
+      background-color: white;
+      transform: scale(3);
+      box-shadow: 0 0 1vw black;
+    }
+
+    #start {
       display: block;
       margin: auto;
-      font-size: 25px;
-      width: 8em;
-      height: 1em;
+      width: 35vw;
+      font-size: 7vw;
+      padding: 3vw;
+      border-radius: 8vw;
+      color: black;
+      background-color: #efefef;
+      border: 2px solid black;
     }
 
-    .input:focus {
-      border: solid blue 1.2px;
-    }
 
-    .select {
-      margin: auto auto 20px auto;
 
-    }
-
-    .sel {
-      width: 40px;
-      height: 40px;
-      border: solid 1.5px lightblue;
-      cursor: pointer;
-    }
-
-    .selo {
-      width: 40px;
-      height: 40px;
-      border: solid 1.5px black;
-    }
-
-    .se {
-      width: 35px;
-      height: 35px;
+    table {
+      background-color: black;
       margin: auto;
     }
 
-    .s {
-      cursor: pointer;
+    .cell {
+      width: 10vw;
+      height: 10vw;
+      background-color: #13ab13;
     }
 
-    .start {
-      width: 200px;
-      height: 40px;
+    td>div {
+      width: 90%;
+      height: 90%;
+      margin: auto;
+      border-radius: 50%;
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .can {
+      width: 3vw;
+      height: 3vw;
+      background-color: #ea9700;
       display: block;
+      border-radius: 50%;
       margin: auto;
-      background-color: blanchedalmond;
-      border: 1px black solid;
-      border-radius: 10px;
-      color: gray;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 5px 9px 7px black;
+    }
+
+    .player {
+      width: 40vw;
+      height: 15vw;
+      border: solid 1vw black;
+    }
+
+    #playerB {
+      box-shadow: 0px 0px 3vw 1vw white;
+    }
+
+    #playerW {
+      border-color: white;
+      box-shadow: 0px 0px 3vw 1vw black;
+      transform: rotate(180deg);
+    }
+
+    .player {
+      background-color: #a2a2a2;
+    }
+
+    .maru {
+      display: inline-block;
+      width: 13vw;
+      height: 13vw;
+      border-radius: 50%;
+      margin: 1vw;
+    }
+
+    #playerB>.maru {
+      background-color: black;
+    }
+
+    #playerW>.maru {
+      background-color: white;
+    }
+
+    .count {
+      display: inline-block;
+      width: 20vw;
+      height: 15vw;
+      position: absolute;
+      font-size: 13vw;
+      text-align: right;
+      line-height: 16vw;
+      font-family: math;
+    }
+
+    #countW {
+      color: white;
+    }
+
+    #countB {
+      color: black;
+    }
+
+    .maru[data-turn="t"] {
+      animation: blinking 0.7s ease-in-out infinite alternate;
+    }
+
+    @keyframes blinking {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    #pass {
+      width: 100vw;
+      height: 30vw;
+      position: absolute;
+      font-size: 23vw;
+      text-align: center;
+      color: yellow;
+      text-shadow: 0px 0px 4vw black;
+    }
+
+    .des {
+      font-size: 5vw;
+      text-align: center;
+    }
+
+    #indicate {
+      position: relative;
+      display: inline-block;
+      margin: 0 36vw;
+    }
+
+    label {
+      display: block;
+      width: 30vw;
+      margin: auto;
+      border-radius: 8vw;
+      border: 1vw solid #999999;
+    }
+
+    #switch:checked+label {
+      border-color: #78bd78;
+    }
+
+    #switch+label>span::after {
+      display: block;
+      height: 8vw;
+      content: 'OFF';
+      font-size: 8vw;
+      line-height: 10vw;
+      padding: 2vw 0 2vw 13vw;
+    }
+
+    #switch:checked+label>span::after {
+      content: 'ON';
+      padding: 2vw 0 2vw 3vw;
+    }
+
+    #onoff {
+      position: absolute;
+      top: 1vw;
+      left: 1vw;
+      width: 12vw;
+      height: 12vw;
+      background-color: #999999;
+      border-radius: 50%;
       transition: 0.4s;
     }
 
-    .start:hover {
-      box-shadow: none;
-      color: black;
-      text-decoration: underline;
+    #switch:checked ~ #onoff{
+      transform: translateX(18vw);
+      background-color: #78bd78;
     }
+  }
+</style>
 
-    .info {
-      height: 80px;
-      border: 3px red solid;
-      margin-top: 40px;
-    }
-
-    .info>span {
-      color: blue;
-      margin-left: 55px;
-    }
-
-    .info>div {
-      font-size: 1.6em;
-      font-weight: 600;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-  <style>
-    .start:hover {
-      border: 1.8px black solid;
-    }
-  </style>
-  <div class="area">
-    <h1>
-      <span style="color:red">色</span>
-      <span style="color:blue">並</span>
-      <span style="color:yellow">べ</span>
-    </h1>
-    <div class="li">
-      <li>自分の色を縦・横・斜めに<br>　 4つ並べたら勝ち!</li>
-      <li>コマは落ちていく</li>
+<body id="body">
+  <div id="setting">
+    <h1>オセロ</h1>
+    <div id="game_speed">
+      <div style="text-align: center;">ゲームスピード</div>
+      <input type="range" id="speed" value="50" step="25">
+      <div><span>遅い</span><span style="float: right;">速い</span></div>
     </div>
-    <div style="height:85px;text-align:center">
-      ユーザーネーム:<br>
-      <input type="text" class="input">
+    <div class="des">置ける場所を表示</div>
+    <div id="indicate">
+      <div>
+        <input type="checkbox" id="switch" style="display: none;">
+        <label for="switch"><span></span></label>
+        <div id="onoff"></div>
+      </div>
     </div>
-    <table class="select">
-      <tr>
-        <th class="sel" id="1">
-          <div class="se" style="background-color:red"></div>
-        </th>
-        <th class="sel" id="2">
-          <div class="se" style="background-color:blue"></div>
-        </th>
-        <th class="sel" id="3">
-          <div class="se" style="background-color:yellow"></div>
-        </th>
-      </tr>
-      <tr>
-        <th class="sel" id="4">
-          <div class="se" style="background-color:green"></div>
-        </th>
-        <th class="sel" id="5">
-          <div class="se" style="background-color:pink"></div>
-        </th>
-        <th class="sel" id="6">
-          <div class="se" style="background-color:purple"></div>
-        </th>
-      </tr>
-      <tr>
-        <th class="s" id="7" style="text-decoration: underline" colspan="3">おまかせ</th>
-      </tr>
-    </table>
+    <button id="start">START</button>
+  </div>
+  <div id="playerW" class="player" style="display: none;"><span class="maru"></span><span id="countW"
+      class="count">2</span></div>
+  <div id="T"></div>
+  <div id="playerB" class="player" style="display: none;"><span class="maru"></span><span id="countB"
+      class="count">2</span></div>
+  <div id="pass" style="display: none;">PASS</div>
 
-    <button class="start">start</button>
-  </div>
-  <div class="info">
-    <span>最新の状況</span>
-    <div>待っている人はいません</div>
-  </div>
+  <script>
+    let data = [];
+    let put_position = ['33', '34', '35', '36', '46', '56', '66', '65', '64', '63', '53', '43'];//置けそうな場所
+    let turn = [false, 1];
+    let count = [null, 2, 2];
+    let blink = document.getElementsByClassName('maru');
+    blink = [null, blink[1], blink[0]];
+    let time
+    let kiroku = [];
+    let passP = [null];
+
+    document.getElementById('start').onclick = () => {//STARTボタン押したら
+
+      time = (100 - document.getElementById('speed').value) * 4;
+
+      let set = document.getElementById('setting');
+      set.innerHTML = '';
+      set.style.backgroundColor = 'transparent';
+
+      setTimeout(() => {
+        let b = document.getElementsByTagName('body')[0];
+        b.style.opacity = 0;
+        setTimeout(() => {
+          b.style.transition = 'opacity 2s';
+          b.style.opacity = 1;
+        }, 100);
+        set.remove();
+        let table = document.createElement('table');//盤面作成
+        for (let i = 1; i < 9; i++) {
+          let tr = document.createElement('tr');
+          for (let j = 1; j < 9; j++) {
+            let td = document.createElement('td');
+            td.classList = 'cell';
+            td.id = `c${i}${j}`;
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        document.getElementById('T').appendChild(table);
+
+        document.getElementById('playerB').style = "";
+        document.getElementById('playerW').style = "";
+        document.getElementById('pass').style = "";
+
+        const height1 = document.getElementById('playerW').getClientRects()[0].height;//css
+        const height2 = document.getElementById('T').getClientRects()[0].height;
+        const height3 = document.getElementById('body').getClientRects()[0].height;
+        document.getElementsByTagName('style')[0].innerHTML +=
+          `.player { margin: ${(height3 - height1 * 2 - height2) / 4}px auto; }`;
+        passP.push(height3 / 2);
+        passP.push(height3 / 2 - document.getElementById('pass').getClientRects()[0].height);
+        document.getElementById('pass').style.display = "none";
+
+        for (let i = 0; i < 10; i++) {
+          data.push([]);
+          for (let j = 0; j < 10; j++) {
+            data[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
+          }
+        }
+
+        document.getElementById('c45').innerHTML = '<div class="black" id="k45"></div>';
+        document.getElementById('c54').innerHTML = '<div class="black" id="k54"></div>';
+        document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
+        document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
+        [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
+
+        blink[1].dataset.turn = "t";
+
+        setTimeout(() => {
+          check(1);
+        }, 1000);
+
+
+        document.getElementsByTagName('table')[0].onclick = (e) => {
+          if (!turn[0]) return;
+          e = e.target;
+          let p;
+          if (e.className == 'can') {
+            p = e.parentElement.id;
+          } else {
+            if (!e.children[0]) return;
+            if (e.children[0].className != 'can') return;
+            p = e.id;
+          }
+          put(p, turn[1]);
+        }
+      }, 900);
+    }
+
+
+    const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
+    const color = [null, 'black', 'white'];
+    const counter = [null, document.getElementById('countB'), document.getElementById('countW')];
+    const put = (p, c) => {
+      turn[0] = false;
+      blink[1].dataset.turn = "";
+      blink[2].dataset.turn = "";
+      let can = document.getElementsByClassName('can');
+      for (let i = 0; can.length; i++) {
+        can[0].remove();
+      }
+
+      document.getElementById(p).innerHTML = `<div class="${color[c]}" id="k${p.substr(1, 2)}"></div>`;
+      count[c]++;
+      counter[c].innerText = count[c];
+
+      p = p.substr(1, 2);
+      let p0 = Number(p[0]);
+      let p1 = Number(p[1]);
+      op = c % 2 + 1;//相手の色
+      data[p0][p1] = c;
+      let LIST = [];
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        let list = [];
+        if (data[p0 + w0][p1 + w1] == op) {
+          list.push([p0 + w0, p1 + w1]);
+          for (let j = 2; j < 15; j++) {
+            if (data[p0 + w0 * j][p1 + w1 * j] == op) {
+              list.push([p0 + w0 * j, p1 + w1 * j]);
+              continue;
+            } else if (data[p0 + w0 * j][p1 + w1 * j] == 0 || data[p0 + w0 * j][p1 + w1 * j] == 3) {
+              break;
+            } else {
+              LIST.push(list);
+              break;
+            }
+          }
+        } else { continue; }
+      }
+
+      let co = 0;
+      for (let i = 0; i < LIST.length; i++) {
+        for (let j = 0; j < LIST[i].length; j++) {
+          let l = LIST[i][j];
+          data[l[0]][l[1]] = c;
+          co++;
+          setTimeout(() => {
+            document.getElementById('k' + l[0] + l[1]).className = color[c];
+            count[c]++;
+            count[op]--;
+            counter[c].innerText = count[c];
+            counter[op].innerText = count[op];
+          }, co * time);
+        }
+      }
+
+      put_position.splice(put_position.indexOf(p), 1);
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        let pu = p0 + w0 + '' + +(p1 + w1);
+        if (data[pu[0]][pu[1]] == 0 && put_position.indexOf(pu) == -1) put_position.push(pu);
+      }
+
+      setTimeout(() => {
+
+        //kiroku.push(document.getElementsByTagName('table')[0].innerHTML);
+
+        turn[1] = op;
+        check(op);
+      }, (co + 1) * time);
+
+    }
+
+
+
+    const check = (c, pa) => {//置けるか
+      let can = [];
+      for (let i = 0; i < put_position.length; i++) {
+        let o = CHECK(put_position[i], c);//１つずつ調べる
+        if (o) can.push(put_position[i]);
+      }
+      if (!can.length) {//どこにも置けなければパス
+        if (pa) {
+          console.log('終了');
+          blink[1].dataset.turn = "";
+          blink[2].dataset.turn = "";
+          return;
+        }
+        turn[1] = c % 2 + 1;
+        blink[c % 2 + 1].dataset.turn = "t";
+        check(c % 2 + 1, true);
+      } else {
+        if (pa) pass(c % 2 + 1);
+        for (let i = 0; i < can.length; i++) {
+          document.getElementById(`c${can[i][0]}${can[i][1]}`).innerHTML = '<span class="can"></span>';
+        }
+        turn[0] = true;
+        blink[c].dataset.turn = "t";
+      }
+    }
+
+    const CHECK = (p, c) => {//cがpに置けるか調べる
+      let p0 = Number(p[0]);
+      let p1 = Number(p[1]);
+      op = c % 2 + 1;//相手の色
+      for (let i = 0; i < 8; i++) {
+        let w0 = way[i][0];
+        let w1 = way[i][1];
+        if (data[p0 + w0][p1 + w1] == op) {
+          for (let j = 2; j < 15; j++) {
+            if (data[p0 + w0 * j][p1 + w1 * j] == op) {
+              continue;
+            } else if (data[p0 + w0 * j][p1 + w1 * j] == 0 || data[p0 + w0 * j][p1 + w1 * j] == 3) {
+              break;
+            } else {
+              return true;
+            }
+          }
+        } else { continue; }
+      }
+      return false;
+    }
+
+    const pass = (c) => {
+      let pa = document.getElementById('pass');
+      pa.style.top = `${passP[c]}px`;
+      pa.style.transform = c == 2 ? 'rotate(180deg)' : '';
+      pa.style.display = '';
+      setTimeout(() => {
+        pa.style.display = 'none';
+      }, 1000);
+
+    }
+
+    // document.getElementById('start').onclick();
+
+    function auto(a, pa) {
+      a = pa ? 15 : isNaN(a) ? 60 : a;
+      for (let i = 0; i < a; i++) {
+        setTimeout(() => {
+          let can = document.getElementsByClassName('can');
+          let r = pa ? 0 : Math.floor(Math.random() * can.length)
+          can = (can[r].parentElement.id);
+          put(can, turn[1]);
+        }, 20 * i);
+      }
+
+
+    }
+
+    function kako(k) {
+      if (!kiroku[k]) return;
+      document.getElementsByTagName('table')[0].innerHTML = kiroku[k];
+    }
+
+  </script>
 </body>
-<script>
-
-  var color = 0;
-
-  function d(e) {
-    return document.getElementById(e);
-  }
-
-  for (let i = 0; i < 6; i++) {
-    document.getElementsByClassName('sel')[i].onclick = () => { select(i + 1) }
-  }
-  d(7).onclick = () => { select(7) }
-  function select(c) {
-    for (let i = 0; i < 6; i++) {
-      d(i + 1).className = "sel";
-    }
-    d(7).style = "";
-    if (c !== 7) {
-      color = c;
-      d(c).className = "selo";
-    } else {
-      d(7).style = "text-decoration: underline";
-      color = 0;
-    }
-    document.getElementsByTagName('style')[1].innerHTML = `.start:hover{border: 1.8px 
-    ${c === 1 ? "red" : c === 2 ? "blue" : c === 3 ? "yellow" : c === 4 ? "green" : c === 5 ? "pink" : c === 6 ? "purple" : "black"}
-     solid}`;
-  }
-</script>
 
 </html>
