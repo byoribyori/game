@@ -159,7 +159,7 @@
   </div>
   <canvas id="canvas1" width="157" height="45"></canvas>
   <div id="result"></div>
-  <canvas id="result_canvas" width="500" height="150" style="display: none;"></canvas>
+  <canvas id="result_canvas" width="500" height="200" style="display: none;"></canvas>
   <div id="f">オセロ</div>
 
   <script>
@@ -475,7 +475,7 @@
         ${count[player_color] > count[player_color % 2 + 1] ? '勝利!' : ''}`;
       setTimeout(() => {
         let win = count[player_color] > count[player_color % 2 + 1];
-        ctx2.clearRect(0, 0, 500, 150);
+        ctx2.clearRect(0, 0, 500, 200);
         ctx2.beginPath();
         ctx2.fillStyle = win ? 'red' : 'blue';
         ctx2.strokeStyle = 'yellow';
@@ -502,7 +502,7 @@
             }, 200 * i);
           }
           setTimeout(() => {
-            ctx2.clearRect(80, 0, 72, 150);
+            ctx2.clearRect(80, 0, 72, 200);
             ctx2.rotate(-(Math.PI / 11));
             ctx2.fillText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
             ctx2.strokeText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
@@ -537,7 +537,7 @@
       }
       result_canvas.style.display = 'none';
       result_canvas.style.transform = '';
-      ctx2.clearRect(0, 0, 500, 150);
+      ctx2.clearRect(0, 0, 500, 200);
       player = true;
       result.innerText = '';
     }
