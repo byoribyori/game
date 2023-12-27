@@ -70,7 +70,7 @@
         position: absolute;
         top: 36vw;
         transition: transform 1.2s;
-        transition-timing-function: linear;
+        transition-timing-function: cubic-bezier(0.8, 0, 1, 1);
       }
 
     }
@@ -149,7 +149,7 @@
   </div>
   <canvas id="canvas1" width="157" height="45"></canvas>
   <div id="result"></div>
-  <canvas id="result_canvas" width="500" height="150" style="display: none; transform: scale(0);"></canvas>
+  <canvas id="result_canvas" width="500" height="150" style="display: none;"></canvas>
 
   <script>
 
@@ -452,27 +452,53 @@
     }
 
     const result = document.getElementById('result');
+    /**
+    * @type {HTMLCanvasElement}
+    */
+    const result_canvas = document.getElementById('result_canvas');
+    const ctx2 = result_canvas.getContext('2d');
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     function end() {
       let count = count_color(DATA);
       result.innerText = `黒${count[1]}  白${count[2]}
         ${count[player_color] > count[player_color % 2 + 1] ? '勝利!' : ''}`;
-      const result_canvas = document.getElementById('result_canvas');
-      const ctx2 = result_canvas.getContext('2d');
-      ctx2.beginPath();
-      if (count[player_color] > count[player_color % 2 + 1]) {
-        ctx2.fillStyle = 'red';
+      setTimeout(() => {
+        let win = count[player_color] > count[player_color % 2 + 1];
+        ctx2.clearRect(0, 0, 500, 150);
+        ctx2.beginPath();
+        ctx2.fillStyle = win ? 'red' : 'blue';
+        ctx2.strokeStyle = 'yellow';
         ctx2.textBaseline = "hanging";
         ctx2.font = '150px fantasy';
-        ctx2.fillText('WIN', (500 - ctx2.measureText("WIN").width) / 2, 0);
-        ctx2.strokeStyle = 'yellow';
-        ctx2.strokeText('WIN', (500 - ctx2.measureText("WIN").width) / 2, 0);
-        result_canvas.style.display = '';
-        setTimeout(() => {
-          result_canvas.style.transform = 'scaleX(1.3)';
-        }, 10);
-      }
-
+        const text = win ? 'WIN' : 'LOSE';
+        if (win) {
+          ctx2.fillText(text, (500 - ctx2.measureText(text).width) / 2, 0);
+          ctx2.strokeText(text, (500 - ctx2.measureText(text).width) / 2, 0);
+          result_canvas.style.transform = 'scale(0)';
+          result_canvas.style.display = '';
+          setTimeout(() => {
+            result_canvas.style.transform = 'scaleX(1.3)';
+          }, 10);
+        } else {
+          let w = (500 - ctx2.measureText(text).width) / 2;
+          result_canvas.style.transform = 'scaleX(1.2)';
+          result_canvas.style.display = '';
+          for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+              ctx2.fillText(text[i], w, 0);
+              ctx2.strokeText(text[i], w, 0);
+              w += ctx2.measureText(text[i]).width;
+            }, 200 * i);
+          }
+          setTimeout(() => {
+            ctx2.clearRect(80, 0, 90, 150);
+            ctx2.rotate(-(Math.PI / 11));
+            ctx2.fillText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 35);
+            ctx2.strokeText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 35);
+            ctx2.rotate(Math.PI / 11);
+          }, 1000);
+        }
+      }, 300);
     }
 
     function hint() {
@@ -499,6 +525,9 @@
           }
         }
       }
+      result_canvas.style.display = 'none';
+      result_canvas.style.transform = '';
+      ctx2.clearRect(0, 0, 500, 150);
       player = true;
       result.innerText = '';
     }
@@ -623,7 +652,7 @@
       console.log(h)
     }
 
-    //end()
+
   </script>
 </body>
 
