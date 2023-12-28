@@ -68,9 +68,16 @@
       #result_canvas {
         width: 100%;
         position: absolute;
-        top: 36vw;
+        top: 32vw;
         transition: transform 1.2s;
         transition-timing-function: cubic-bezier(0.8, 0, 1, 1);
+        z-index: 2;
+      }
+
+      #win {
+        position: absolute;
+        top: 0;
+        left: 0;
       }
 
     }
@@ -117,7 +124,7 @@
     .hint {
       display: inline-block;
       width: 100%;
-      font-size: 5vw;
+      font-size: 4vw;
       text-align: center;
     }
 
@@ -160,6 +167,7 @@
   <canvas id="canvas1" width="157" height="45"></canvas>
   <div id="result"></div>
   <canvas id="result_canvas" width="500" height="200" style="display: none;"></canvas>
+  <canvas id="win" style="display: none;"></canvas>
   <div id="f">オセロ</div>
 
   <script>
@@ -454,11 +462,14 @@
       }
       if (canlist(DATA, vacant, player_color).length) {
         player = true;
-      } else {//プレイヤーがパスならもう一度COM
+      } else if (canlist(DATA, vacant, o).length) {//プレイヤーがパスならもう一度COM
         can.splice(can.indexOf(mass), 1);
         setTimeout(() => {
           com(can);
         }, 700);
+      } else {
+        end();
+        return;
       }
     }
 
@@ -480,28 +491,29 @@
         ctx2.fillStyle = win ? 'red' : 'blue';
         ctx2.strokeStyle = 'yellow';
         ctx2.textBaseline = "hanging";
-        ctx2.font = '150px Titillium Web';//fantasy
+        ctx2.font = '150px Titillium Web';
         const text = win ? 'WIN' : 'LOSE';
-        if (win) {
+        if (win) {//勝ったとき
           ctx2.fillText(text, (500 - ctx2.measureText(text).width) / 2, 0);
           ctx2.strokeText(text, (500 - ctx2.measureText(text).width) / 2, 0);
           result_canvas.style.transform = 'scale(0)';
           result_canvas.style.display = '';
-          setTimeout(() => {
+          setTimeout(() => {//文字があらわれる
             result_canvas.style.transform = 'scaleX(1.2)';
           }, 50);
-        } else {
+          setTimeout(kamifubuki, 1400);
+        } else {//負けたとき
           let w = (500 - ctx2.measureText(text).width) / 2;
           result_canvas.style.transform = 'scaleX(1.2)';
           result_canvas.style.display = '';
           for (let i = 0; i < 4; i++) {
-            setTimeout(() => {
+            setTimeout(() => {//1文字ずつ描く
               ctx2.fillText(text[i], w, 0);
               ctx2.strokeText(text[i], w, 0);
               w += ctx2.measureText(text[i]).width;
             }, 200 * i);
           }
-          setTimeout(() => {
+          setTimeout(() => {// L を傾ける
             ctx2.clearRect(80, 0, 72, 200);
             ctx2.rotate(-(Math.PI / 11));
             ctx2.fillText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
@@ -510,6 +522,48 @@
           }, 1000);
         }
       }, 300);
+    }
+
+    /**
+    * @type {HTMLCanvasElement}
+    */
+    const win_canvas = document.getElementById('win');
+    const ctx3 = win_canvas.getContext('2d');
+    let loop;
+    function kamifubuki() {
+      let w = document.getElementsByTagName('body')[0].getClientRects()[0].width;//canvasの大きさ 横は100%
+      win_canvas.width = w;
+      let h = document.getElementById('button_area').getClientRects()[0].y;//縦はボタンの上まで
+      win_canvas.height = h;
+      win_canvas.style.display = '';
+      let kami = {};
+      let bangou = 0;
+      let color_list = ['red', 'blue', 'yellow'];
+      const size = Math.floor(document.getElementById('c11').getClientRects()[0].width / 2);
+      const plus = size / 5;//1ループで落ちる距離
+      loop = setInterval(() => {
+        ctx3.clearRect(0, 0, w, h);
+        if (!(bangou % 3)) {//3ループに1度追加
+          kami[bangou] = { //紙を追加
+            x: Math.floor(Math.random() * w),
+            y: -size,
+            color: color_list[Math.floor(Math.random() * 3)],
+            kakudo: 0,
+            kaiten: Math.random() > 0.5 ? 1 : -1 //回転方向
+          };
+        }
+        bangou++;
+        for (let key in kami) {//全ての紙を動かす
+          let k = kami[key];
+          ctx3.fillStyle = k.color;
+          ctx3.save();
+          ctx3.translate(k.x, k.y += plus);
+          ctx3.rotate(Math.PI / 30 * (k.kakudo += k.kaiten));
+          ctx3.fillRect(0, 0, size, size);
+          ctx3.restore();
+          if (k.y > h + size) delete kami[key];//下までいったら消す
+        }
+      }, 40);
     }
 
     function hint() {
@@ -537,7 +591,11 @@
       }
       result_canvas.style.display = 'none';
       result_canvas.style.transform = '';
+      win_canvas.style.display = 'none';
+      clearInterval(loop);
       ctx2.clearRect(0, 0, 500, 200);
+      ctx3.clearRect(0, 0, win_canvas.width, win_canvas.height);
+
       player = true;
       result.innerText = '';
     }
@@ -662,7 +720,6 @@
       console.log(h)
     }
 
-    //end()
   </script>
 </body>
 
