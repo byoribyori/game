@@ -13,9 +13,45 @@
 
     @media screen and (max-width:500px) {
 
+      h1 {
+        font-size: 9vw;
+        text-align: center;
+      }
+
+      #select_area {
+        font-size: 6vw;
+        text-align: center;
+      }
+
+      select {
+        font-size: 6vw;
+      }
+
+      #start {
+        width: 25vw;
+        height: 25vw;
+        font-size: 7vw;
+        margin: 5vw auto;
+        display: block;
+        border-radius: 50%;
+        border: none;
+        background-color: black;
+        color: white;
+        font-family: 'kosugi Maru';
+        /* font-family: 'Gravitas One', serif; */
+        padding: 0;
+      }
+
+      /* #start:hover{
+  background-color: black;
+    color: white;
+} */
+
+
+
       .cell {
-        width: 10vw;
-        height: 10vw;
+        width: 11vw;
+        height: 11vw;
       }
 
       #button_area {
@@ -57,18 +93,19 @@
 
       #canvas1 {
         width: 32vw;
-        display: block;
         margin: auto;
         padding: 10px;
         border: 1vw solid black;
         border-top: 1vw solid white;
         border-left: white solid 1vw;
+        opacity: 1;
+        transition: opacity 1s;
       }
 
       #result_canvas {
         width: 100%;
         position: absolute;
-        top: 32vw;
+        top: 35vw;
         transition: transform 1.2s;
         transition-timing-function: cubic-bezier(0.8, 0, 1, 1);
         z-index: 2;
@@ -78,6 +115,35 @@
         position: absolute;
         top: 0;
         left: 0;
+      }
+
+      #again {
+        width: 70vw;
+        margin: 2vw auto;
+      }
+
+      div#again button {
+        width: 25vw;
+        height: 25vw;
+        border-radius: 50%;
+        border: none;
+        padding: 0;
+        line-height: 6vw;
+        font-size: 4vw;
+        font-family: 'kosugi Maru';
+        transition: transform 1.5s;
+        transition-timing-function: linear;
+      }
+
+      #betu {
+        background-color: white;
+        color: black;
+      }
+
+      #change {
+        background-color: black;
+        color: white;
+        float: right;
       }
 
     }
@@ -90,6 +156,7 @@
     html {
       width: 100%;
       height: 100%;
+      font-family: 'kosugi Maru';
     }
 
     body {
@@ -124,7 +191,7 @@
     .hint {
       display: inline-block;
       width: 100%;
-      font-size: 4vw;
+      font-size: 5vw;
       text-align: center;
     }
 
@@ -142,7 +209,7 @@
     }
   </style>
   <style id="none">
-    div:not(#body),
+    div:not(#body):not(#body *),
     canvas {
       display: none;
     }
@@ -154,557 +221,602 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@900&family=Zen+Maru+Gothic&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Titillium+Web:wght@900&display=swap"
     rel="stylesheet">
-
   <div id="body">
-    <button onclick="start()" id="start">sssssssss</button>
+    <h1>詰めオセロ</h1>
+    <div id="select_area">難易度
+      <select id="select">
+        <option value="5">初級</option>
+        <option value="2">中級</option>
+        <option value="0">上級</option>
+      </select>
+    </div>
+    <button onclick="start()" id="start">START</button>
+    <div id="f">　</div>
   </div>
   <div id="button_area">
     <button id="reset">リセット</button>
     <button id="hint">ヒント</button>
   </div>
   <canvas id="canvas1" width="157" height="45"></canvas>
-  <div id="result"></div>
+  <div id="result" style="display: none;"></div> <!-- -->
   <canvas id="result_canvas" width="500" height="200" style="display: none;"></canvas>
   <canvas id="win" style="display: none;"></canvas>
-  <div id="f">オセロ</div>
+  <div id="again" style="display: none;">
+    <button id="betu"></button>
+    <button id="change">難易度を<br>変える</button>
+  </div>
+
 
   <script>
 
+    let n, nanido;
     function start() {
+      n = Number(document.getElementById('select').value);
+      nanido = 50 + n;//50限界
+      document.getElementById('betu').innerHTML = `${['上級', , '中級', , , '初級'][n]}<br>別の問題`;
       document.getElementById('body').innerHTML = '作成中';
       console.log(document.getElementById('body').innerHTML, Date.now())
       setTimeout(all, 10);
     }
 
-    //function all(){
-    const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
-    let DATA, copyDATA;
-    let kif = 'f5';
-    let player = true;//プレイヤーのターン
-    let player_color
-    let vacant = [];//空きマス
+    function all() {
+      const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
+      let DATA, copyDATA;
+      let kif = 'f5';
+      let player = true;//プレイヤーのターン
+      let player_color
+      let vacant = [];//空きマス
 
-    function check(p, c, d) {//pに置けるか c=色 d=DATA
-      let p0 = Number(p[0]);
-      let p1 = Number(p[1]);
-      let o = c % 2 + 1;
-      let tonari = [];
-      for (let i = 0; i < 8; i++) {//隣に相手の石があるか
-        let w0 = way[i][0];
-        let w1 = way[i][1];
-        tonari.push(d[p0 + w0][p1 + w1] == o);
-      }
-
-      for (let i = 0; i < 8; i++) {
-        if (!tonari[i]) continue;//隣に相手の石があったところだけチェック
-        let w0 = way[i][0];
-        let w1 = way[i][1];
-        for (let j = 2; true; j++) {
-          if (d[p0 + w0 * j][p1 + w1 * j] == 0 || d[p0 + w0 * j][p1 + w1 * j] == 3) break;
-          if (d[p0 + w0 * j][p1 + w1 * j] == c) { return true; }
-        }
-      }
-      return false;
-    }
-
-    const abc = [0, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    function put(p, c, d, display, ki) {
-      let p0 = Number(p[0]);
-      let p1 = Number(p[1]);
-      let o = c % 2 + 1;
-
-      d[p0][p1] = c;
-      if (display) document.getElementById('c' + p).innerHTML = `<div class="${[0, 'black', 'white'][c]}" id=k${p}>`;
-      if (ki) kif += abc[p[1]] + p[0];
-
-      let tonari = [];
-      for (let i = 0; i < 8; i++) {//隣に相手の石があるか
-        let w0 = way[i][0];
-        let w1 = way[i][1];
-        tonari.push(d[p0 + w0][p1 + w1] == o);
-      }
-
-      for (let i = 0; i < 8; i++) {
-        if (!tonari[i]) continue;//隣に相手の石があったところだけチェック
-        let w0 = way[i][0];
-        let w1 = way[i][1];
-        let list = [[p0 + w0, p1 + w1]];//返す石リスト
-        for (let j = 2; true; j++) {
-          if (d[p0 + w0 * j][p1 + w1 * j] == 0 || d[p0 + w0 * j][p1 + w1 * j] == 3) break;
-          if (d[p0 + w0 * j][p1 + w1 * j] == o) {
-            list.push([p0 + w0 * j, p1 + w1 * j]);
-          } else {
-            for (let i2 = 0; i2 < list.length; i2++) {//リスト内の石を返す
-              let l = list[i2];
-              d[l[0]][l[1]] = c;
-              if (display) document.getElementById('k' + l[0] + l[1]).className = [0, 'black', 'white'][c];
-            }
-            break;
-          }
-        }
-      }
-    }
-
-    function valuation(d, p, c, h, Z) {//評価値計算 (データ,残りマス,色,評価の視点)
-      //console.group();
-      //console.log(c, '視点      置く候補', p); hyouji(d);
-      let o = c % 2 + 1;//相手
-      let can = [];//c が置ける場所があるか
-      for (let i = 0; i < p.length; i++) {
-        if (check(p[i], c, d)) can.push(p[i]);
-      }
-      if (!can.length) {//どこにも置けなかったら
-        for (let i = 0; i < p.length; i++) {
-          if (check(p[i], o, d)) can.push(p[i]);
-        }
-        if (!can.length) {//相手も置けなければ石を数えて終了
-          //console.groupEnd();
-          let cc = count_color(d);
-          let point = cc[h] - cc[h % 2 + 1];
-          if (cc[0]) {//空きマスがあったら勝っているほうにカウント
-            if (point > 0) {
-              point += cc[0];
-            } else if (point < 0) {
-              point -= cc[0];
-            }
-          }
-          return point;
-        } else {//相手は置けるなら自分pass
-          //console.groupEnd();
-          return valuation(d, p, o, h);
-        }
-      }
-
-      let point = [];
-      for (let i = 0; i < can.length; i++) {//置ける全てのマスの評価値を計算
-        let karid = copy(d);//仮のデータ
-        put(can[i], c, karid);
-        let karip = p.concat();
-        karip.splice(karip.indexOf(can[i]), 1);
-        point.push(valuation(karid, karip, o, h));
-      }
-      //console.groupEnd();
-      return Z ? point : c == h ? Math.max(...point) : Math.min(...point);
-    }
-
-    function adjustment(d, p, c, t, count) {////最大評価値が+2の問題にする(データ、残りマス、置けるところ,ターン)
-      let point = valuation(d, p, t, t, true);//評価値計算
-      if (point.indexOf(-2) > -1) {//置いたら-2(相手視点で+2になる)
-        put(c[point.indexOf(-2)], t, d, false, true);
-        console.log(t + 'が', c[point.indexOf(-2)], 'において完成')
-        return t % 2 + 1;
-      }
-      if (Math.max(...point) == 2) {//最善が+2
-        console.log('このままでOK')
-        return t;
-      }
-      if (point.indexOf(2) > -1) {//+2置いて-2置けば完成
-        put(c[point.indexOf(2)], t, d, false, true);//+2に置く
-        p.splice(p.indexOf(c[point.indexOf(2)]), 1);
-        let o = t % 2 + 1;
-        c = canlist(d, p, o);
-        if (!c.length) return false;
-        point = valuation(d, p, o, o, true);
-        put(c[point.indexOf(-2)], o, d, false, true);//-2に置く
-        console.log('+2  -2 で完成')
-        return t;
-      }
-
-      let k = t;//仮のターン
-      d = copy(d);
-      for (let k = t; true; k = k % 2 + 1) {//勝つ手筋が1つだけなら完成
-        let pass = false;
-        do {//相手がパスなら繰り返し
-          let m = Math.max(...point);
-          if (k == t) {//プレイヤーのターンに勝ち筋が
-            if (m < 1) return false;//1つも無ければだめ
-            let sec = second(point);
-            if (sec > 0) return false;//2つ以上あってもだめ
-          }
-          put(c[point.indexOf(m)], k, d, false, false);//互いに最善
-          p.splice(p.indexOf(c[point.indexOf(m)]), 1);
-          c = canlist(d, p, k % 2 + 1);//相手の置けるところ
-          if (c.length) {
-            point = valuation(d, p, k % 2 + 1, k % 2 + 1, true);
-          } else {//相手パス
-            c = canlist(d, p, k);//自分の置けるところ
-            if (!c.length) return 2 + t;//falseにならずに終われば成功
-            pass = true;
-            point = valuation(d, p, k, k, true);
-          }
-        } while (pass)//相手パスなら
-      }
-
-
-
-
-      return false;
-    }
-
-    function create(NUM) {//問題作成
-      console.log('作成開始')
-      DATA = [];/////let DATA
-      kif = 'f5';
-      for (let i = 0; i < 10; i++) {
-        DATA.push([]);
-        for (let j = 0; j < 10; j++) {
-          DATA[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
-        }
-      }
-      DATA[4][4] = 2;
-      DATA[4][5] = 1;
-      DATA[5][4] = 1;
-      DATA[5][5] = 1;
-      DATA[5][6] = 1;
-
-      let put_position = ['33', '34', '35', '36', '46', '47', '57', '67', '66', '65', '64', '63', '53', '43'];//置けそうな場所
-
-      for (let t = 1; t < NUM; t++) {//NUM 手ランダムに置いて問題盤面を作る
-        let c = t % 2 + 1;
-        let can = [];
-        for (let i = 0; i < put_position.length; i++) {
-          if (check(put_position[i], c, DATA)) can.push(put_position[i]);
-        }
-        if (!can.length) {
-          console.log('やり直し');
-          return false;//パスになったらやり直し
-        }
-        can = can[Math.floor(Math.random() * can.length)];//置けるところからランダム
-        put(can, c, DATA, false, true);
-        put_position.splice(put_position.indexOf(can), 1);
-        for (let i = 0; i < 8; i++) {
+      function check(p, c, d) {//pに置けるか c=色 d=DATA
+        let p0 = Number(p[0]);
+        let p1 = Number(p[1]);
+        let o = c % 2 + 1;
+        let tonari = [];
+        for (let i = 0; i < 8; i++) {//隣に相手の石があるか
           let w0 = way[i][0];
           let w1 = way[i][1];
-          let pu = Number(can[0]) + w0 + '' + +(Number(can[1]) + w1);
-          if (DATA[pu[0]][pu[1]] == 0 && put_position.indexOf(pu) == -1) put_position.push(pu);
+          tonari.push(d[p0 + w0][p1 + w1] == o);
         }
-      }
 
-      put_position = [];//残りは数マスなので全て入れる
-      for (let i = 1; i < 9; i++) {
-        let k = DATA[i].concat();
-        let ki = k.indexOf(0);
-        while (ki > -1) {
-          k[ki] = 4;
-          put_position.push('' + i + ki);
-          ki = k.indexOf(0);
+        for (let i = 0; i < 8; i++) {
+          if (!tonari[i]) continue;//隣に相手の石があったところだけチェック
+          let w0 = way[i][0];
+          let w1 = way[i][1];
+          for (let j = 2; true; j++) {
+            if (d[p0 + w0 * j][p1 + w1 * j] == 0 || d[p0 + w0 * j][p1 + w1 * j] == 3) break;
+            if (d[p0 + w0 * j][p1 + w1 * j] == c) { return true; }
+          }
         }
-      }
-
-      let t = NUM % 2 + 1;//tのターン
-      let can = [];//tの置ける場所
-      for (let i = 0; i < put_position.length; i++) {
-        if (check(put_position[i], t, DATA)) can.push(put_position[i]);
-      }
-      if (can.length < 2) {//置けるところが少ない場合やり直し
         return false;
       }
 
-      if (put_position.length > 10) {
+      const abc = [0, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+      function put(p, c, d, display, ki) {
+        let p0 = Number(p[0]);
+        let p1 = Number(p[1]);
+        let o = c % 2 + 1;
+
+        d[p0][p1] = c;
+        if (display) document.getElementById('c' + p).innerHTML = `<div class="${[0, 'black', 'white'][c]}" id=k${p}>`;
+        if (ki) kif += abc[p[1]] + p[0];
+
+        let tonari = [];
+        for (let i = 0; i < 8; i++) {//隣に相手の石があるか
+          let w0 = way[i][0];
+          let w1 = way[i][1];
+          tonari.push(d[p0 + w0][p1 + w1] == o);
+        }
+
+        for (let i = 0; i < 8; i++) {
+          if (!tonari[i]) continue;//隣に相手の石があったところだけチェック
+          let w0 = way[i][0];
+          let w1 = way[i][1];
+          let list = [[p0 + w0, p1 + w1]];//返す石リスト
+          for (let j = 2; true; j++) {
+            if (d[p0 + w0 * j][p1 + w1 * j] == 0 || d[p0 + w0 * j][p1 + w1 * j] == 3) break;
+            if (d[p0 + w0 * j][p1 + w1 * j] == o) {
+              list.push([p0 + w0 * j, p1 + w1 * j]);
+            } else {
+              for (let i2 = 0; i2 < list.length; i2++) {//リスト内の石を返す
+                let l = list[i2];
+                d[l[0]][l[1]] = c;
+                if (display) document.getElementById('k' + l[0] + l[1]).className = [0, 'black', 'white'][c];
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      function valuation(d, p, c, h, Z) {//評価値計算 (データ,残りマス,色,評価の視点)
+        //console.group();
+        //console.log(c, '視点      置く候補', p); hyouji(d);
+        let o = c % 2 + 1;//相手
+        let can = [];//c が置ける場所があるか
+        for (let i = 0; i < p.length; i++) {
+          if (check(p[i], c, d)) can.push(p[i]);
+        }
+        if (!can.length) {//どこにも置けなかったら
+          for (let i = 0; i < p.length; i++) {
+            if (check(p[i], o, d)) can.push(p[i]);
+          }
+          if (!can.length) {//相手も置けなければ石を数えて終了
+            //console.groupEnd();
+            let cc = count_color(d);
+            let point = cc[h] - cc[h % 2 + 1];
+            if (cc[0]) {//空きマスがあったら勝っているほうにカウント
+              if (point > 0) {
+                point += cc[0];
+              } else if (point < 0) {
+                point -= cc[0];
+              }
+            }
+            return point;
+          } else {//相手は置けるなら自分pass
+            //console.groupEnd();
+            return valuation(d, p, o, h);
+          }
+        }
+
+        let point = [];
+        for (let i = 0; i < can.length; i++) {//置ける全てのマスの評価値を計算
+          let karid = copy(d);//仮のデータ
+          put(can[i], c, karid);
+          let karip = p.concat();
+          karip.splice(karip.indexOf(can[i]), 1);
+          point.push(valuation(karid, karip, o, h));
+        }
+        //console.groupEnd();
+        return Z ? point : c == h ? Math.max(...point) : Math.min(...point);
+      }
+
+      function adjustment(d, p, c, t, count) {////最大評価値が+2の問題にする(データ、残りマス、置けるところ,ターン)
+        let point = valuation(d, p, t, t, true);//評価値計算
+        if (point.indexOf(-2) > -1) {//置いたら-2(相手視点で+2になる)
+          put(c[point.indexOf(-2)], t, d, false, true);
+          console.log(t + 'が', c[point.indexOf(-2)], 'において完成')
+          return t % 2 + 1;
+        }
+        if (Math.max(...point) == 2) {//最善が+2
+          console.log('このままでOK')
+          return t;
+        }
+        // if (point.indexOf(2) > -1) {//+2置いて-2置けば完成
+        //   put(c[point.indexOf(2)], t, d, false, true);//+2に置く
+        //   p.splice(p.indexOf(c[point.indexOf(2)]), 1);
+        //   let o = t % 2 + 1;
+        //   c = canlist(d, p, o);
+        //   if (!c.length) return false;
+        //   point = valuation(d, p, o, o, true);
+        //   put(c[point.indexOf(-2)], o, d, false, true);//-2に置く
+        //   console.log('+2  -2 で完成')
+        //   return t;
+        // }
+
+        let k = t;//仮のターン
+        d = copy(d);
+        for (let k = t; true; k = k % 2 + 1) {//勝つ手筋が1つだけなら完成
+          let pass = false;
+          do {//相手がパスなら繰り返し
+            let m = Math.max(...point);
+            if (k == t) {//プレイヤーのターンに勝ち筋が
+              if (m < 1) return false;//1つも無ければだめ
+              let sec = second(point);
+              if (sec > 0) return false;//2つ以上あってもだめ
+            }
+            put(c[point.indexOf(m)], k, d, false, false);//互いに最善
+            p.splice(p.indexOf(c[point.indexOf(m)]), 1);
+            c = canlist(d, p, k % 2 + 1);//相手の置けるところ
+            if (c.length) {
+              point = valuation(d, p, k % 2 + 1, k % 2 + 1, true);
+            } else {//相手パス
+              c = canlist(d, p, k);//自分の置けるところ
+              if (!c.length) return 2 + t;//falseにならずに終われば成功
+              pass = true;
+              point = valuation(d, p, k, k, true);
+            }
+          } while (pass)//相手パスなら
+        }
+
+
+
+
         return false;
       }
-      let s = adjustment(DATA, put_position, can, t, 0);//数を調整
-      //let s = 3;
-      if (!s) return false;
-      let count = count_color(DATA);
-      if (s < 3) {//通常
-        if (count[s] > count[s % 2 + 1]) return false;
-      } else {//勝ち筋1つの問題
-        s -= 2;
-        console.log('%c1つ', 'color:red')
+
+      function create(NUM) {//問題作成
+        console.log('作成開始')
+        DATA = [];/////let DATA
+        kif = 'f5';
+        for (let i = 0; i < 10; i++) {
+          DATA.push([]);
+          for (let j = 0; j < 10; j++) {
+            DATA[i].push(i == 0 || i == 9 || j == 0 || j == 9 ? 3 : 0);
+          }
+        }
+        DATA[4][4] = 2;
+        DATA[4][5] = 1;
+        DATA[5][4] = 1;
+        DATA[5][5] = 1;
+        DATA[5][6] = 1;
+
+        let put_position = ['33', '34', '35', '36', '46', '47', '57', '67', '66', '65', '64', '63', '53', '43'];//置けそうな場所
+
+        for (let t = 1; t < NUM; t++) {//NUM 手ランダムに置いて問題盤面を作る
+          let c = t % 2 + 1;
+          let can = [];
+          for (let i = 0; i < put_position.length; i++) {
+            if (check(put_position[i], c, DATA)) can.push(put_position[i]);
+          }
+          if (!can.length) return false;//パスになったらやり直し
+
+          can = can[Math.floor(Math.random() * can.length)];//置けるところからランダム
+          put(can, c, DATA, false, true);
+          put_position.splice(put_position.indexOf(can), 1);
+          for (let i = 0; i < 8; i++) {
+            let w0 = way[i][0];
+            let w1 = way[i][1];
+            let pu = Number(can[0]) + w0 + '' + +(Number(can[1]) + w1);
+            if (DATA[pu[0]][pu[1]] == 0 && put_position.indexOf(pu) == -1) put_position.push(pu);
+          }
+        }
+
+        put_position = [];//残りは数マスなので全て入れる
+        for (let i = 1; i < 9; i++) {
+          let k = DATA[i].concat();
+          let ki = k.indexOf(0);
+          while (ki > -1) {
+            k[ki] = 4;
+            put_position.push('' + i + ki);
+            ki = k.indexOf(0);
+          }
+        }
+
+        let t = NUM % 2 + 1;//tのターン
+        let can = [];//tの置ける場所
+        for (let i = 0; i < put_position.length; i++) {
+          if (check(put_position[i], t, DATA)) can.push(put_position[i]);
+        }
+        if (can.length < 2) {//置けるところが少ない場合やり直し
+          return false;
+        }
+
+        if (put_position.length > 10) {
+          return false;
+        }
+        let s = adjustment(DATA, put_position, can, t, 0);//数を調整
+        //let s = 3;
+        if (!s) return false;
+        let count = count_color(DATA);
+        if (s < 3) {//通常
+          if (count[s] > count[s % 2 + 1]) return false;
+        } else {//勝ち筋1つの問題
+          s -= 2;
+          console.log('%c1つ', 'color:red')
+        }
+
+        console.log(count, '今の数')
+        return s;
       }
 
-      console.log(count, '今の数')
-      return s;
-    }
-
-    function touch(p) {
-      if (!player || !check(p, player_color, DATA)) return;
-      let hint = document.getElementsByClassName('hint');
-      while (hint.length) {
-        hint[0].remove();
-      }
-      player = false;
-      put(p, player_color, DATA, true);
-      vacant.splice(vacant.indexOf(p), 1);
-      if (!vacant.length) {//空きマスがなくなった
-        end();
-        return;
-      }
-      let can = canlist(DATA, vacant, player_color % 2 + 1);
-      if (!can.length) {//COMパス
-        if (canlist(DATA, vacant, player_color).length) {//プレイヤーは置ける
-          player = true;
+      function touch(p) {
+        if (!player || !check(p, player_color, DATA)) return;
+        let hint = document.getElementsByClassName('hint');
+        while (hint.length) {
+          hint[0].remove();
+        }
+        player = false;
+        put(p, player_color, DATA, true);
+        vacant.splice(vacant.indexOf(p), 1);
+        if (!vacant.length) {//空きマスがなくなった
+          end();
           return;
-        } else {//プレイヤーも置けない
+        }
+        let can = canlist(DATA, vacant, player_color % 2 + 1);
+        if (!can.length) {//COMパス
+          if (canlist(DATA, vacant, player_color).length) {//プレイヤーは置ける
+            player = true;
+            return;
+          } else {//プレイヤーも置けない
+            end();
+            return;
+          }
+        }
+        setTimeout(() => {
+          com(can);//COM思考
+        }, 700);
+
+      }
+
+      function com(can) {
+        let o = player_color % 2 + 1;
+        let hyouka = valuation(DATA, vacant, o, o, true);
+        let max = Math.max(...hyouka);
+        let mass = can[hyouka.indexOf(max)];
+        put(mass, o, DATA, true);
+        vacant.splice(vacant.indexOf(mass), 1);
+        if (!vacant.length) {//空きマスがなくなった
+          end();
+          return;
+        }
+        if (canlist(DATA, vacant, player_color).length) {//プレイヤーがうてればターン交代
+          player = true;
+        } else if (canlist(DATA, vacant, o).length) {//プレイヤーがパスならもう一度COM
+          can.splice(can.indexOf(mass), 1);
+          setTimeout(() => {
+            com(can);
+          }, 700);
+        } else {
           end();
           return;
         }
       }
-      setTimeout(() => {
-        com(can);//COM思考
-      }, 700);
 
-    }
-
-    function com(can) {
-      let o = player_color % 2 + 1;
-      let hyouka = valuation(DATA, vacant, o, o, true);
-      let max = Math.max(...hyouka);
-      let mass = can[hyouka.indexOf(max)];
-      put(mass, o, DATA, true);
-      vacant.splice(vacant.indexOf(mass), 1);
-      if (!vacant.length) {//空きマスがなくなった
-        end();
-        return;
-      }
-      if (canlist(DATA, vacant, player_color).length) {
-        player = true;
-      } else if (canlist(DATA, vacant, o).length) {//プレイヤーがパスならもう一度COM
-        can.splice(can.indexOf(mass), 1);
-        setTimeout(() => {
-          com(can);
-        }, 700);
-      } else {
-        end();
-        return;
-      }
-    }
-
-    const result = document.getElementById('result');
-    /**
-    * @type {HTMLCanvasElement}
-    */
-    const result_canvas = document.getElementById('result_canvas');
-    const ctx2 = result_canvas.getContext('2d');
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    function end() {
-      let count = count_color(DATA);
-      result.innerText = `黒${count[1]}  白${count[2]}
+      const result = document.getElementById('result');
+      /**
+      * @type {HTMLCanvasElement}
+      */
+      const result_canvas = document.getElementById('result_canvas');
+      const ctx2 = result_canvas.getContext('2d');
+      function end() {
+        let count = count_color(DATA);
+        result.innerText = `黒${count[1]}  白${count[2]}
         ${count[player_color] > count[player_color % 2 + 1] ? '勝利!' : ''}`;
-      setTimeout(() => {
-        let win = count[player_color] > count[player_color % 2 + 1];
-        ctx2.clearRect(0, 0, 500, 200);
-        ctx2.beginPath();
-        ctx2.fillStyle = win ? 'red' : 'blue';
-        ctx2.strokeStyle = 'yellow';
-        ctx2.textBaseline = "hanging";
-        ctx2.font = '150px Titillium Web';
-        const text = win ? 'WIN' : 'LOSE';
-        if (win) {//勝ったとき
-          ctx2.fillText(text, (500 - ctx2.measureText(text).width) / 2, 0);
-          ctx2.strokeText(text, (500 - ctx2.measureText(text).width) / 2, 0);
-          result_canvas.style.transform = 'scale(0)';
-          result_canvas.style.display = '';
-          setTimeout(() => {//文字があらわれる
+        setTimeout(() => {
+          let win = count[player_color] > count[player_color % 2 + 1];
+          ctx2.clearRect(0, 0, 500, 200);
+          ctx2.beginPath();
+          ctx2.fillStyle = win ? 'red' : 'blue';
+          ctx2.strokeStyle = 'yellow';
+          ctx2.textBaseline = "hanging";
+          ctx2.font = '150px Titillium Web';
+          const text = win ? 'WIN' : 'LOSE';
+          if (win) {//勝ったとき
+            ctx2.fillText(text, (500 - ctx2.measureText(text).width) / 2, 0);
+            ctx2.strokeText(text, (500 - ctx2.measureText(text).width) / 2, 0);
+            result_canvas.style.transform = 'scale(0)';
+            result_canvas.style.display = '';
+            setTimeout(() => {//文字があらわれる
+              result_canvas.style.transform = 'scaleX(1.2)';
+            }, 50);
+            setTimeout(kamifubuki, 1400);
+            setTimeout(() => {
+              canvas1.style.opacity = 0;
+              setTimeout(() => {
+                canvas1.style.display = 'none';
+                canvas1.style.opacity = '';
+                setTimeout(appear_again, 100);
+              }, 1200);
+            }, 1400);
+          } else {//負けたとき
+            let w = (500 - ctx2.measureText(text).width) / 2;
             result_canvas.style.transform = 'scaleX(1.2)';
-          }, 50);
-          setTimeout(kamifubuki, 1400);
-        } else {//負けたとき
-          let w = (500 - ctx2.measureText(text).width) / 2;
-          result_canvas.style.transform = 'scaleX(1.2)';
-          result_canvas.style.display = '';
-          for (let i = 0; i < 4; i++) {
-            setTimeout(() => {//1文字ずつ描く
-              ctx2.fillText(text[i], w, 0);
-              ctx2.strokeText(text[i], w, 0);
-              w += ctx2.measureText(text[i]).width;
-            }, 200 * i);
+            result_canvas.style.display = '';
+            for (let i = 0; i < 4; i++) {
+              setTimeout(() => {//1文字ずつ描く
+                ctx2.fillText(text[i], w, 0);
+                ctx2.strokeText(text[i], w, 0);
+                w += ctx2.measureText(text[i]).width;
+              }, 200 * i);
+            }
+            setTimeout(() => {// L を傾ける
+              ctx2.clearRect(80, 0, 72, 200);
+              ctx2.rotate(-(Math.PI / 11));
+              ctx2.fillText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
+              ctx2.strokeText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
+              ctx2.rotate(Math.PI / 11);
+            }, 1000);
           }
-          setTimeout(() => {// L を傾ける
-            ctx2.clearRect(80, 0, 72, 200);
-            ctx2.rotate(-(Math.PI / 11));
-            ctx2.fillText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
-            ctx2.strokeText('L', (500 - ctx2.measureText(text).width) / 2 - 40, 31);
-            ctx2.rotate(Math.PI / 11);
-          }, 1000);
-        }
-      }, 300);
-    }
-
-    /**
-    * @type {HTMLCanvasElement}
-    */
-    const win_canvas = document.getElementById('win');
-    const ctx3 = win_canvas.getContext('2d');
-    let loop;
-    function kamifubuki() {
-      let w = document.getElementsByTagName('body')[0].getClientRects()[0].width;//canvasの大きさ 横は100%
-      win_canvas.width = w;
-      let h = document.getElementById('button_area').getClientRects()[0].y;//縦はボタンの上まで
-      win_canvas.height = h;
-      win_canvas.style.display = '';
-      let kami = {};
-      let bangou = 0;
-      let color_list = ['red', 'blue', 'yellow'];
-      const size = Math.floor(document.getElementById('c11').getClientRects()[0].width / 2);
-      const plus = size / 5;//1ループで落ちる距離
-      loop = setInterval(() => {
-        ctx3.clearRect(0, 0, w, h);
-        if (!(bangou % 3)) {//3ループに1度追加
-          kami[bangou] = { //紙を追加
-            x: Math.floor(Math.random() * w),
-            y: -size,
-            color: color_list[Math.floor(Math.random() * 3)],
-            kakudo: 0,
-            kaiten: Math.random() > 0.5 ? 1 : -1 //回転方向
-          };
-        }
-        bangou++;
-        for (let key in kami) {//全ての紙を動かす
-          let k = kami[key];
-          ctx3.fillStyle = k.color;
-          ctx3.save();
-          ctx3.translate(k.x, k.y += plus);
-          ctx3.rotate(Math.PI / 30 * (k.kakudo += k.kaiten));
-          ctx3.fillRect(0, 0, size, size);
-          ctx3.restore();
-          if (k.y > h + size) delete kami[key];//下までいったら消す
-        }
-      }, 40);
-    }
-
-    function hint() {
-      if (!player) return;
-      let point = valuation(DATA, vacant, player_color, player_color, true);
-      let can = canlist(DATA, vacant, player_color);
-      for (let i = 0; i < can.length; i++) {
-        let po = point[i];
-        document.getElementById('c' + can[i]).innerHTML = `<span id=h${can[i]} class='hint' data-plus="${po > 0 ? 't' : 'f'}">${po > 0 ? '+' : ''}${po}</span>`;
+        }, 300);
       }
-    }
 
-    function reset() {
-      DATA = copy(copyDATA);
-      vacant = [];
+      /**
+      * @type {HTMLCanvasElement}
+      */
+      const win_canvas = document.getElementById('win');
+      const ctx3 = win_canvas.getContext('2d');
+      let loop;
+      function kamifubuki() {
+        let w = document.getElementsByTagName('body')[0].getClientRects()[0].width;//canvasの大きさ 横は100%
+        win_canvas.width = w;
+        let h = document.getElementById('button_area').getClientRects()[0].y;//縦はボタンの上まで
+        win_canvas.height = h;
+        win_canvas.style.display = '';
+        let kami = {};
+        let bangou = 0;
+        let color_list = ['red', 'blue', 'yellow'];
+        const size = Math.floor(document.getElementById('c11').getClientRects()[0].width / 2);
+        const plus = size / 5;//1ループで落ちる距離
+        loop = setInterval(() => {
+          ctx3.clearRect(0, 0, w, h);
+          if (!(bangou % 3)) {//3ループに1度追加
+            kami[bangou] = { //紙を追加
+              x: Math.floor(Math.random() * w),
+              y: -size,
+              color: color_list[Math.floor(Math.random() * 3)],
+              kakudo: 0,
+              kaiten: Math.random() > 0.5 ? 1 : -1 //回転方向
+            };
+          }
+          bangou++;
+          for (let key in kami) {//全ての紙を動かす
+            let k = kami[key];
+            ctx3.fillStyle = k.color;
+            ctx3.save();
+            ctx3.translate(k.x, k.y += plus);
+            ctx3.rotate(Math.PI / 30 * (k.kakudo += k.kaiten * Math.random() * 2));
+            ctx3.fillRect(0, 0, size, size);
+            ctx3.restore();
+            if (k.y > h + size) delete kami[key];//下までいったら消す
+          }
+        }, 40);
+      }
+
+      function appear_again() {/////////////////////////////////////////////////////////////////////////////////////
+        const button = [document.getElementById('betu'), document.getElementById('change')];
+        button[0].style.transform = 'rotateY(90deg)';
+        button[1].style.transform = 'rotateY(90deg)';
+        again.style.display = '';//ボタンを表示
+        setTimeout(() => {
+          button[0].style.transform = 'rotateY(0deg)';
+          button[1].style.transform = 'rotateY(0deg)';
+        }, 50);
+
+      }
+
+      function hint() {
+        if (!player) return;
+        let point = valuation(DATA, vacant, player_color, player_color, true);
+        let can = canlist(DATA, vacant, player_color);
+        for (let i = 0; i < can.length; i++) {
+          let po = point[i];
+          document.getElementById('c' + can[i]).innerHTML = `<span id=h${can[i]} class='hint' data-plus="${po > 0 ? 't' : 'f'}">${po > 0 ? '+' : ''}${po}</span>`;
+        }
+      }
+
+      function reset() {
+        DATA = copy(copyDATA);
+        vacant = [];
+        for (let i = 1; i < 9; i++) {
+          for (let j = 1; j < 9; j++) {
+            if (DATA[i][j]) {
+              document.getElementById('c' + i + j).innerHTML = `<div class="${[0, 'black', 'white'][DATA[i][j]]}" id="k${i}${j}"></div>`;
+            } else {
+              document.getElementById('c' + i + j).innerHTML = '';
+              vacant.push('' + i + j);
+            }
+          }
+        }
+        canvas1.style.display = 'block';
+        result_canvas.style.display = 'none';
+        result_canvas.style.transform = '';
+        win_canvas.style.display = 'none';
+        again.style.display = 'none';
+        clearInterval(loop);
+        ctx2.clearRect(0, 0, 500, 200);
+        ctx3.clearRect(0, 0, win_canvas.width, win_canvas.height);
+        player = true;
+        result.innerText = '';
+      }
+
+      function copy(d) {//2次元配列をコピー
+        let c = [];
+        for (let i = 0; i < d.length; i++) {
+          c.push(d[i].concat());
+        }
+        return c;
+      }
+
+      function abs(a) {//絶対値
+        let b = [];
+        for (let i = 0; i < a.length; i++) {
+          b.push(Math.abs(a[i]));
+        }
+        return b;
+      }
+
+      function canlist(d, p, c) {//置けるところ
+        let can = [];
+        for (let i = 0; i < p.length; i++) {
+          if (check(p[i], c, d)) can.push(p[i]);
+        }
+        return can;
+      }
+
+      function count_color(d) {//白黒　石の数
+        let count = [0, 0, 0];
+        for (let i = 1; i < 9; i++) {
+          for (let j = 1; j < 9; j++) {
+            count[d[i][j]]++;
+          }
+        }
+        return count;
+      }
+
+      function second(a) {//配列中の2番目に大きい数
+        a = a.concat();
+        let m = Math.max(...a);
+        a[a.indexOf(m)] = -100;
+        return Math.max(...a);
+      }
+
+      if (nanido < 50 || nanido > 55) return;
+
+      do {
+        player_color = create(nanido + Math.floor(Math.random() * 2));
+      } while (!player_color)
+      copyDATA = copy(DATA);
+
+      let body = document.getElementById('body');
+      body.innerHTML = '';
+      let table = document.createElement('table');//盤面作成
       for (let i = 1; i < 9; i++) {
+        let tr = document.createElement('tr');
         for (let j = 1; j < 9; j++) {
+          let td = document.createElement('td');
+          td.classList = 'cell';
+          td.id = `c${i}${j}`;
           if (DATA[i][j]) {
-            document.getElementById('c' + i + j).innerHTML = `<div class="${[0, 'black', 'white'][DATA[i][j]]}" id="k${i}${j}"></div>`;
+            td.innerHTML = `<div class="${[0, 'black', 'white'][DATA[i][j]]}" id="k${i}${j}"></div>`;
           } else {
-            document.getElementById('c' + i + j).innerHTML = '';
             vacant.push('' + i + j);
+            td.onclick = (e) => {
+              let id = e.target.id;
+              id = id[1] + id[2];
+              if (vacant.indexOf(id) > -1) touch(id);//空きマスにしか置けない
+            }
           }
+
+          tr.appendChild(td);
         }
+        table.appendChild(tr);
       }
-      result_canvas.style.display = 'none';
-      result_canvas.style.transform = '';
-      win_canvas.style.display = 'none';
-      clearInterval(loop);
-      ctx2.clearRect(0, 0, 500, 200);
-      ctx3.clearRect(0, 0, win_canvas.width, win_canvas.height);
+      body.appendChild(table);
 
-      player = true;
-      result.innerText = '';
-    }
+      // let input = document.createElement('input');//棋譜エリア
+      // input.type = 'text';
+      // input.id = 'kif';
+      // input.value = kif;
+      // body.appendChild(input);
+      // input = document.createElement('button');
+      // input.id = 'copy';
+      // input.innerText = 'コピー';
+      // input.onclick = () => {
+      //   document.getElementById('kif').select();
+      //   document.execCommand("Copy");
+      // }
+      // body.appendChild(input);
 
-    function copy(d) {//2次元配列をコピー
-      let c = [];
-      for (let i = 0; i < d.length; i++) {
-        c.push(d[i].concat());
+      document.getElementById('reset').onclick = reset;
+
+      document.getElementById('hint').onclick = hint;
+
+      const canvas1 = document.getElementById('canvas1');
+      canvas1.style.backgroundColor = [0, '#e8e8e8', '#cccccc'][player_color];
+      canvas1.style.display = 'block';
+      const ctx1 = canvas1.getContext("2d");
+      ctx1.beginPath();
+      ctx1.fillStyle = [0, 'black', 'white'][player_color];
+      ctx1.arc(20, 23, 20, 0, 2 * Math.PI, false);
+      ctx1.fill();
+      ctx1.font = '40px serif';
+      ctx1.fillText('で勝て', 40, 40);
+
+      let again = document.getElementById('again');
+      document.getElementById('betu').onclick = () => {//難易度変わらず別の問題
+        again.style.display = 'none';
+        reset();
+        all();
       }
-      return c;
-    }
-
-    function abs(a) {//絶対値
-      let b = [];
-      for (let i = 0; i < a.length; i++) {
-        b.push(Math.abs(a[i]));
+      document.getElementById('change').onclick = () => {//リロード
+        window.location.reload();
       }
-      return b;
+
+      if (document.getElementById('none')) document.getElementById('none').remove();
+
     }
-
-    function canlist(d, p, c) {//置けるところ
-      let can = [];
-      for (let i = 0; i < p.length; i++) {
-        if (check(p[i], c, d)) can.push(p[i]);
-      }
-      return can;
-    }
-
-    function count_color(d) {//白黒　石の数
-      let count = [0, 0, 0];
-      for (let i = 1; i < 9; i++) {
-        for (let j = 1; j < 9; j++) {
-          count[d[i][j]]++;
-        }
-      }
-      return count;
-    }
-
-    function second(a) {//配列中の2番目に大きい数
-      a = a.concat();
-      let m = Math.max(...a);
-      a[a.indexOf(m)] = -100;
-      return Math.max(...a);
-    }
-
-    const nanido = 53;//50限界
-    do {
-      player_color = create(nanido + Math.floor(Math.random() * 2));
-    } while (!player_color)
-    copyDATA = copy(DATA);
-
-    let body = document.getElementById('body');
-    body.innerHTML = '';
-    let table = document.createElement('table');//盤面作成
-    for (let i = 1; i < 9; i++) {
-      let tr = document.createElement('tr');
-      for (let j = 1; j < 9; j++) {
-        let td = document.createElement('td');
-        td.classList = 'cell';
-        td.id = `c${i}${j}`;
-        if (DATA[i][j]) {
-          td.innerHTML = `<div class="${[0, 'black', 'white'][DATA[i][j]]}" id="k${i}${j}"></div>`;
-        } else {
-          vacant.push('' + i + j);
-          td.onclick = (e) => {
-            let id = e.target.id;
-            id = id[1] + id[2];
-            if (vacant.indexOf(id) > -1) touch(id);//空きマスにしか置けない
-          }
-        }
-
-        tr.appendChild(td);
-      }
-      table.appendChild(tr);
-    }
-    body.appendChild(table);
-
-    // let input = document.createElement('input');//棋譜エリア
-    // input.type = 'text';
-    // input.id = 'kif';
-    // input.value = kif;
-    // body.appendChild(input);
-    // input = document.createElement('button');
-    // input.id = 'copy';
-    // input.innerText = 'コピー';
-    // input.onclick = () => {
-    //   document.getElementById('kif').select();
-    //   document.execCommand("Copy");
-    // }
-    // body.appendChild(input);
-
-    document.getElementById('reset').onclick = reset;
-
-    document.getElementById('hint').onclick = hint;
-
-    const canvas1 = document.getElementById('canvas1');
-    canvas1.style.backgroundColor = [0, '#e8e8e8', '#cccccc'][player_color];
-    const ctx1 = canvas1.getContext("2d");
-    ctx1.beginPath();
-    ctx1.fillStyle = [0, 'black', 'white'][player_color];
-    ctx1.arc(20, 23, 20, 0, 2 * Math.PI, false);
-    ctx1.fill();
-    ctx1.font = '40px serif';
-    ctx1.fillText('で勝て', 40, 40);
-
-    document.getElementById('none').remove();
-
-
-    //}all
 
 
     function hyouji(d) {
