@@ -16,6 +16,7 @@
       h1 {
         font-size: 9vw;
         text-align: center;
+        font-family: 'Zen Antique Soft';
       }
 
       #select_area {
@@ -38,26 +39,54 @@
         background-color: black;
         color: white;
         font-family: 'kosugi Maru';
-        /* font-family: 'Gravitas One', serif; */
         padding: 0;
       }
 
-      /* #start:hover{
-  background-color: black;
-    color: white;
-} */
+      #counter {
+        height: 7vw;
+        display: flex;
+        position: relative;
+        background-color: lightgray;
+        font-weight: bold;
+        z-index: 3;
+      }
 
+      #counter>div {
+        width: 50vw;
+        height: 100%;
+        font-size: 6vw;
+        line-height: 7vw;
+        text-align: center;
+      }
 
+      #proportion {
+        position: relative;
+        height: 2vw;
+        width: 100vw;
+        box-shadow: black 0px 0px 2vw;
+        z-index: 2;
+      }
+
+      #black_c {
+        color: black;
+        text-shadow: 0 0 1vw white;
+        border-right: 1px solid black;
+      }
+
+      #white_c {
+        color: white;
+        text-shadow: 0 0 1vw black;
+        border-left: 1px solid black;
+      }
 
       .cell {
-        width: 11vw;
-        height: 11vw;
+        width: 10vw;
+        height: 10vw;
       }
 
       #button_area {
         width: 60vw;
-        height: 16vw;
-        margin: auto;
+        margin: 0 auto 4vw;
       }
 
       #button_area>button {
@@ -65,7 +94,7 @@
         padding: 2vw;
         font-weight: bold;
         border: none;
-        font-family: monospace;
+        font-family: 'kosugi Maru';
       }
 
       #button_area>button:hover {
@@ -105,7 +134,7 @@
       #result_canvas {
         width: 100%;
         position: absolute;
-        top: 35vw;
+        top: 38vw;
         transition: transform 1.2s;
         transition-timing-function: cubic-bezier(0.8, 0, 1, 1);
         z-index: 2;
@@ -119,12 +148,12 @@
 
       #again {
         width: 70vw;
-        margin: 2vw auto;
+        margin: auto;
       }
 
       div#again button {
-        width: 25vw;
-        height: 25vw;
+        width: 24vw;
+        height: 24vw;
         border-radius: 50%;
         border: none;
         padding: 0;
@@ -170,7 +199,7 @@
 
     table {
       background-color: black;
-      margin: 5vw auto;
+      margin: 2vw auto;
     }
 
     td>div {
@@ -207,6 +236,11 @@
       color: lightgray;
       font-family: 'Titillium Web', sans-serif;
     }
+
+    #f2 {
+      font-family: 'Zen Antique Soft';
+      color: transparent;
+    }
   </style>
   <style id="none">
     div:not(#body):not(#body *),
@@ -221,11 +255,17 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Titillium+Web:wght@900&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gravitas+One&family=Kosugi+Maru&family=Titillium+Web:wght@900&family=Zen+Antique+Soft&display=swap"
     rel="stylesheet">
+  <div id="counter">
+    <div id="black_c">2</div>
+    <div id="white_c">31</div>
+  </div>
+  <div id="proportion"></div>
   <div id="body">
     <h1>詰めオセロ</h1>
-    <div id="select_area">難易度
+    <div id="select_area">難易度:
       <select id="select">
         <option value="5">初級</option>
         <option value="2">中級</option>
@@ -233,7 +273,8 @@
       </select>
     </div>
     <button onclick="start()" id="start">START</button>
-    <div id="f">　</div>
+    <div id="f">詰め</div>
+    <div id="f2">勝て</div>
   </div>
   <div id="button_area">
     <button id="reset">リセット</button>
@@ -328,6 +369,7 @@
             }
           }
         }
+        if (display) update_count(DATA);
       }
 
       function valuation(d, p, c, h, Z) {//評価値計算 (データ,残りマス,色,評価の視点)
@@ -581,7 +623,7 @@
             setTimeout(() => {//文字があらわれる
               result_canvas.style.transform = 'scaleX(1.2)';
             }, 50);
-            setTimeout(kamifubuki, 1400);
+            setTimeout(kamifubuki, 1000);
             setTimeout(() => {
               canvas1.style.opacity = 0;
               setTimeout(() => {
@@ -626,7 +668,7 @@
         win_canvas.style.display = '';
         let kami = {};
         let bangou = 0;
-        let color_list = ['red', 'blue', 'yellow'];
+        let color_list = ['red', 'blue', 'yellow', 'pink'];
         const size = Math.floor(document.getElementById('c11').getClientRects()[0].width / 2);
         const plus = size / 5;//1ループで落ちる距離
         loop = setInterval(() => {
@@ -634,8 +676,8 @@
           if (!(bangou % 3)) {//3ループに1度追加
             kami[bangou] = { //紙を追加
               x: Math.floor(Math.random() * w),
-              y: -size,
-              color: color_list[Math.floor(Math.random() * 3)],
+              y: size * 0.6,
+              color: color_list[Math.floor(Math.random() * 4)],
               kakudo: 0,
               kaiten: Math.random() > 0.5 ? 1 : -1 //回転方向
             };
@@ -654,7 +696,7 @@
         }, 40);
       }
 
-      function appear_again() {/////////////////////////////////////////////////////////////////////////////////////
+      function appear_again() {
         const button = [document.getElementById('betu'), document.getElementById('change')];
         button[0].style.transform = 'rotateY(-270deg)';
         button[1].style.transform = 'rotateY(-270deg)';
@@ -697,6 +739,7 @@
         clearInterval(loop);
         ctx2.clearRect(0, 0, 500, 200);
         ctx3.clearRect(0, 0, win_canvas.width, win_canvas.height);
+        update_count(DATA);
         player = true;
         result.innerText = '';
       }
@@ -733,6 +776,17 @@
           }
         }
         return count;
+      }
+
+      const count_area = [document.getElementById('proportion'), document.getElementById('black_c'), document.getElementById('white_c')];
+      function update_count(d) {
+        const c = count_color(d);
+        count_area[1].innerText = c[1];
+        count_area[2].innerText = c[2];
+        let difference = c[1] - c[2];//黒と白の差
+        difference = 50 + difference * 2;
+        difference = Math.min(Math.max(10, difference), 90);//10以上90以下にする
+        count_area[0].style.backgroundImage = `linear-gradient(90deg, black ${difference}%, white ${difference}%)`
       }
 
       function second(a) {//配列中の2番目に大きい数
@@ -801,8 +855,8 @@
       ctx1.fillStyle = [0, 'black', 'white'][player_color];
       ctx1.arc(20, 23, 20, 0, 2 * Math.PI, false);
       ctx1.fill();
-      ctx1.font = '40px serif';
-      ctx1.fillText('で勝て', 40, 40);
+      ctx1.font = '40px Zen Antique Soft';
+      ctx1.fillText('で勝て', 43, 39);
 
       let again = document.getElementById('again');
       document.getElementById('betu').onclick = () => {//難易度変わらず別の問題
@@ -814,23 +868,25 @@
         window.location.reload();
       }
 
+      update_count(DATA);
+
       if (document.getElementById('none')) document.getElementById('none').remove();
 
     }
 
 
-    function hyouji(d) {
-      if (!d) d = DATA;
-      let m = [' ', '●', '○', ' '];
-      let h = '';
-      for (let i = 1; i < 9; i++) {
-        for (let j = 1; j < 9; j++) {
-          h += m[d[i][j]] + ' ';
-        }
-        h += '\n';
-      }
-      console.log(h)
-    }
+    // function hyouji(d) {
+    //   if (!d) d = DATA;
+    //   let m = [' ', '●', '○', ' '];
+    //   let h = '';
+    //   for (let i = 1; i < 9; i++) {
+    //     for (let j = 1; j < 9; j++) {
+    //       h += m[d[i][j]] + ' ';
+    //     }
+    //     h += '\n';
+    //   }
+    //   console.log(h)
+    // }
 
   </script>
 </body>
