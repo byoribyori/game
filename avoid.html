@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>避ける</title>
   <style>
-     html,
+    html,
     body {
       overflow: hidden
     }
@@ -22,30 +23,90 @@
       margin: 0;
     }
 
-    #display{
+    #display {
       width: 90vw;
-    display: block;
-    border: solid 1vw;
-    margin: 4vw auto;
+      display: block;
+      border: solid 1vw;
+      margin: 4vw auto;
+      outline: 1vw black solid;
+      outline-offset: -1vw;
+    }
+
+    #manipulate{
+      width: 90vw;
+    display: flex;
+    margin: auto;
+    }
+
+    #manipulate > canvas{
+      width: 44vw;
+      margin: auto;
+      background-color: #e2e2e2;
+      display: block;
     }
   </style>
 </head>
+
 <body>
-  <canvas id="display" width="400" height="600"></canvas>
+  <canvas id="display" width="400" height="500"></canvas>
+  <div id="manipulate">
+  <canvas width="200" height="60"></canvas>
+  <canvas width="200" height="60"></canvas>
+</div>
+<button id="start">スタート</button>
 
   <script>
-  /**
-  * @type {HTMLCanvasElement}
-  */
+    /**
+    * @type {HTMLCanvasElement}
+    */
     const display = document.getElementById('display');
-    const ctx1 = display.getContext('2d');
-    ctx1.beginPath();
-    ctx1.font = '20px serif';
-    ctx1.fillStyle='red'
-    ctx1.fillText('0',0,0);
-    ctx1.fillText('50',50,50);
-    ctx1.fillText('10',10,10);
-    ctx1.fillText('100',100,100);
+    const ctx_display = display.getContext('2d');
+    const manipulate = document.getElementById('manipulate').getElementsByTagName('canvas');
+    /**
+    * @type {HTMLCanvasElement}
+    */
+    const manipulate_left = manipulate[0];
+    const manipulate_right = manipulate[1];
+    const ctx_left = manipulate_left.getContext('2d');
+    const ctx_right = manipulate_right.getContext('2d');
+    
+    ctx_left.beginPath();
+    ctx_left.strokeStyle='black';
+    ctx_left.lineWidth=3;
+    ctx_left.moveTo(30,30);
+    ctx_left.lineTo(60,50);
+    ctx_left.lineTo(110,10);
+    ctx_left.stroke();
+
+
+    //const player = {x:400,y:500};
+    ctx_display.beginPath();
+    ctx_display.font='40px serif'
+    ctx_display.fillStyle='black'
+
+    manipulate_left.addEventListener('mousedown',(e)=>{
+      e.preventDefault()
+      ctx_display.fillText('mousedown',40,40)
+    });
+
+    manipulate_left.addEventListener('click',(e)=>{
+      e.preventDefault()
+      ctx_display.fillText('click',40,150)
+    });
+
+    manipulate_left.addEventListener('mouseup',(e)=>{
+      e.preventDefault()
+      ctx_display.fillText('mouseup',40,230)
+    });
+
+    let loop;
+    document.getElementById('start').addEventListener('click',()=>{
+      loop=setInterval(()=>{
+        console.log(1)
+      },500);
+    })
+
   </script>
 </body>
+
 </html>
