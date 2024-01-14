@@ -67,10 +67,23 @@
     * @type {HTMLCanvasElement}
     */
     const manipulate_left = manipulate[0];
-    const manipulate_right = manipulate[1];
     const ctx_left = manipulate_left.getContext('2d');
+    /**
+    * @type {HTMLCanvasElement}
+    */
+    const manipulate_right = manipulate[1];
     const ctx_right = manipulate_right.getContext('2d');
+    
+    ctx_left.beginPath();
+    ctx_left.strokeStyle = 'black';
+    ctx_left.lineWidth=3;
+    ctx_left.moveTo(140,30);
+    ctx_left.lineTo(60,30);
+    ctx_left.lineTo(85,5);
+    ctx_left.moveTo(60,30);
+    ctx_left.lineTo(85,55);
 
+    ctx_left.stroke();
 
 
 
@@ -103,10 +116,12 @@
 
     let loop;
     const player = { x: 180, y: 500 };
-    document.getElementById('start').addEventListener('click', () => {
+    let start = document.getElementById('start');
+    start.addEventListener('click', () => {
+      start.remove();
       loop = setInterval(() => {
-        if (touch[0]) player.x = Math.max(player.x - 5, 0);//左がタッチされていたら左に動かす
-        if (touch[1]) player.x = Math.min(player.x + 5, 360);;//右がタッチされていたら右に動かす
+        if (touch[0]) player.x = Math.max(player.x - 3, 0);//左がタッチされていたら左に動かす
+        if (touch[1]) player.x = Math.min(player.x + 3, 360);;//右がタッチされていたら右に動かす
         ctx_display.clearRect(0, 0, 400, 600);
         ctx_display.beginPath();
         ctx_display.strokeStyle = 'black';
@@ -122,7 +137,7 @@
         ctx_display.moveTo(player.x + 20, 555);
         ctx_display.lineTo(player.x + 40, 545);//手
         ctx_display.stroke();
-      }, 50);
+      }, 30);
     })
 
 
