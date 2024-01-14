@@ -83,37 +83,29 @@
     ctx_display.beginPath();
     ctx_display.font='40px serif'
     ctx_display.fillStyle='black'
-    function down(e){
-      e.preventDefault()
-      ctx_display.fillText('mousedown',40,40)
-    }
 
-    manipulate_left.addEventListener('mousedown',down,false);
 
-    manipulate_left.addEventListener('click',(e)=>{
-      e.preventDefault()
-      ctx_display.fillText('click',40,150)
-    },false);
-
-    manipulate_left.addEventListener('mouseup',(e)=>{
-      e.preventDefault()
-      ctx_display.fillText('mouseup',40,230)
-    },false);
-
+let count = 0;
+let touch = false
     manipulate_left.addEventListener('touchstart',(e)=>{
-      e.preventDefault()
+      touch=true
+      //e.preventDefault()
       ctx_display.fillText('touchstart',40,290)
     },false);
 
     manipulate_left.addEventListener('touchend',(e)=>{
-      e.preventDefault()
+      touch=false
+      //e.preventDefault()
       ctx_display.fillText('touchend',40,360)
     },false);
 
     let loop;
     document.getElementById('start').addEventListener('click',()=>{
       loop=setInterval(()=>{
-        console.log(1)
+        if(touch)count--;
+        else count++;
+        ctx_display.clearRect(0,0,400,500)
+        ctx_display.fillText(count,50,50)
       },500);
     })
 
