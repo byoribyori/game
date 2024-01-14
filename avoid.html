@@ -32,13 +32,13 @@
       outline-offset: -1vw;
     }
 
-    #manipulate{
+    #manipulate {
       width: 90vw;
-    display: flex;
-    margin: auto;
+      display: flex;
+      margin: auto;
     }
 
-    #manipulate > canvas{
+    #manipulate>canvas {
       width: 44vw;
       margin: auto;
       background-color: #e2e2e2;
@@ -48,12 +48,12 @@
 </head>
 
 <body>
-  <canvas id="display" width="400" height="500"></canvas>
+  <canvas id="display" width="400" height="600"></canvas>
   <div id="manipulate">
-  <canvas width="200" height="60"></canvas>
-  <canvas width="200" height="60"></canvas>
-</div>
-<button id="start">スタート</button>
+    <canvas width="200" height="60"></canvas>
+    <canvas width="200" height="60"></canvas>
+  </div>
+  <button id="start">スタート</button>
 
   <script>
     /**
@@ -61,6 +61,7 @@
     */
     const display = document.getElementById('display');
     const ctx_display = display.getContext('2d');
+
     const manipulate = document.getElementById('manipulate').getElementsByTagName('canvas');
     /**
     * @type {HTMLCanvasElement}
@@ -69,47 +70,62 @@
     const manipulate_right = manipulate[1];
     const ctx_left = manipulate_left.getContext('2d');
     const ctx_right = manipulate_right.getContext('2d');
-    
-    ctx_left.beginPath();
-    ctx_left.strokeStyle='black';
-    ctx_left.lineWidth=3;
-    ctx_left.moveTo(30,30);
-    ctx_left.lineTo(60,50);
-    ctx_left.lineTo(110,10);
-    ctx_left.stroke();
 
 
-    //const player = {x:400,y:500};
+
+
+
     ctx_display.beginPath();
-    ctx_display.font='40px serif'
-    ctx_display.fillStyle='black'
+    ctx_display.font = '40px serif'
+    ctx_display.fillStyle = 'black'
 
 
-let count = 0;
-let touch = false
-    manipulate_left.addEventListener('touchstart',(e)=>{
-      touch=true
-      //e.preventDefault()
-      ctx_display.fillText('touchstart',40,290)
-    },false);
+    let touch = [false, false];
+    manipulate_left.addEventListener('touchstart', (e) => {
+      e.preventDefault()
+      touch[0] = true;
+    }, false);
 
-    manipulate_left.addEventListener('touchend',(e)=>{
-      touch=false
-      //e.preventDefault()
-      ctx_display.fillText('touchend',40,360)
-    },false);
+    manipulate_left.addEventListener('touchend', (e) => {
+      e.preventDefault()
+      touch[0] = false;
+    }, false);
+
+    manipulate_right.addEventListener('touchstart', (e) => {
+      e.preventDefault()
+      touch[1] = true;
+    }, false);
+
+    manipulate_right.addEventListener('touchend', (e) => {
+      e.preventDefault()
+      touch[1] = false;
+    }, false);
 
     let loop;
-    document.getElementById('start').addEventListener('click',()=>{
-      loop=setInterval(()=>{
-        if(touch)count--;
-        else count++;
-        ctx_display.clearRect(0,0,400,500)
-        ctx_display.fillText(count,50,50)
-      },500);
+    const player = { x: 180, y: 500 };
+    document.getElementById('start').addEventListener('click', () => {
+      loop = setInterval(() => {
+        if (touch[0]) player.x = Math.max(player.x - 5, 0);//左がタッチされていたら左に動かす
+        if (touch[1]) player.x = Math.min(player.x + 5, 360);;//右がタッチされていたら右に動かす
+        ctx_display.clearRect(0, 0, 400, 600);
+        ctx_display.beginPath();
+        ctx_display.strokeStyle = 'black';
+        ctx_display.lineWidth = 2;
+        ctx_display.arc(player.x + 20, 520, 15, 0, 2 * Math.PI, false);//頭
+        ctx_display.moveTo(player.x + 20, 535);
+        ctx_display.lineTo(player.x + 20, 570);//胴体
+        ctx_display.lineTo(player.x + 3, 590);//足
+        ctx_display.moveTo(player.x + 20, 570);
+        ctx_display.lineTo(player.x + 37, 590);//足
+        ctx_display.moveTo(player.x + 20, 555);
+        ctx_display.lineTo(player.x, 545);//手
+        ctx_display.moveTo(player.x + 20, 555);
+        ctx_display.lineTo(player.x + 40, 545);//手
+        ctx_display.stroke();
+      }, 50);
     })
 
-    
+
   </script>
 </body>
 
