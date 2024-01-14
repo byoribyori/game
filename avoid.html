@@ -73,25 +73,32 @@
     */
     const manipulate_right = manipulate[1];
     const ctx_right = manipulate_right.getContext('2d');
-    
-    ctx_left.beginPath();
-    ctx_left.strokeStyle = 'black';
-    ctx_left.lineWidth=3;
-    ctx_left.moveTo(140,30);
-    ctx_left.lineTo(60,30);
-    ctx_left.lineTo(85,5);
-    ctx_left.moveTo(60,30);
-    ctx_left.lineTo(85,55);
 
-    ctx_left.stroke();
+    ctx_left.beginPath();//左矢印
+    ctx_left.fillStyle = 'black';
+    ctx_left.lineWidth = 3;
+    ctx_left.moveTo(85, 5);
+    ctx_left.lineTo(60, 30);
+    ctx_left.lineTo(85, 55);
+    ctx_left.lineTo(85, 40);
+    ctx_left.lineTo(140, 40);
+    ctx_left.lineTo(140, 20);
+    ctx_left.lineTo(85, 20);
+    ctx_left.closePath()
+    ctx_left.fill();
 
-
-
-
-    ctx_display.beginPath();
-    ctx_display.font = '40px serif'
-    ctx_display.fillStyle = 'black'
-
+    ctx_right.beginPath();//右矢印
+    ctx_right.fillStyle = 'black';
+    ctx_right.lineWidth = 3;
+    ctx_right.moveTo(115, 5);
+    ctx_right.lineTo(140, 30);
+    ctx_right.lineTo(115, 55);
+    ctx_right.lineTo(115, 40);
+    ctx_right.lineTo(60, 40);
+    ctx_right.lineTo(60, 20);
+    ctx_right.lineTo(115, 20);
+    ctx_right.closePath()
+    ctx_right.fill();
 
     let touch = [false, false];
     manipulate_left.addEventListener('touchstart', (e) => {
@@ -114,29 +121,74 @@
       touch[1] = false;
     }, false);
 
+    ctx_display.font = '40px serif'
     let loop;
-    const player = { x: 180, y: 500 };
     let start = document.getElementById('start');
     start.addEventListener('click', () => {
       start.remove();
+      let count = 0, drop = {}, drop_id = 0, playerX = 180;//（プレイヤーのYは固定）
+      const type_list = [
+        { color: 'red', width: 40, height: 60, speed: 5 },
+        { color: 'blue', width: 40, height: 40, speed: 8 },
+        { color: 'black', width: 40, height: 20, speed: 3 },
+        { color: 'green', width: 40, height: 40, speed: 5 },];
+      let position_list = [0, 40, 120, 160, 200, 240, 280, 320, 360];
       loop = setInterval(() => {
-        if (touch[0]) player.x = Math.max(player.x - 3, 0);//左がタッチされていたら左に動かす
-        if (touch[1]) player.x = Math.min(player.x + 3, 360);;//右がタッチされていたら右に動かす
+        //プレイヤー描画
+        if (touch[0]) playerX = Math.max(playerX - 3, 0);//左がタッチされていたら左に動かす
+        if (touch[1]) playerX = Math.min(playerX + 3, 360);;//右がタッチされていたら右に動かす
         ctx_display.clearRect(0, 0, 400, 600);
         ctx_display.beginPath();
         ctx_display.strokeStyle = 'black';
         ctx_display.lineWidth = 2;
-        ctx_display.arc(player.x + 20, 520, 15, 0, 2 * Math.PI, false);//頭
-        ctx_display.moveTo(player.x + 20, 535);
-        ctx_display.lineTo(player.x + 20, 570);//胴体
-        ctx_display.lineTo(player.x + 3, 590);//足
-        ctx_display.moveTo(player.x + 20, 570);
-        ctx_display.lineTo(player.x + 37, 590);//足
-        ctx_display.moveTo(player.x + 20, 555);
-        ctx_display.lineTo(player.x, 545);//手
-        ctx_display.moveTo(player.x + 20, 555);
-        ctx_display.lineTo(player.x + 40, 545);//手
+        ctx_display.arc(playerX + 20, 520, 15, 0, 2 * Math.PI, false);//頭
+        ctx_display.moveTo(playerX + 20, 535);
+        ctx_display.lineTo(playerX + 20, 570);//胴体
+        ctx_display.lineTo(playerX + 3, 590);//足
+        ctx_display.moveTo(playerX + 20, 570);
+        ctx_display.lineTo(playerX + 37, 590);//足
+        ctx_display.moveTo(playerX + 20, 555);
+        ctx_display.lineTo(playerX, 545);//手
+        ctx_display.moveTo(playerX + 20, 555);
+        ctx_display.lineTo(playerX + 40, 545);//手
         ctx_display.stroke();
+
+        for (let i in drop) {
+          const d = drop[i];
+          d.y += d.speed;
+          if (d.y < 600) {
+            ctx_display.fillStyle = d.color;
+            ctx_display.fillRect(d.x, d.y, d.width, d.height);
+            // ctx_display.fillText(i, d.x, d.y)
+            if (d.y >= 505 - d.height && d.y < 590 && d.x + d.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
+              delete drop[i];
+              position_list.push(d.x);
+              console.log('%cあたった', `color:${d.color}`)
+            }
+          } else {//下まで落ちたら消す
+            delete drop[i];
+            position_list.push(d.x);
+          }
+        }
+
+
+
+
+        count = count % 100 + 1;
+        if (count % 20 == 0) {//20ループに1度新たに落とす
+          const type = type_list[drop_id % 4];
+          const r = Math.floor(Math.random() * position_list.length);//位置ランダム
+          drop[drop_id] = {
+            color: type.color,
+            width: type.width,
+            height: type.height,
+            x: position_list[r],
+            y: -type.height,
+            speed: type.speed
+          };
+          drop_id++;
+          position_list.splice(r, 1);
+        }
       }, 30);
     })
 
