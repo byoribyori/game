@@ -83,21 +83,32 @@
     ctx_display.beginPath();
     ctx_display.font='40px serif'
     ctx_display.fillStyle='black'
-
-    manipulate_left.addEventListener('mousedown',(e)=>{
+    function down(e){
       e.preventDefault()
       ctx_display.fillText('mousedown',40,40)
-    });
+    }
+
+    manipulate_left.addEventListener('mousedown',down,false);
 
     manipulate_left.addEventListener('click',(e)=>{
       e.preventDefault()
       ctx_display.fillText('click',40,150)
-    });
+    },false);
 
     manipulate_left.addEventListener('mouseup',(e)=>{
       e.preventDefault()
       ctx_display.fillText('mouseup',40,230)
-    });
+    },false);
+
+    manipulate_left.addEventListener('touchstart',(e)=>{
+      e.preventDefault()
+      ctx_display.fillText('touchstart',40,290)
+    },false);
+
+    manipulate_left.addEventListener('touchend',(e)=>{
+      e.preventDefault()
+      ctx_display.fillText('touchend',40,360)
+    },false);
 
     let loop;
     document.getElementById('start').addEventListener('click',()=>{
@@ -106,6 +117,7 @@
       },500);
     })
 
+    
   </script>
 </body>
 
