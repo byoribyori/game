@@ -23,13 +23,19 @@
       margin: 0;
     }
 
+    #score {
+      position: absolute;
+      top: 3vw;
+      left: 5vw;
+      display: block;
+      width: 90vw;
+    }
+
     #display {
       width: 90vw;
       display: block;
-      border: solid 1vw;
-      margin: 4vw auto;
-      outline: 1vw black solid;
-      outline-offset: -1vw;
+      margin: 3vw auto;
+      box-shadow: inset 0vw 0vw 2vw 1vw gray;
     }
 
     #manipulate {
@@ -48,6 +54,7 @@
 </head>
 
 <body>
+  <canvas id="score" width="400" height="40"></canvas>
   <canvas id="display" width="400" height="600"></canvas>
   <div id="manipulate">
     <canvas width="200" height="60"></canvas>
@@ -128,10 +135,11 @@
       start.remove();
       let count = 0, drop = {}, drop_id = 0, playerX = 180;//（プレイヤーのYは固定）
       const type_list = [
-        { color: 'red', width: 40, height: 60, speed: 5 },
-        { color: 'blue', width: 40, height: 40, speed: 8 },
-        { color: 'black', width: 40, height: 20, speed: 3 },
-        { color: 'green', width: 40, height: 40, speed: 5 },];
+        { color: 'red', width: 40, height: 60, speed: 7 },
+        { color: 'blue', width: 40, height: 40, speed: 12 },
+        { color: 'black', width: 40, height: 20, speed: 5 },
+        { color: 'green', width: 40, height: 40, speed: 7 },
+        { color: 'yellow', width: 40, height: 40, speed: 9 }];
       let position_list = [0, 40, 120, 160, 200, 240, 280, 320, 360];
       loop = setInterval(() => {
         //プレイヤー描画
@@ -155,12 +163,14 @@
 
         for (let i in drop) {
           const d = drop[i];
-          d.y += d.speed;
+          const type = d.type;
+          const this_block = type_list[type];
+          d.y += this_block.speed;
           if (d.y < 600) {
-            ctx_display.fillStyle = d.color;
-            ctx_display.fillRect(d.x, d.y, d.width, d.height);
+            ctx_display.fillStyle = this_block.color;
+            ctx_display.fillRect(d.x, d.y, this_block.width, this_block.height);
             // ctx_display.fillText(i, d.x, d.y)
-            if (d.y >= 505 - d.height && d.y < 590 && d.x + d.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
+            if (d.y >= 505 - this_block.height && d.y < 590 && d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
               delete drop[i];
               position_list.push(d.x);
               console.log('%cあたった', `color:${d.color}`)
@@ -171,25 +181,19 @@
           }
         }
 
-
-
-
         count = count % 100 + 1;
         if (count % 20 == 0) {//20ループに1度新たに落とす
-          const type = type_list[drop_id % 4];
+          const t = Math.random() > 0.1 ? drop_id % 4 : 4;//ブロックのタイプ
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
-            color: type.color,
-            width: type.width,
-            height: type.height,
+            type: t,
             x: position_list[r],
-            y: -type.height,
-            speed: type.speed
+            y: -type_list[t].height,
           };
           drop_id++;
           position_list.splice(r, 1);
         }
-      }, 30);
+      }, 50);
     })
 
 
