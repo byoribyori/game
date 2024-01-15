@@ -36,6 +36,7 @@
       display: block;
       margin: 3vw auto;
       box-shadow: inset 0vw 0vw 2vw 1vw gray;
+      transition: background-color 1s;
     }
 
     #manipulate {
@@ -50,17 +51,25 @@
       background-color: #e2e2e2;
       display: block;
     }
+
+    #font>span {
+      color: transparent;
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@500&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <canvas id="score" width="400" height="40"></canvas>
+  <canvas id="score" width="400" height="50"></canvas>
   <canvas id="display" width="400" height="600"></canvas>
   <div id="manipulate">
     <canvas width="200" height="60"></canvas>
     <canvas width="200" height="60"></canvas>
   </div>
   <button id="start">スタート</button>
+  <div id="font"><span style="font-family: Tektur;">s1</span></div>
 
   <script>
     /**
@@ -68,6 +77,12 @@
     */
     const display = document.getElementById('display');
     const ctx_display = display.getContext('2d');
+
+    /**
+    * @type {HTMLCanvasElement}
+    */
+    const score_area = document.getElementById('score');
+    const ctx_score = score_area.getContext('2d');
 
     const manipulate = document.getElementById('manipulate').getElementsByTagName('canvas');
     /**
@@ -128,27 +143,38 @@
       touch[1] = false;
     }, false);
 
-    ctx_display.font = '40px serif'
+    let score = 0;
+    ctx_score.font = '30px Tektur';
+    ctx_score.textBaseline = 'top';
+    function score_update() {
+      ctx_score.clearRect(0, 0, 400, 50);
+      ctx_score.fillText('SCORE ' + score, 15, 15);
+    }
+
     let loop;
     let start = document.getElementById('start');
     start.addEventListener('click', () => {
       start.remove();
-      let count = 0, drop = {}, drop_id = 0, playerX = 180;//（プレイヤーのYは固定）
+      ctx_display.strokeStyle = 'black';
+      ctx_display.lineWidth = 2;
+      let count = 0, drop = {}, drop_id = 0;
+      let playerLife = 5, playerX = 180;//（プレイヤーのYは固定）
+      let speedup = 1;
       const type_list = [
-        { color: 'red', width: 40, height: 60, speed: 7 },
-        { color: 'blue', width: 40, height: 40, speed: 12 },
-        { color: 'black', width: 40, height: 20, speed: 5 },
-        { color: 'green', width: 40, height: 40, speed: 7 },
-        { color: 'yellow', width: 40, height: 40, speed: 9 }];
+        { color: 'blue', width: 40, height: 40, speed: 12 },//速い　弱い
+        { color: 'red', width: 40, height: 60, speed: 7 },//基本
+        { color: 'black', width: 40, height: 20, speed: 5 },//遅い　強い
+        { color: 'green', width: 40, height: 40, speed: 7 },//触ると得点
+        { color: 'yellow', width: 40, height: 40, speed: 9 }//ボーナス
+      ];
       let position_list = [0, 40, 120, 160, 200, 240, 280, 320, 360];
+      score_update();
       loop = setInterval(() => {
         //プレイヤー描画
-        if (touch[0]) playerX = Math.max(playerX - 3, 0);//左がタッチされていたら左に動かす
-        if (touch[1]) playerX = Math.min(playerX + 3, 360);;//右がタッチされていたら右に動かす
+        if (touch[0]) playerX = Math.max(playerX - 3 * speedup, 0);//左がタッチされていたら左に動かす
+        if (touch[1]) playerX = Math.min(playerX + 3 * speedup, 360);;//右がタッチされていたら右に動かす
         ctx_display.clearRect(0, 0, 400, 600);
         ctx_display.beginPath();
-        ctx_display.strokeStyle = 'black';
-        ctx_display.lineWidth = 2;
         ctx_display.arc(playerX + 20, 520, 15, 0, 2 * Math.PI, false);//頭
         ctx_display.moveTo(playerX + 20, 535);
         ctx_display.lineTo(playerX + 20, 570);//胴体
@@ -161,7 +187,7 @@
         ctx_display.lineTo(playerX + 40, 545);//手
         ctx_display.stroke();
 
-        for (let i in drop) {
+        for (let i in drop) {//ブロック描画
           const d = drop[i];
           const type = d.type;
           const this_block = type_list[type];
@@ -169,21 +195,40 @@
           if (d.y < 600) {
             ctx_display.fillStyle = this_block.color;
             ctx_display.fillRect(d.x, d.y, this_block.width, this_block.height);
-            // ctx_display.fillText(i, d.x, d.y)
-            if (d.y >= 505 - this_block.height && d.y < 590 && d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
+            if (d.y >= 505 - this_block.height && d.y < 590 &&
+              d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
               delete drop[i];
               position_list.push(d.x);
-              console.log('%cあたった', `color:${d.color}`)
+              console.log('%cあたった', `color:${this_block.color}`)
+              if(speedup==2){//ボーナスタイム中
+                if (type == 3) score += 2;//緑は当たったら得点
+              }else if (type < 3) playerLife -= type + 1;//当たってしまった
+              else if (type == 3) score += 2;//緑は当たったら得点
+              else {//黄色に当たったらボーナスタイム
+                speedup = 2;
+                ctx_display.strokeStyle = 'yellow';
+                display.style.backgroundColor='darkgray';
+                setTimeout(() => {
+                  speedup = 1;
+                  ctx_display.strokeStyle = 'black';
+                  display.style.backgroundColor='';
+                }, 10000);
+              }
+              score_update();
             }
           } else {//下まで落ちたら消す
             delete drop[i];
             position_list.push(d.x);
+            score++;
+            score_update();
           }
         }
 
+        ctx_display.clearRect(0, 0, 400, 50);
+
         count = count % 300 + 1;
         if (count % 15 == 0) {//15ループに1度新たに落とす
-          const t = Math.random() > 0.06 ? drop_id % 4 : 4;//ブロックのタイプ
+          const t = Math.random() < 0.1 && speedup==1 ? 4 : drop_id % 4;//ブロックのタイプ
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
@@ -194,7 +239,7 @@
           position_list.splice(r, 1);
         }
       }, 50);
-    })
+    });
 
 
   </script>
