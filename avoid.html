@@ -122,7 +122,12 @@
     ctx_right.closePath()
     ctx_right.fill();
 
-    let touch = [false, false];
+    let loop;
+    let start = document.getElementById('start');
+    start.addEventListener('click', () => {
+      start.remove();
+
+      let touch = [false, false];
     manipulate_left.addEventListener('touchstart', (e) => {
       e.preventDefault()
       touch[0] = true;
@@ -146,15 +151,21 @@
     let score = 0;
     ctx_score.font = '30px Tektur';
     ctx_score.textBaseline = 'top';
+    ctx_score.strokeStyle = 'black';
+      ctx_score.lineWidth = 2;
     function score_update() {
       ctx_score.clearRect(0, 0, 400, 50);
-      ctx_score.fillText('SCORE ' + score, 15, 15);
+      ctx_score.fillStyle='black';
+      ctx_score.fillText('SCORE ' + score, 15, 15);//スコア描画
+      ctx_score.fillText('HP' ,210, 15);
+      ctx_score.strokeRect(255,15,120,25);
+      ctx_score.fillStyle='lightgreen';
+      ctx_score.fillRect(255,15,Math.max(0,playerLife*24),25);
+      if(playerLife<=0){
+        clearInterval(loop);
+      }
     }
 
-    let loop;
-    let start = document.getElementById('start');
-    start.addEventListener('click', () => {
-      start.remove();
       ctx_display.strokeStyle = 'black';
       ctx_display.lineWidth = 2;
       let count = 0, drop = {}, drop_id = 0;
@@ -195,21 +206,23 @@
           if (d.y < 600) {
             ctx_display.fillStyle = this_block.color;
             ctx_display.fillRect(d.x, d.y, this_block.width, this_block.height);
-            if (d.y >= 505 - this_block.height && d.y < 590 &&
+            if (d.y +this_block.height> 505  && d.y < 590 &&
               d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
               delete drop[i];
               position_list.push(d.x);
-              console.log('%cあたった', `color:${this_block.color}`)
+              //console.log('%cあたった', `color:${this_block.color}`)
               if(speedup==2){//ボーナスタイム中
                 if (type == 3) score += 2;//緑は当たったら得点
               }else if (type < 3) playerLife -= type + 1;//当たってしまった
               else if (type == 3) score += 2;//緑は当たったら得点
               else {//黄色に当たったらボーナスタイム
                 speedup = 2;
+                ctx_display.lineWidth = 3;
                 ctx_display.strokeStyle = 'yellow';
                 display.style.backgroundColor='darkgray';
                 setTimeout(() => {
                   speedup = 1;
+                  ctx_display.lineWidth = 2;
                   ctx_display.strokeStyle = 'black';
                   display.style.backgroundColor='';
                 }, 10000);
@@ -224,7 +237,7 @@
           }
         }
 
-        ctx_display.clearRect(0, 0, 400, 50);
+        ctx_display.clearRect(0, 0, 400, 50);//スコア表示の場所確保
 
         count = count % 300 + 1;
         if (count % 15 == 0) {//15ループに1度新たに落とす
