@@ -171,8 +171,8 @@
       score_update();
       loop = setInterval(() => {
         //プレイヤー描画
-        if (touch[0]) playerX = Math.max(playerX - 3 * speedup, 0);//左がタッチされていたら左に動かす
-        if (touch[1]) playerX = Math.min(playerX + 3 * speedup, 360);;//右がタッチされていたら右に動かす
+        if (touch[0]) playerX = Math.max(playerX - 4 * speedup, 0);//左がタッチされていたら左に動かす
+        if (touch[1]) playerX = Math.min(playerX + 4 * speedup, 360);;//右がタッチされていたら右に動かす
         ctx_display.clearRect(0, 0, 400, 600);
         ctx_display.beginPath();
         ctx_display.arc(playerX + 20, 520, 15, 0, 2 * Math.PI, false);//頭
