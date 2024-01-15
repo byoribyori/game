@@ -228,7 +228,7 @@
 
         count = count % 300 + 1;
         if (count % 15 == 0) {//15ループに1度新たに落とす
-          const t = Math.random() < 0.1 && speedup==1 ? 4 : drop_id % 4;//ブロックのタイプ
+          const t = Math.random() < 0.05 && speedup==1 ? 4 : drop_id % 4;//ブロックのタイプ
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
