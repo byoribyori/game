@@ -181,9 +181,9 @@
           }
         }
 
-        count = count % 100 + 1;
-        if (count % 20 == 0) {//20ループに1度新たに落とす
-          const t = Math.random() > 0.1 ? drop_id % 4 : 4;//ブロックのタイプ
+        count = count % 300 + 1;
+        if (count % 15 == 0) {//15ループに1度新たに落とす
+          const t = Math.random() > 0.06 ? drop_id % 4 : 4;//ブロックのタイプ
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
