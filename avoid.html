@@ -256,11 +256,10 @@
 
         if (playerHP < 1) gameover();
 
-        count = count % 300 + 1;
-        if (count % 15 == 0) {//15ループに1度新たに落とす
+        count = count % 12 + 1;
+        if (count % 12 == 1) {//12ループに1度新たに落とす
           //5回に1回は緑 低確率で黄、ピンク それ以外ランダム
-          const t = drop_id % 5 == 3 ? 3 : Math.random() < 0.03 && speedup == 1 ? 4 :
-            Math.random() < 0.03 ? 5 : random_block[Math.floor(Math.random() * 5)];
+          const t = drop_id % 50 == 0 && playerHP != 5 ? 5 : drop_id % 5 == 3 ? 3 : Math.random() < 0.02 && speedup == 1 ? 4 : random_block[Math.floor(Math.random() * 5)];
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
