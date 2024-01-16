@@ -23,7 +23,7 @@
       margin: 0;
     }
 
-    #score {
+    #scoreAndHP {
       position: absolute;
       top: 3vw;
       left: 5vw;
@@ -62,7 +62,7 @@
 </head>
 
 <body>
-  <canvas id="score" width="400" height="50"></canvas>
+  <canvas id="scoreAndHP" width="400" height="50"></canvas>
   <canvas id="display" width="400" height="600"></canvas>
   <div id="manipulate">
     <canvas width="200" height="60"></canvas>
@@ -81,8 +81,8 @@
     /**
     * @type {HTMLCanvasElement}
     */
-    const score_area = document.getElementById('score');
-    const ctx_score = score_area.getContext('2d');
+    const scoreAndHPa = document.getElementById('scoreAndHP');
+    const ctx_sl = scoreAndHP.getContext('2d');
 
     const manipulate = document.getElementById('manipulate').getElementsByTagName('canvas');
     /**
@@ -126,64 +126,72 @@
     let start = document.getElementById('start');
     start.addEventListener('click', () => {
       start.remove();
+      document.getElementById('font').remove();
 
       let touch = [false, false];
-    manipulate_left.addEventListener('touchstart', (e) => {
-      e.preventDefault()
-      touch[0] = true;
-    }, false);
+      manipulate_left.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        touch[0] = true;
+      }, false);
 
-    manipulate_left.addEventListener('touchend', (e) => {
-      e.preventDefault()
-      touch[0] = false;
-    }, false);
+      manipulate_left.addEventListener('touchend', (e) => {
+        e.preventDefault()
+        touch[0] = false;
+      }, false);
 
-    manipulate_right.addEventListener('touchstart', (e) => {
-      e.preventDefault()
-      touch[1] = true;
-    }, false);
+      manipulate_right.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        touch[1] = true;
+      }, false);
 
-    manipulate_right.addEventListener('touchend', (e) => {
-      e.preventDefault()
-      touch[1] = false;
-    }, false);
+      manipulate_right.addEventListener('touchend', (e) => {
+        e.preventDefault()
+        touch[1] = false;
+      }, false);
 
-    let score = 0;
-    ctx_score.font = '30px Tektur';
-    ctx_score.textBaseline = 'top';
-    ctx_score.strokeStyle = 'black';
-      ctx_score.lineWidth = 2;
-    function score_update() {
-      ctx_score.clearRect(0, 0, 400, 50);
-      ctx_score.fillStyle='black';
-      ctx_score.fillText('SCORE ' + score, 15, 15);//スコア描画
-      ctx_score.fillText('HP' ,210, 15);
-      ctx_score.strokeRect(255,15,120,25);
-      ctx_score.fillStyle='lightgreen';
-      ctx_score.fillRect(255,15,Math.max(0,playerLife*24),25);
-      if(playerLife<=0){
-        clearInterval(loop);
+      let score = 0;
+      ctx_sl.font = '30px Tektur';
+      ctx_sl.textBaseline = 'top';
+      ctx_sl.strokeStyle = 'black';
+      ctx_sl.lineWidth = 2;
+      function score_update(s) {
+        score += s;
+        ctx_sl.clearRect(0, 0, 200, 50);
+        ctx_sl.fillStyle = 'black';
+        ctx_sl.fillText('SCORE ' + score, 15, 15);//スコア描画
       }
-    }
+      function hp_update(l) {
+        playerHP = Math.min(5, playerHP + l);//最大5
+        ctx_sl.clearRect(200, 0, 200, 50);
+        ctx_sl.fillStyle = 'black';
+        ctx_sl.fillText('HP', 210, 15);
+        ctx_sl.fillStyle = 'lightgreen';
+        ctx_sl.fillRect(255, 15, Math.max(0, playerHP * 24), 25);//HP描画
+        ctx_sl.strokeRect(255, 15, 120, 25);
+      }
 
       ctx_display.strokeStyle = 'black';
       ctx_display.lineWidth = 2;
       let count = 0, drop = {}, drop_id = 0;
-      let playerLife = 5, playerX = 180;//（プレイヤーのYは固定）
+      let playerHP = 5, playerX = 180;//（プレイヤーのYは固定）
       let speedup = 1;
       const type_list = [
-        { color: 'blue', width: 40, height: 40, speed: 12 },//速い　弱い
+        { color: 'blue', width: 40, height: 40, speed: 13 },//速い　弱い
         { color: 'red', width: 40, height: 60, speed: 7 },//基本
         { color: 'black', width: 40, height: 20, speed: 5 },//遅い　強い
-        { color: 'green', width: 40, height: 40, speed: 7 },//触ると得点
-        { color: 'yellow', width: 40, height: 40, speed: 9 }//ボーナス
+        { color: 'green', width: 40, height: 40, speed: 9 },//触ると得点
+        { color: 'yellow', width: 40, height: 40, speed: 11 },//ボーナス
+        { color: 'pink', width: 40, height: 40, speed: 11 }//回復
       ];
       let position_list = [0, 40, 120, 160, 200, 240, 280, 320, 360];
-      score_update();
+      const random_block = [0, 0, 1, 1, 2];
+      score_update(0);
+      hp_update(0);
       loop = setInterval(() => {
         //プレイヤー描画
         if (touch[0]) playerX = Math.max(playerX - 4 * speedup, 0);//左がタッチされていたら左に動かす
         if (touch[1]) playerX = Math.min(playerX + 4 * speedup, 360);;//右がタッチされていたら右に動かす
+        ctx_display.fillStyle = 'black';
         ctx_display.clearRect(0, 0, 400, 600);
         ctx_display.beginPath();
         ctx_display.arc(playerX + 20, 520, 15, 0, 2 * Math.PI, false);//頭
@@ -205,43 +213,54 @@
           d.y += this_block.speed;
           if (d.y < 600) {
             ctx_display.fillStyle = this_block.color;
-            ctx_display.fillRect(d.x, d.y, this_block.width, this_block.height);
-            if (d.y +this_block.height> 505  && d.y < 590 &&
+            if (type == 5) {
+              ctx_display.beginPath();
+              ctx_display.arc(d.x + 20, d.y + 20, 20, 0, 2 * Math.PI, false);
+              ctx_display.fill();
+            }
+            else ctx_display.fillRect(d.x, d.y, this_block.width, this_block.height);
+            if (d.y + this_block.height > 505 && d.y < 590 &&
               d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
               delete drop[i];
               position_list.push(d.x);
-              //console.log('%cあたった', `color:${this_block.color}`)
-              if(speedup==2){//ボーナスタイム中
-                if (type == 3) score += 2;//緑は当たったら得点
-              }else if (type < 3) playerLife -= type + 1;//当たってしまった
-              else if (type == 3) score += 2;//緑は当たったら得点
-              else {//黄色に当たったらボーナスタイム
+              console.log('%cあたった', `color:${this_block.color}`)
+              if (speedup == 2) {//ボーナスタイム中
+                if (type == 3) score_update(2);//緑は当たったら得点
+              } else if (type < 3) {//当たってしまった
+                hp_update(-type - 1)
+              }
+              else if (type == 3) score_update(2);//緑は当たったら得点
+              else if (type == 4) {//黄色に当たったらボーナスタイム
                 speedup = 2;
                 ctx_display.lineWidth = 3;
                 ctx_display.strokeStyle = 'yellow';
-                display.style.backgroundColor='darkgray';
+                display.style.backgroundColor = 'darkgray';
                 setTimeout(() => {
                   speedup = 1;
                   ctx_display.lineWidth = 2;
                   ctx_display.strokeStyle = 'black';
-                  display.style.backgroundColor='';
+                  display.style.backgroundColor = '';
                 }, 10000);
+              } else {//ピンクは回復
+                hp_update(1);
               }
-              score_update();
             }
           } else {//下まで落ちたら消す
             delete drop[i];
             position_list.push(d.x);
-            score++;
-            score_update();
+            if (type < 3) score_update(1);
           }
         }
 
         ctx_display.clearRect(0, 0, 400, 50);//スコア表示の場所確保
 
+        if (playerHP < 1) gameover();
+
         count = count % 300 + 1;
         if (count % 15 == 0) {//15ループに1度新たに落とす
-          const t = Math.random() < 0.05 && speedup==1 ? 4 : drop_id % 4;//ブロックのタイプ
+          //5回に1回は緑 低確率で黄、ピンク それ以外ランダム
+          const t = drop_id % 5 == 3 ? 3 : Math.random() < 0.03 && speedup == 1 ? 4 :
+            Math.random() < 0.03 ? 5 : random_block[Math.floor(Math.random() * 5)];
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
@@ -252,6 +271,17 @@
           position_list.splice(r, 1);
         }
       }, 50);
+
+      function gameover() {
+        clearInterval(loop);
+        ctx_display.fillStyle = 'white';
+        ctx_display.strokeStyle = 'black';
+        ctx_display.font = '70px Tektur';
+        const text = 'GAMEOVER';
+        const margin = 200 - ctx_display.measureText(text).width / 2;
+        ctx_display.fillText(text, margin, 300);
+        ctx_display.strokeText(text, margin, 300);
+      }
     });
 
 
