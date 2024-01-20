@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>避ける</title>
   <style>
-    html,
+    /* html,
     body {
       overflow: hidden
-    }
+    } */
 
     html {
       width: 100%;
@@ -33,7 +33,7 @@
       transition: background-color 1s;
     }
 
-    #sub_display {
+    #sub_display,#description {
       position: absolute;
       top: 3vw;
       left: 5vw;
@@ -49,10 +49,32 @@
     }
 
     #manipulate>canvas {
+      display: block;
       width: 43vw;
       margin: auto;
-      background-color: #e2e2e2;
-      display: block;
+    border: 1px solid black;
+    }
+
+    [data-click="0"]{
+      background: linear-gradient(0deg, gray, white);
+    }
+
+    [data-click="1"]{
+      background: linear-gradient(180deg, gray, white);
+    }
+
+    #start{
+      position: absolute;
+      top: 70%;
+    left: 31vw;
+    width: 38vw;
+    font-size: 8vw;
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 1vw;
+    font-family: Tektur;
+    z-index: 3;
     }
 
     #font>span {
@@ -68,12 +90,18 @@
   <canvas id="display" width="400" height="600"></canvas>
   <canvas id="sub_display" width="400" height="600"></canvas>
   <div id="manipulate">
-    <canvas width="200" height="60"></canvas>
-    <canvas width="200" height="60"></canvas>
+    <canvas width="200" height="60" data-click="0"></canvas>
+    <canvas width="200" height="60" data-click="0"></canvas>
   </div>
-  <button id="start">スタート</button>
-  <div id="font"><span style="font-family: Tektur;">s1</span></div>
-  <div id="effect_life"></div>
+  <button id="start">START</button>
+  <table id="description">
+    <tr><td>※音量注意</td><td><button id="confirm">音量確認</button></td></tr>
+  </table>
+  <!-- <div id="font"><span style="font-family: Tektur;">s1</span></div> -->
+
+<audio id="yellow" src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0" preload="auto"></audio>
+<audio id="block" src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0" preload="auto"></audio>
+<audio id="green" src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0" preload="auto"></audio>
 
   <script>
     /**
@@ -126,31 +154,46 @@
     ctx_right.closePath()
     ctx_right.fill();
 
+    const audio = document.getElementsByTagName('audio');
+    document.getElementById('confirm').addEventListener('click',()=>{
+      audio.green.play();
+    })
+
+    document.onkeydown = (e) => {
+      console.log(e.key)
+        if (e.key == 'Enter'&&document.getElementById('start'))start.click();
+      }
+
     let loop;
     let start = document.getElementById('start');
     start.addEventListener('click', () => {
       start.remove();
-      document.getElementById('font').remove();
+      document.getElementById('description').remove();
+      //document.getElementById('font').remove();
 
       let touch = [false, false];
       manipulate_left.addEventListener('touchstart', (e) => {
-        e.preventDefault()
+        e.preventDefault();
         touch[0] = true;
+        manipulate_left.dataset.click="1";
       }, false);
 
       manipulate_left.addEventListener('touchend', (e) => {
-        e.preventDefault()
+        e.preventDefault();
         touch[0] = false;
+        manipulate_left.dataset.click="0";
       }, false);
 
       manipulate_right.addEventListener('touchstart', (e) => {
-        e.preventDefault()
+        e.preventDefault();
         touch[1] = true;
+        manipulate_right.dataset.click="1";
       }, false);
 
       manipulate_right.addEventListener('touchend', (e) => {
-        e.preventDefault()
+        e.preventDefault();
         touch[1] = false;
+        manipulate_right.dataset.click="0";
       }, false);
 
       document.onkeydown = (e) => {
@@ -244,15 +287,15 @@
               d.x + this_block.width > playerX && d.x < playerX + 40) {//プレイヤーと重なっている
               delete drop[i];
               position_list.push(d.x);
-              console.log('%cあたった', `color:${this_block.color}`)
-              if (speedup == 2) {//ボーナスタイム中
-                if (type == 3) score_update(2);//緑は当たったら得点
-                else if (type == 5) hp_update(1);
-              } else if (type < 3) {//当たってしまった
-                hp_update(-type - 1);
-                effect(-type - 1, d.x, d.y);
-              }
-              else if (type == 3) score_update(2);//緑は当たったら得点
+              if (type == 3) {//緑は当たったら得点
+                audio.green.play();
+                score_update(3);
+              }else if(type==5){//ピンクは回復
+                  if (playerHP != 5) {
+                  hp_update(1);
+                  effect(1, d.x, d.y);
+                }
+              }else if(speedup==2)true;//ボーナスタイム中なら以下無効
               else if (type == 4) {//黄色に当たったらボーナスタイム
                 speedup = 2;
                 ctx_display.lineWidth = 3;
@@ -264,11 +307,10 @@
                   ctx_display.strokeStyle = 'black';
                   display.style.backgroundColor = '';
                 }, 10000);
-              } else {//ピンクは回復
-                if (playerHP != 5) {
-                  hp_update(1);
-                  effect(1, d.x, d.y);
-                }
+              }else {//当たってしまった
+                audio.block.play();
+                hp_update(-type - 1);
+                effect(-type - 1, d.x, d.y);
               }
             }
           } else {//下まで落ちたら消す
