@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>避ける</title>
   <style>
-     html,
+    html,
     body {
       overflow: hidden
-    } 
+    }
 
     html {
       width: 100%;
@@ -33,13 +33,18 @@
       transition: background-color 1s;
     }
 
-    #sub_display,#description {
+    #sub_display,
+    #description,
+    #description_text {
       position: absolute;
+      display: block;
+      z-index: 2;
+    }
+
+    #sub_display {
+      width: 90vw;
       top: 3vw;
       left: 5vw;
-      display: block;
-      width: 90vw;
-      z-index: 2;
     }
 
     #manipulate {
@@ -52,29 +57,109 @@
       display: block;
       width: 43vw;
       margin: auto;
-    border: 1px solid black;
+      border: 1px solid black;
     }
 
-    [data-click="0"]{
+    [data-click="0"] {
       background: linear-gradient(0deg, gray, white);
     }
 
-    [data-click="1"]{
+    [data-click="1"] {
       background: linear-gradient(180deg, gray, white);
     }
 
-    #start{
+    #confirm {
+      position: absolute;
+      top: 97vw;
+      left: 13vw;
+      z-index: 3;
+    }
+
+    #start {
       position: absolute;
       top: 70%;
-    left: 31vw;
-    width: 38vw;
-    font-size: 8vw;
-    background-color: black;
-    color: white;
-    border: none;
-    padding: 1vw;
-    font-family: Tektur;
-    z-index: 3;
+      left: 31vw;
+      width: 38vw;
+      font-size: 8vw;
+      background-color: black;
+      color: white;
+      border: none;
+      padding: 1vw;
+      font-family: Tektur;
+      z-index: 3;
+    }
+
+    #description,
+    #description_text,
+    #confirm {
+      font-family: 'DotGothic16';
+      font-size: 5vw;
+    }
+
+    #description_text {
+      width: 40vw;
+      height: 80vw;
+      top: 14vw;
+      left: 8vw;
+      font-size: calc(40vw/9);
+    }
+
+    #description_text>div {
+      margin-top: 2vw;
+    }
+
+    #description {
+      width: 40vw;
+      font-weight: bold;
+      top: 10vw;
+      left: 50vw;
+    }
+
+    #description>div {
+      display: flex;
+      height: 8vw;
+      line-height: 8vw;
+      padding: 1vw;
+      border-bottom: solid 1vw black;
+    }
+
+    #description>div>div {
+      display: inline-block;
+    }
+
+    #description>div>div:nth-child(2) {
+      width: 30vw;
+      text-align: center;
+    }
+
+    .block_description {
+      display: inline-block;
+      width: 8vw;
+      margin: auto;
+    }
+
+    .circle_description {
+      display: inline-block;
+      width: 8vw;
+      height: 8vw;
+      border-radius: 50%;
+      margin: auto;
+    }
+
+    #blue {
+      background-color: blue;
+      height: 12vw;
+    }
+
+    #red {
+      background-color: red;
+      height: 8vw;
+    }
+
+    #black {
+      background-color: black;
+      height: 4vw;
+      margin-top: 2.5vw;
     }
 
     #font>span {
@@ -83,7 +168,8 @@
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Tektur:wght@500&display=swap"
+    rel="stylesheet">
 </head>
 
 <body>
@@ -94,14 +180,63 @@
     <canvas width="200" height="60" data-click="0"></canvas>
   </div>
   <button id="start">START</button>
-  <table id="description">
-    <tr><td>※音量注意</td><td><button id="confirm">音量確認</button></td></tr>
-  </table>
+  <div id="description_text">
+    <div>落ちてくるブロックをよけろ</div>
+    <div>よけるたびにSCORE+1</div>
+  </div>
+  <div id="description">
+    <div style="height: 7vw;">
+      <div style="width: 37vw;text-align: right;">あたると..</div>
+    </div>
+    <div style="height: 12vw; line-height: 12vw;">
+      <div>
+        <div class="block_description" id="blue"></div>
+      </div>
+      <div>1ダメージ</div>
+    </div>
+    <div>
+      <div>
+        <div class="block_description" id="red"></div>
+      </div>
+      <div>2ダメージ</div>
+    </div>
+    <div>
+      <div>
+        <div class="block_description" id="black"></div>
+      </div>
+      <div>3ダメージ</div>
+    </div>
+    <div>
+      <div>
+        <div class="circle_description" id="green" style="background-color: green;"></div>
+      </div>
+      <div>SCORE +3</div>
+    </div>
+    <div>
+      <div>
+        <div class="circle_description" id="pink" style="background-color: pink;"></div>
+      </div>
+      <div>HP +1</div>
+    </div>
+    <div>
+      <div>
+        <div class="circle_description" id="yellow" style="background-color: yellow;"></div>
+      </div>
+      <div>10秒間無敵</div>
+    </div>
+  </div>
+  <div><button id="confirm">音量確認</button></div>
   <!-- <div id="font"><span style="font-family: Tektur;">s1</span></div> -->
 
-<audio id="yellow" src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0" preload="auto"></audio>
-<audio id="block" src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0" preload="auto"></audio>
-<audio id="green" src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0" preload="auto"></audio>
+  <audio id="yellow"
+    src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0"
+    preload="auto"></audio>
+  <audio id="block"
+    src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0"
+    preload="auto"></audio>
+  <audio id="green"
+    src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0"
+    preload="auto"></audio>
 
   <script>
     /**
@@ -155,14 +290,14 @@
     ctx_right.fill();
 
     const audio = document.getElementsByTagName('audio');
-    document.getElementById('confirm').addEventListener('click',()=>{
+    document.getElementById('confirm').addEventListener('click', () => {
       audio.green.play();
     })
 
     document.onkeydown = (e) => {
       console.log(e.key)
-        if (e.key == 'Enter'&&document.getElementById('start'))start.click();
-      }
+      if (e.key == 'Enter' && document.getElementById('start')) start.click();
+    }
 
     let loop;
     let start = document.getElementById('start');
@@ -175,25 +310,25 @@
       manipulate_left.addEventListener('touchstart', (e) => {
         e.preventDefault();
         touch[0] = true;
-        manipulate_left.dataset.click="1";
+        manipulate_left.dataset.click = "1";
       }, false);
 
       manipulate_left.addEventListener('touchend', (e) => {
         e.preventDefault();
         touch[0] = false;
-        manipulate_left.dataset.click="0";
+        manipulate_left.dataset.click = "0";
       }, false);
 
       manipulate_right.addEventListener('touchstart', (e) => {
         e.preventDefault();
         touch[1] = true;
-        manipulate_right.dataset.click="1";
+        manipulate_right.dataset.click = "1";
       }, false);
 
       manipulate_right.addEventListener('touchend', (e) => {
         e.preventDefault();
         touch[1] = false;
-        manipulate_right.dataset.click="0";
+        manipulate_right.dataset.click = "0";
       }, false);
 
       document.onkeydown = (e) => {
@@ -290,12 +425,12 @@
               if (type == 3) {//緑は当たったら得点
                 audio.green.play();
                 score_update(3);
-              }else if(type==5){//ピンクは回復
-                  if (playerHP != 5) {
+              } else if (type == 5) {//ピンクは回復
+                if (playerHP != 5) {
                   hp_update(1);
                   effect(1, d.x, d.y);
                 }
-              }else if(speedup==2)true;//ボーナスタイム中なら以下無効
+              } else if (speedup == 2) true;//ボーナスタイム中なら以下無効
               else if (type == 4) {//黄色に当たったらボーナスタイム
                 speedup = 2;
                 ctx_display.lineWidth = 3;
@@ -307,7 +442,7 @@
                   ctx_display.strokeStyle = 'black';
                   display.style.backgroundColor = '';
                 }, 10000);
-              }else {//当たってしまった
+              } else {//当たってしまった
                 audio.block.play();
                 hp_update(-type - 1);
                 effect(-type - 1, d.x, d.y);
