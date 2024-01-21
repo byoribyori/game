@@ -254,7 +254,7 @@
       <!-- <img id="sound" src="./audio.png">
       <img id="mute" src="./mute.png"> -->
       <img id="sound" src="https://github.com/byoribyori/game/assets/42292029/0308d5f9-e5b5-4988-99d5-a63ed3238e38">
-  <img id="mute" src="https://github.com/byoribyori/game/assets/42292029/0351904f-91f6-4905-8138-f3e44d81d4ee">
+      <img id="mute" src="https://github.com/byoribyori/game/assets/42292029/0351904f-91f6-4905-8138-f3e44d81d4ee">
     </div>
   </div>
   <!-- <div id="font"><span style="font-family: Tektur;">s1</span></div> -->
@@ -334,13 +334,13 @@
     img.sound.addEventListener('click', () => {
       onoff.dataset.sound = 'off';
       for (let i of audio) {
-        i.volume = 0;
+        i.muted = true;
       }
     });
     img.mute.addEventListener('click', () => {
       onoff.dataset.sound = 'on';
       for (let i of audio) {
-        i.volume = 1;
+        i.muted = false;
       }
     });
 
@@ -393,14 +393,16 @@
       ctx_sub.textBaseline = 'top';
       ctx_sub.strokeStyle = 'black';
       ctx_sub.lineWidth = 2;
+      
       function score_update(s) {
         score += s;
         ctx_sub.clearRect(0, 0, 200, 50);
         ctx_sub.fillStyle = 'black';
-        ctx_sub.fillText('SCORE ' + score, 15, 15);//スコア描画
+        ctx_sub.fillTex
+        t('SCORE ' + score, 15, 15);//スコア描画
       }
       function hp_update(l) {
-        playerHP += l;//最大5
+        playerHP += l;
         ctx_sub.clearRect(200, 0, 200, 50);
         ctx_sub.fillStyle = 'black';
         ctx_sub.fillText('HP', 210, 15);
