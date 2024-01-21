@@ -68,16 +68,9 @@
       background: linear-gradient(180deg, gray, white);
     }
 
-    #confirm {
-      position: absolute;
-      top: 97vw;
-      left: 13vw;
-      z-index: 3;
-    }
-
     #start {
       position: absolute;
-      top: 70%;
+      top: 75%;
       left: 31vw;
       width: 38vw;
       font-size: 8vw;
@@ -159,7 +152,23 @@
     #black {
       background-color: black;
       height: 4vw;
-      margin-top: 2.5vw;
+      margin-top: 2vw;
+    }
+
+    #confirm {
+      position: absolute;
+      top: 93vw;
+      left: 13vw;
+      z-index: 3;
+      border-radius: 7vw;
+      padding: 2vw;
+      width: 27vw;
+      background: linear-gradient(0deg, #8f8f8f, white);
+      border: 1px solid black;
+    }
+
+    #confirm[data-click="1"] {
+      background: linear-gradient(180deg, #8f8f8f, white);
     }
 
     #font>span {
@@ -225,18 +234,17 @@
       <div>10秒間無敵</div>
     </div>
   </div>
-  <div><button id="confirm">音量確認</button></div>
+  <button id="confirm">音量確認</button>
   <!-- <div id="font"><span style="font-family: Tektur;">s1</span></div> -->
 
-  <audio id="yellow"
-    src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0"
-    preload="auto"></audio>
-  <audio id="block"
-    src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0"
-    preload="auto"></audio>
-  <audio id="green"
-    src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0"
-    preload="auto"></audio>
+  <audio id="yellow"     preload="auto"
+    src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0"></audio>
+  <audio id="block"     preload="auto"
+    src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0"></audio>
+  <audio id="green"     preload="auto"
+    src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0"></audio>
+  <audio id="pink" preload="auto"
+    src="https://dl.dropboxusercontent.com/scl/fi/gws307ieq6hsbbj480bop/avoid_pink.mp3?rlkey=jnsivp5q9t7jsibdwuyg1732w&dl=0"></audio>
 
   <script>
     /**
@@ -290,12 +298,16 @@
     ctx_right.fill();
 
     const audio = document.getElementsByTagName('audio');
-    document.getElementById('confirm').addEventListener('click', () => {
+    const confirm = document.getElementById('confirm');
+    confirm.addEventListener('click', () => {
+      confirm.dataset.click = 1;
       audio.green.play();
+      setTimeout(() => {
+        confirm.dataset.click = '';
+      }, 700);
     })
 
     document.onkeydown = (e) => {
-      console.log(e.key)
       if (e.key == 'Enter' && document.getElementById('start')) start.click();
     }
 
@@ -429,11 +441,13 @@
                 score_update(3);
               } else if (type == 5) {//ピンクは回復
                 if (playerHP != 5) {
+                  audio.pink.play();
                   hp_update(1);
                   effect(1, d.x, d.y);
                 }
               } else if (speedup == 2) true;//ボーナスタイム中なら以下無効
               else if (type == 4) {//黄色に当たったらボーナスタイム
+                audio.yellow.play();
                 speedup = 2;
                 ctx_display.lineWidth = 3;
                 ctx_display.strokeStyle = 'yellow';
@@ -463,8 +477,8 @@
 
         count = count % 12 + 1;
         if (count % 12 == 1) {//12ループに1度新たに落とす
-          //50回に1回ピンク 7回に1回緑 低確率で黄 それ以外ランダム
-          const t = drop_id % 50 == 0 && playerHP != 5 ? 5 : drop_id % 7 == 3 ? 3 : Math.random() < 0.02 && speedup == 1 ? 4 : random_block[Math.floor(Math.random() * 5)];
+          //40回に1回ピンク 7回に1回緑 低確率で黄 それ以外ランダム
+          const t = drop_id % 40 == 0 && playerHP != 5 ? 5 : drop_id % 7 == 3 ? 3 : Math.random() < 0.02 && speedup == 1 ? 4 : random_block[Math.floor(Math.random() * 5)];
           const r = Math.floor(Math.random() * position_list.length);//位置ランダム
           drop[drop_id] = {
             type: t,
