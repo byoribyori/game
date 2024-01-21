@@ -70,7 +70,7 @@
 
     #start {
       position: absolute;
-      top: 75%;
+      top: 115vw;
       left: 31vw;
       width: 38vw;
       font-size: 8vw;
@@ -158,17 +158,31 @@
     #confirm {
       position: absolute;
       top: 93vw;
-      left: 13vw;
+      left: 9vw;
       z-index: 3;
       border-radius: 7vw;
       padding: 2vw;
       width: 27vw;
+      color: black;
       background: linear-gradient(0deg, #8f8f8f, white);
       border: 1px solid black;
     }
 
     #confirm[data-click="1"] {
       background: linear-gradient(180deg, #8f8f8f, white);
+    }
+
+    img {
+      position: absolute;
+      top: 94vw;
+      left: 38vw;
+      width: 10vw;
+      z-index: 4;
+    }
+
+    #sound_onoff[data-sound="on"]>#mute,
+    #sound_onoff[data-sound="off"]>#sound {
+      display: none;
     }
 
     #font>span {
@@ -188,60 +202,68 @@
     <canvas width="200" height="60" data-click="0"></canvas>
     <canvas width="200" height="60" data-click="0"></canvas>
   </div>
-  <button id="start">START</button>
-  <div id="description_text">
-    <div>落ちてくるブロックをよけろ</div>
-    <div>よけるたびにSCORE+1</div>
+  <div id="ready">
+    <button id="start">START</button>
+    <div id="description_text">
+      <div>落ちてくるブロックをよけろ</div>
+      <div>よけるたびにSCORE+1</div>
+    </div>
+    <div id="description">
+      <div style="height: 7vw;">
+        <div style="width: 37vw;text-align: right;">あたると..</div>
+      </div>
+      <div style="height: 12vw; line-height: 12vw;">
+        <div>
+          <div class="block_description" id="blue"></div>
+        </div>
+        <div>1ダメージ</div>
+      </div>
+      <div>
+        <div>
+          <div class="block_description" id="red"></div>
+        </div>
+        <div>2ダメージ</div>
+      </div>
+      <div>
+        <div>
+          <div class="block_description" id="black"></div>
+        </div>
+        <div>3ダメージ</div>
+      </div>
+      <div>
+        <div>
+          <div class="circle_description" id="green" style="background-color: green;"></div>
+        </div>
+        <div>SCORE +3</div>
+      </div>
+      <div>
+        <div>
+          <div class="circle_description" id="pink" style="background-color: pink;"></div>
+        </div>
+        <div>HP +1</div>
+      </div>
+      <div>
+        <div>
+          <div class="circle_description" id="yellow" style="background-color: yellow;"></div>
+        </div>
+        <div>10秒間無敵</div>
+      </div>
+    </div>
+    <button id="confirm">音量確認</button>
+    <div id="sound_onoff" data-sound="on">
+      <!-- <img id="sound" src="./audio.png">
+      <img id="mute" src="./mute.png"> -->
+      <img id="sound" src="https://github.com/byoribyori/game/assets/42292029/0308d5f9-e5b5-4988-99d5-a63ed3238e38">
+  <img id="mute" src="https://github.com/byoribyori/game/assets/42292029/0351904f-91f6-4905-8138-f3e44d81d4ee">
+    </div>
   </div>
-  <div id="description">
-    <div style="height: 7vw;">
-      <div style="width: 37vw;text-align: right;">あたると..</div>
-    </div>
-    <div style="height: 12vw; line-height: 12vw;">
-      <div>
-        <div class="block_description" id="blue"></div>
-      </div>
-      <div>1ダメージ</div>
-    </div>
-    <div>
-      <div>
-        <div class="block_description" id="red"></div>
-      </div>
-      <div>2ダメージ</div>
-    </div>
-    <div>
-      <div>
-        <div class="block_description" id="black"></div>
-      </div>
-      <div>3ダメージ</div>
-    </div>
-    <div>
-      <div>
-        <div class="circle_description" id="green" style="background-color: green;"></div>
-      </div>
-      <div>SCORE +3</div>
-    </div>
-    <div>
-      <div>
-        <div class="circle_description" id="pink" style="background-color: pink;"></div>
-      </div>
-      <div>HP +1</div>
-    </div>
-    <div>
-      <div>
-        <div class="circle_description" id="yellow" style="background-color: yellow;"></div>
-      </div>
-      <div>10秒間無敵</div>
-    </div>
-  </div>
-  <button id="confirm">音量確認</button>
   <!-- <div id="font"><span style="font-family: Tektur;">s1</span></div> -->
 
-  <audio id="yellow"     preload="auto"
+  <audio id="yellow" preload="auto"
     src="https://dl.dropboxusercontent.com/scl/fi/vk4j65wj7vmlngrucdy6k/avoid_yellow.mp3?rlkey=nldx0hvemv6pl18rzdtj30bq0&dl=0"></audio>
-  <audio id="block"     preload="auto"
+  <audio id="block" preload="auto"
     src="https://dl.dropboxusercontent.com/scl/fi/tca5q35m21v12dijfr0o5/block.mp3?rlkey=4qk9kmeaavtup359og1i2vz33&dl=0"></audio>
-  <audio id="green"     preload="auto"
+  <audio id="green" preload="auto"
     src="https://dl.dropboxusercontent.com/scl/fi/lkcuied6kfpp11rgr88ku/avoid_green.mp3?rlkey=r43o8c8hyaj55stv82b59d4ox&dl=0"></audio>
   <audio id="pink" preload="auto"
     src="https://dl.dropboxusercontent.com/scl/fi/gws307ieq6hsbbj480bop/avoid_pink.mp3?rlkey=jnsivp5q9t7jsibdwuyg1732w&dl=0"></audio>
@@ -298,14 +320,29 @@
     ctx_right.fill();
 
     const audio = document.getElementsByTagName('audio');
-    const confirm = document.getElementById('confirm');
+    const confirm = document.getElementById('confirm');//音量確認ボタン
     confirm.addEventListener('click', () => {
       confirm.dataset.click = 1;
       audio.green.play();
       setTimeout(() => {
         confirm.dataset.click = '';
       }, 700);
-    })
+    });
+
+    const onoff = document.getElementById('sound_onoff');//音声あり/なし
+    const img = document.getElementsByTagName('img');
+    img.sound.addEventListener('click', () => {
+      onoff.dataset.sound = 'off';
+      for (let i of audio) {
+        i.volume = 0;
+      }
+    });
+    img.mute.addEventListener('click', () => {
+      onoff.dataset.sound = 'on';
+      for (let i of audio) {
+        i.volume = 1;
+      }
+    });
 
     document.onkeydown = (e) => {
       if (e.key == 'Enter' && document.getElementById('start')) start.click();
@@ -314,10 +351,7 @@
     let loop;
     let start = document.getElementById('start');
     start.addEventListener('click', () => {
-      start.remove();
-      document.getElementById('description').remove();
-      document.getElementById('description_text').remove();
-      document.getElementById('confirm').remove();
+      document.getElementById('ready').remove();
       //document.getElementById('font').remove();
 
       let touch = [false, false];
