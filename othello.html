@@ -167,10 +167,12 @@
       margin: auto;
     }
 
-    .player {
+      .player {
+      display: flex;
       width: 40vw;
       height: 15vw;
       border: solid 1vw black;
+      background-color: #a2a2a2;
     }
 
     #playerB {
@@ -181,10 +183,6 @@
       border-color: white;
       box-shadow: 0px 0px 3vw 1vw black;
       transform: rotate(180deg);
-    }
-
-    .player {
-      background-color: #a2a2a2;
     }
 
     .maru {
@@ -207,11 +205,10 @@
       display: inline-block;
       width: 20vw;
       height: 15vw;
-      position: absolute;
       font-size: 13vw;
       text-align: right;
-      line-height: 16vw;
-      font-family: math;
+      font-family: 'Lilita One', sans-serif;
+      line-height: 15vw;
     }
 
     #countW {
@@ -249,6 +246,9 @@
   }
 </style>
 <style id="style"></style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
 
 <body id="body">
   <div id="setting">
@@ -342,8 +342,6 @@
         document.getElementById('c44').innerHTML = '<div class="white" id="k44"></div>';
         document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
         [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
-
-        blink[1].dataset.turn = "t";
 
         setTimeout(() => {
           check(1);
