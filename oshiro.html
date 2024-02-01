@@ -42,7 +42,8 @@
 
     #game_speed {
       width: 50vw;
-      margin: 0 auto 5vw;;
+      margin: 0 auto 5vw;
+      ;
       font-size: 5vw;
     }
 
@@ -116,9 +117,10 @@
       box-shadow: 0 0 1vw;
     }
 
-    #switch:checked ~ #onoff{
+    #switch:checked~#onoff {
       transform: translateX(20vw) scale(1.3);
-      background-color: black;;
+      background-color: black;
+      ;
     }
 
     #start {
@@ -233,6 +235,30 @@
       }
     }
 
+    .undo {
+      width: 15vw;
+      height: 15vw;
+      line-height: 15vw;
+      background-color: #a2a2a2;
+      position: absolute;
+      border: solid 1vw #a2a2a2;
+      ;
+      font-size: 5vw;
+      font-family: 'Noto Sans JP', sans-serif;
+      border-radius: 3vw;
+    }
+
+    #undoW {
+      transform: rotate(180deg);
+      color: white;
+      left: 6vw;
+    }
+
+    #undoB {
+      color: black;
+      left: 77vw;
+    }
+
     #pass {
       width: 100vw;
       height: 30vw;
@@ -248,11 +274,12 @@
 <style id="style"></style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-  
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@600&family=Lilita+One&display=swap"
+  rel="stylesheet">
+
 <body id="body">
   <div id="setting">
-    <h1>オセロ<small>(白先攻)</small></h1>
+    <h1>オセロ</h1>
     <div id="game_speed">
       <div style="text-align: center;">ゲームスピード</div>
       <input type="range" id="speed" value="50" step="25">
@@ -261,7 +288,7 @@
     <div class="des">置ける場所を表示</div>
     <div id="indicate">
       <div>
-        <input type="checkbox" id="switch" style="display: none;">
+        <input type="checkbox" id="switch" style="display: none;" checked>
         <label for="switch"><span></span></label>
         <div id="onoff"></div>
       </div>
@@ -273,6 +300,8 @@
   <div id="T"></div>
   <div id="playerB" class="player" style="display: none;"><span class="maru"></span><span id="countB"
       class="count">2</span></div>
+  <div id="undoW" class="undo" style="display: none;">待った</div>
+  <div id="undoB" class="undo" style="display: none;">待った</div>
   <div id="pass" style="display: none;">PASS</div>
 
   <script>
@@ -282,15 +311,17 @@
     let count = [null, 2, 2];
     let blink = document.getElementsByClassName('maru');
     blink = [null, blink[1], blink[0]];
-    let time
-    let kiroku = [];
+    const playerBW = document.getElementsByClassName('player');
+    const undo = document.getElementsByClassName('undo');
+    let time, table;
+    let history = [];
     let passP = [null];
 
     document.getElementById('start').onclick = () => {//STARTボタン押したら
 
       time = (100 - document.getElementById('speed').value) * 4;
-      document.getElementById('style').innerHTML=`
-      .can{background-color:${document.getElementById('switch').checked?'#ea9700':'transparent;'}}`;
+      document.getElementById('style').innerHTML = `
+      .can{background-color:${document.getElementById('switch').checked ? '#ea9700' : 'transparent;'}}`;
 
       let set = document.getElementById('setting');
       set.innerHTML = '';
@@ -304,7 +335,7 @@
           b.style.opacity = 1;
         }, 100);
         set.remove();
-        let table = document.createElement('table');//盤面作成
+        table = document.createElement('table');//盤面作成
         for (let i = 1; i < 9; i++) {
           let tr = document.createElement('tr');
           for (let j = 1; j < 9; j++) {
@@ -317,11 +348,13 @@
         }
         document.getElementById('T').appendChild(table);
 
-        document.getElementById('playerB').style = "";
-        document.getElementById('playerW').style = "";
+        playerBW[0].style = "";
+        playerBW[1].style = "";
         document.getElementById('pass').style = "";
+        undo[0].style = "";
+        undo[1].style = "";
 
-        const height1 = document.getElementById('playerW').getClientRects()[0].height;//css
+        const height1 = playerBW[0].getClientRects()[0].height;//css
         const height2 = document.getElementById('T').getClientRects()[0].height;
         const height3 = document.getElementById('body').getClientRects()[0].height;
         document.getElementsByTagName('style')[0].innerHTML +=
@@ -329,6 +362,8 @@
         passP.push(height3 / 2);
         passP.push(height3 / 2 - document.getElementById('pass').getClientRects()[0].height);
         document.getElementById('pass').style.display = "none";
+        undo[0].style.top = `${(height3 - height1 * 2 - height2) / 4}px`;
+        undo[1].style.top = `${playerBW[1].getClientRects()[0].top}px`;
 
         for (let i = 0; i < 10; i++) {
           data.push([]);
@@ -343,11 +378,6 @@
         document.getElementById('c55').innerHTML = '<div class="white" id="k55"></div>';
         [data[4][5], data[5][4], data[4][4], data[5][5]] = [1, 1, 2, 2];//初期４コマ
 
-        setTimeout(() => {
-          check(2);
-        }, 1000);
-
-
         document.getElementsByTagName('table')[0].onclick = (e) => {
           if (!turn[0]) return;
           e = e.target;
@@ -361,14 +391,58 @@
           }
           put(p, turn[1]);
         }
+
+        const UNDO = (t) => {
+          if (!turn[0]||!history.length) return;
+          const n = history.length - 1;
+          if(t!=history[n][0])return;
+          turn[0] = false;
+          table.innerHTML = history[n][1];
+          turn[1] = history[n][0];
+          put_position = history[n][2].concat();
+          let countBW = [0, 0];
+          for (let i = 1; i < 9; i++) {
+            for (let j = 1; j < 9; j++) {
+              let ishi = document.getElementById('k' + i + j);
+              if (!ishi) {
+                data[i][j] = 0;
+                continue;
+              }
+              if (ishi.className == 'black') {
+                countBW[0]++;
+                data[i][j] = 1;
+              } else {
+                countBW[1]++;
+                data[i][j] = 2;
+              }
+            }
+          }
+
+          count[1]= countBW[0];
+          count[2]= countBW[1];
+          counter[1].innerText = countBW[0];
+          counter[2].innerText = countBW[1];
+          blink[turn[1]].dataset.turn='t';
+          blink[turn[1]%2+1].dataset.turn='';
+          history.splice(n, 1);
+          turn[0] = true;
+        }
+
+        undo[0].onclick = ()=>{UNDO(2)};
+        undo[1].onclick = ()=>{UNDO(1)};
+
+        setTimeout(() => {
+          check(turn[1]);
+        }, 1000);
       }, 900);
     }
-
 
     const way = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]];
     const color = [null, 'black', 'white'];
     const counter = [null, document.getElementById('countB'), document.getElementById('countW')];
+
     const put = (p, c) => {
+      history.push([c, table.innerHTML,put_position.concat()]);
       turn[0] = false;
       blink[1].dataset.turn = "";
       blink[2].dataset.turn = "";
@@ -432,16 +506,11 @@
       }
 
       setTimeout(() => {
-
-        //kiroku.push(document.getElementsByTagName('table')[0].innerHTML);
-
         turn[1] = op;
         check(op);
       }, (co + 1) * time);
 
     }
-
-
 
     const check = (c, pa) => {//置けるか
       let can = [];
@@ -451,7 +520,6 @@
       }
       if (!can.length) {//どこにも置けなければパス
         if (pa) {
-          console.log('終了');
           blink[1].dataset.turn = "";
           blink[2].dataset.turn = "";
           return;
@@ -502,8 +570,6 @@
 
     }
 
-    // document.getElementById('start').onclick();
-
     // function auto(a, pa) {
     //   a = pa ? 15 : isNaN(a) ? 60 : a;
     //   for (let i = 0; i < a; i++) {
@@ -514,12 +580,10 @@
     //       put(can, turn[1]);
     //     }, 20 * i);
     //   }
+
+
     // }
 
-    // function kako(k) {
-    //   if (!kiroku[k]) return;
-    //   document.getElementsByTagName('table')[0].innerHTML = kiroku[k];
-    // }
 
   </script>
 </body>
