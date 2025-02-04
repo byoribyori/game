@@ -32,10 +32,11 @@
 
     #ratio {
         height: 9vw;
-        border-radius: 3vw 0 0;
+        border-radius: 3vw 0 0 3vw;
         background-color: red;
         position: absolute;
         z-index: -1;
+        transition: width 0.7s linear;
     }
 
     #number_display {
@@ -44,6 +45,12 @@
         margin: auto;
         font-size: 40vw;
         text-align: center;
+    }
+
+    #tap {
+        font-size: 6vw;
+        text-align: center;
+        margin: 7vw;
     }
 </style>
 
@@ -57,15 +64,18 @@
     </div>
     <div id="game" style="display: none;">
         <div id="meter">
-            <div id="ratio"></div>
+            <div id="ratio" style="width: 0;"></div>
         </div>
         <div id="number_display"></div>
+        <div id="tap">画面タップで次へ</div>
     </div>
 </body>
 <script>
     const max = document.getElementById('max');
     const input_range = document.getElementById('range');
     const start_button = document.getElementById('start');
+    const ratio = document.getElementById('ratio');
+    const display = document.getElementById('number_display');
     let range = 20;//難易度
 
     input_range.addEventListener('keydown', function (e) {//難易度変更
@@ -88,17 +98,35 @@
             number_list.push(i);
         }
         console.log(number_list)
-        const ratio = document.getElementById('ratio');
-        const display = document.getElementById('number_display');
-        ratio.style.width = Math.round(100 / number_list.length) * 0.8 + 'vw';
+        ratio.style.width = Math.round(80 / (range - 1)) + 'vw';
         let r = number_list[Math.floor(Math.random() * number_list.length)];
         display.innerText = r;
         number_list.splice(number_list.indexOf(r), 1);
         console.log(number_list)
+        setTimeout(() => {
+            game(number_list);
+        }, 50);
 
 
 
     });
+
+    let tap = true;
+    const game = (number_list) => {
+        document.getElementsByTagName('body')[0].addEventListener('click', () => {
+            if (!tap) return;
+            if (number_list.length == 1) {//問題へ
+                return;
+            }
+            tap = false;
+            ratio.style.width = Math.round(80 / (range - 1) * (range - number_list.length + 1)) + 'vw';
+            let r = number_list[Math.floor(Math.random() * number_list.length)];
+            display.innerText = r;
+            number_list.splice(number_list.indexOf(r), 1);
+            console.log(number_list)
+            tap = true;
+        });
+    }
 </script>
 
 </html>
