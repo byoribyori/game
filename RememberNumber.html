@@ -45,12 +45,13 @@
         margin: auto;
         font-size: 40vw;
         text-align: center;
+        transition: transform 0.4s linear;
     }
 
     #tap {
         font-size: 6vw;
         text-align: center;
-        margin: 7vw;
+        margin: 9vw;
     }
 </style>
 
@@ -66,7 +67,7 @@
         <div id="meter">
             <div id="ratio" style="width: 0;"></div>
         </div>
-        <div id="number_display"></div>
+        <div id="number_display" style="transform: rotateY(0deg);"></div>
         <div id="tap">画面タップで次へ</div>
     </div>
 </body>
@@ -115,16 +116,28 @@
     const game = (number_list) => {
         document.getElementsByTagName('body')[0].addEventListener('click', () => {
             if (!tap) return;
+            tap = false;
             if (number_list.length == 1) {//問題へ
                 return;
             }
-            tap = false;
-            ratio.style.width = Math.round(80 / (range - 1) * (range - number_list.length + 1)) + 'vw';
+            if(number_list.length==2){
+                ratio.style.width='80vw';
+                setTimeout(() => {
+                    ratio.style.borderRadius='3vw';
+                }, 700);
+            }else ratio.style.width = Math.round(80 / (range - 1) * (range - number_list.length + 1)) + 'vw';
             let r = number_list[Math.floor(Math.random() * number_list.length)];
-            display.innerText = r;
+            display.style.transform='rotateY(90deg)';
+            setTimeout(() => {
+                display.innerText = r;
+                display.style.transform='rotateY(0deg)';
             number_list.splice(number_list.indexOf(r), 1);
             console.log(number_list)
-            tap = true;
+            setTimeout(() => {
+                tap = true;
+            }, 500);  
+            }, 400);
+
         });
     }
 </script>
