@@ -22,7 +22,7 @@
         font-size: 6vw;
     }
 
-    #meter{
+    #meter {
         width: 80vw;
         height: 9vw;
         border: black solid 1vw;
@@ -30,14 +30,15 @@
         margin: 5vw auto;
     }
 
-    #ratio{
-        width: 0%;
-        height: 100%;
-        border-radius: 3vw;
+    #ratio {
+        height: 9vw;
+        border-radius: 3vw 0 0;
         background-color: red;
+        position: absolute;
+        z-index: -1;
     }
 
-    #number_display{
+    #number_display {
         width: 50vw;
         height: 50vw;
         margin: auto;
@@ -69,7 +70,7 @@
 
     input_range.addEventListener('keydown', function (e) {//難易度変更
         setTimeout(() => {
-         range = Math.floor(Number(this.value));
+            range = Math.floor(Number(this.value));
             if (this.value == '' || isNaN(this.value) || this.value <= 1) range = 20;
             if (range > 50) [range, this.value] = [50, 50];//最大50
             if (range > 1) {//最低2
@@ -79,20 +80,20 @@
     });
 
     start_button.addEventListener('click', () => {
-        console.log('難易度',range)
+        console.log('難易度', range)
         document.getElementById('initial_screen').remove();
-        document.getElementById('game').style='';
+        document.getElementById('game').style = '';
         let number_list = [1];
-        for(let i=2;i<=range;i++){
+        for (let i = 2; i <= range; i++) {
             number_list.push(i);
         }
         console.log(number_list)
         const ratio = document.getElementById('ratio');
         const display = document.getElementById('number_display');
-        ratio.style.width=Math.round(100/number_list.length)+'%';
-        let r = number_list[Math.floor(Math.random()*number_list.length)];
+        ratio.style.width = Math.round(100 / number_list.length) * 0.8 + 'vw';
+        let r = number_list[Math.floor(Math.random() * number_list.length)];
         display.innerText = r;
-        number_list.splice(number_list.indexOf(r),1);
+        number_list.splice(number_list.indexOf(r), 1);
         console.log(number_list)
 
 
