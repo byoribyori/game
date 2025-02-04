@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RememberNumber</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        background-color: lightblue;
+        font-family: sans-serif;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 8vw;
+    }
+
+    #start{
+        font-size: 6vw;
+    }
+</style>
+
+<body>
+    <div id="initial_screen">
+        <h1>REMEMBER NUMBER</h1>
+        <input type="number" id="range" placeholder="20" oninput="javascript: this.value = this.value.slice(0, 2);">
+        <button id="start">START</button>
+    </div>
+</body>
+<script>
+    const start_button = document.getElementById('start');
+    start_button.addEventListener('click', () => {
+        document.getElementById('initial_screen').remove();
+
+    });
+</script>
+
+</html>
