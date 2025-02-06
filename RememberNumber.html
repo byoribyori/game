@@ -18,8 +18,39 @@
         font-size: 8vw;
     }
 
-    #start {
+    #description {
         font-size: 6vw;
+        width: 15em;
+        margin: auto;
+    }
+
+    table {
+        margin: 5vw auto;
+    }
+
+    #td1 {
+        font-size: 6vw;
+        width: 6em;
+        text-align: center;
+    }
+
+    #range {
+        width: 1.5em;
+        text-align: center;
+        font-size: 10vw;
+        border: solid 1px black;
+        border-radius: 3vw;
+    }
+
+    #start {
+        display: block;
+        font-size: 9vw;
+        padding: 1vw 4vw;
+        background-color: white;
+        border: #00BCD4 solid 3px;
+        color: #00BCD4;
+        border-radius: 2vw;
+        margin: 9vw auto 0;
     }
 
     #meter {
@@ -53,15 +84,29 @@
         text-align: center;
         margin: 9vw;
     }
+
+    #anserI {
+        width: 1.5em;
+        font-size: 15vw;
+        text-align: center;
+    }
 </style>
 
 <body>
     <div id="initial_screen">
         <h1>REMEMBER NUMBER</h1>
-        <div>1から<span id="max">20</span>まで
+        <div id="description">1から<span id="max" style="text-decoration: red underline;">15</span>までの数字の内<br>
+            <span id="max_1">14</span>個の数字が1つずつ表示される<br>
+            残った1つの数字を当てろ
         </div>
-        <input type="number" id="range" placeholder="20">
+        <table style="border-bottom: solid 2px red;">
+            <tr>
+                <td id="td1">難易度設定</td>
+                <td><input type="number" id="range" placeholder="15"></td>
+            </tr>
+        </table>
         <button id="start">START</button>
+
     </div>
     <div id="game" style="display: none;">
         <div id="meter">
@@ -70,22 +115,29 @@
         <div id="number_display" style="transform: rotateY(0deg);"></div>
         <div id="tap">画面タップで次へ</div>
     </div>
+    <div id="question" style="display: none;">
+        <h4>残った数字は?</h4>
+        <input type="number" id="anserI">
+        <button id="anserB">回答</button>
+    </div>
 </body>
 <script>
     const max = document.getElementById('max');
+    const max_1 = document.getElementById('max_1');
     const input_range = document.getElementById('range');
     const start_button = document.getElementById('start');
     const ratio = document.getElementById('ratio');
     const display = document.getElementById('number_display');
-    let range = 20;//難易度
+    let range = 15;//難易度
 
     input_range.addEventListener('keydown', function (e) {//難易度変更
         setTimeout(() => {
             range = Math.floor(Number(this.value));
-            if (this.value == '' || isNaN(this.value) || this.value <= 1) range = 20;
+            if (this.value == '' || isNaN(this.value) || this.value <= 1) range = 15;
             if (range > 50) [range, this.value] = [50, 50];//最大50
             if (range > 1) {//最低2
                 max.innerText = range;
+                max_1.innerText = range - 1;
             }
         }, 20);
     });
@@ -118,28 +170,42 @@
             if (!tap) return;
             tap = false;
             if (number_list.length == 1) {//問題へ
+                question(number_list[0]);
                 return;
             }
-            if(number_list.length==2){
-                ratio.style.width='80vw';
+            if (number_list.length == 2) {
+                ratio.style.width = '80vw';
                 setTimeout(() => {
-                    ratio.style.borderRadius='3vw';
+                    ratio.style.borderRadius = '3vw';
                 }, 700);
-            }else ratio.style.width = Math.round(80 / (range - 1) * (range - number_list.length + 1)) + 'vw';
+            } else ratio.style.width = Math.round(80 / (range - 1) * (range - number_list.length + 1)) + 'vw';
             let r = number_list[Math.floor(Math.random() * number_list.length)];
-            display.style.transform='rotateY(90deg)';
+            display.style.transform = 'rotateY(90deg)';
             setTimeout(() => {
                 display.innerText = r;
-                display.style.transform='rotateY(0deg)';
-            number_list.splice(number_list.indexOf(r), 1);
-            console.log(number_list)
-            setTimeout(() => {
-                tap = true;
-            }, 500);  
+                display.style.transform = 'rotateY(0deg)';
+                number_list.splice(number_list.indexOf(r), 1);
+                console.log(number_list)
+                setTimeout(() => {
+                    tap = true;
+                }, 500);
             }, 400);
 
         });
     }
+
+    const question = (n) => {
+        document.getElementById('game').remove();
+        document.getElementById('question').style.display = '';
+        document.getElementById('anserB').addEventListener('click', () => {
+            if (document.getElementById('anserI').value == n) {
+                alert('正解')
+            }
+        });
+
+    }
+
+
 </script>
 
 </html>
