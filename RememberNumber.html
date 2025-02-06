@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" style="height: 100%;">
 
 <head>
     <meta charset="UTF-8">
@@ -85,9 +85,37 @@
         margin: 9vw;
     }
 
+    h2 {
+        text-align: center;
+        font-size: 8vw;
+        margin-top: 11vw;
+    }
+
+    .anser {
+        padding: 1vw;
+    }
+
     #anserI {
         width: 1.5em;
+        height: 20vw;
+        text-align: center;
         font-size: 15vw;
+        border: solid 1px black;
+        border-radius: 4vw;
+    }
+
+    #anserB {
+        width: 25vw;
+        height: 20vw;
+        font-size: 10vw;
+        border: gray solid 1px;
+        background-color: #e3e3e3;
+        border-radius: 0;
+    }
+
+    #result {
+        font-size: 15vw;
+        font-weight: bold;
         text-align: center;
     }
 </style>
@@ -116,9 +144,14 @@
         <div id="tap">画面タップで次へ</div>
     </div>
     <div id="question" style="display: none;">
-        <h4>残った数字は?</h4>
-        <input type="number" id="anserI">
-        <button id="anserB">回答</button>
+        <h2>残った数字は?</h2>
+        <table>
+            <tr>
+                <td class="anser"><input type="number" id="anserI"></td>
+                <td class="anser"><button id="anserB">回答</button></td>
+            </tr>
+        </table>
+        <div id="result"></div>
     </div>
 </body>
 <script>
@@ -166,7 +199,7 @@
 
     let tap = true;
     const game = (number_list) => {
-        document.getElementsByTagName('body')[0].addEventListener('click', () => {
+        document.getElementsByTagName('html')[0].addEventListener('click', () => {
             if (!tap) return;
             tap = false;
             if (number_list.length == 1) {//問題へ
@@ -198,8 +231,12 @@
         document.getElementById('game').remove();
         document.getElementById('question').style.display = '';
         document.getElementById('anserB').addEventListener('click', () => {
+            document.getElementById('anserI').readOnly = true;
+            const result = document.getElementById('result');
             if (document.getElementById('anserI').value == n) {
-                alert('正解')
+                result.innerHTML = `<span style="color:red;">正解</span>`;
+            } else {
+                result.innerHTML = `<span style="color:blue;">不正解</span><br>正解は ${n}`;
             }
         });
 
