@@ -22,87 +22,89 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let player = null;
-let opponent = null;
-let roomId = '';
-let used = [];
+let roomId = prompt("部屋番号を入力してください");
+let myPlayerId = null;
+let myUsedNumbers = [];
 let currentTurn = 1;
-let scores = { my: 0, opp: 0 };
+let scores = { player1: 0, player2: 0 };
 
-document.getElementById("joinBtn").onclick = async () => {
-  roomId = document.getElementById("roomInput").value;
-  if (!roomId) return alert("部屋番号を入れてね");
+const gameRef = ref(db, `rooms/${roomId}`);
 
-  const roomRef = ref(db, `rooms/${roomId}`);
-  const snap = await get(roomRef);
-  const data = snap.val();
+async function joinRoom() {
+  const snapshot = await get(gameRef);
+  const data = snapshot.val();
 
-  if (!data || !data.player1) {
-    player = "player1";
-    opponent = "player2";
-    await set(roomRef, { player1: true, turns: {} });
+  if (!data) {
+    await set(gameRef, {
+      player1: true,
+      currentTurn: 1,
+      scores: { player1: 0, player2: 0 }
+    });
+    myPlayerId = "player1";
   } else if (!data.player2) {
-    player = "player2";
-    opponent = "player1";
-    await update(roomRef, { player2: true });
+    await update(gameRef, { player2: true });
+    myPlayerId = "player2";
   } else {
-    alert("部屋が満員です");
-    return;
+    alert("満員です！");
   }
 
-  document.getElementById("entry").classList.add("hidden");
-  document.getElementById("game").classList.remove("hidden");
-  document.getElementById("role").textContent = player;
+  listenToGame();
+  setupUI();
+}
 
-  setupButtons();
-  listenForTurns();
-};
-
-function setupButtons() {
-  const grid = document.getElementById("numberGrid");
+function setupUI() {
+  const board = document.getElementById("board");
   for (let i = 1; i <= 9; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
-    btn.onclick = () => play(i, btn);
-    grid.appendChild(btn);
+    btn.className = "num-btn";
+    btn.onclick = () => submitNumber(i, btn);
+    board.appendChild(btn);
   }
 }
 
-function play(num, btn) {
-  if (used.includes(num) || currentTurn > 9) return;
+function submitNumber(num, btn) {
+  if (myUsedNumbers.includes(num)) return;
 
-  used.push(num);
+  set(ref(db, `rooms/${roomId}/turns/${currentTurn}/${myPlayerId}`), num);
+  myUsedNumbers.push(num);
   btn.disabled = true;
-  btn.style.background = "#ccc";
-
-  set(ref(db, `rooms/${roomId}/turns/turn${currentTurn}/${player}`), num);
+  btn.classList.add("used");
 }
 
-function listenForTurns() {
+function listenToGame() {
   const turnsRef = ref(db, `rooms/${roomId}/turns`);
   onValue(turnsRef, (snapshot) => {
-    const turns = snapshot.val() || {};
-    currentTurn = Object.keys(turns).length + 1;
-    document.getElementById("turn").textContent = Math.min(currentTurn, 9);
+    const turns = snapshot.val();
+    if (!turns) return;
 
-    scores = { my: 0, opp: 0 };
+    const turnData = turns[currentTurn];
+    if (turnData && turnData.player1 && turnData.player2) {
+      // 勝敗判定
+      const p1 = turnData.player1;
+      const p2 = turnData.player2;
+      let winner = null;
+      if (p1 > p2) winner = "player1";
+      else if (p2 > p1) winner = "player2";
 
-    for (let t in turns) {
-      const mine = turns[t][player];
-      const opp = turns[t][opponent];
-
-      if (mine && opp) {
-        if (mine > opp) scores.my++;
-        else if (mine < opp) scores.opp++;
+      if (winner) {
+        scores[winner]++;
+        update(ref(db, `rooms/${roomId}/scores`), scores);
       }
-    }
 
-    document.getElementById("myScore").textContent = scores.my;
-    document.getElementById("opponentScore").textContent = scores.opp;
+      // ターン進める
+      currentTurn++;
+      update(ref(db, `rooms/${roomId}`), { currentTurn });
 
-    if (Object.keys(turns).length === 9) {
-      const result = scores.my > scores.opp ? "勝ち！" : scores.my < scores.opp ? "負け…" : "引き分け！";
-      alert(`ゲーム終了！\nあなた：${scores.my}点\n相手：${scores.opp}点\n→ ${result}`);
+      // ゲーム終了
+      if (currentTurn > 9) {
+        let result = "引き分け！";
+        if (scores.player1 > scores.player2) result = "プレイヤー1の勝ち！";
+        if (scores.player2 > scores.player1) result = "プレイヤー2の勝ち！";
+        alert(`ゲーム終了！\n${result}`);
+      }
     }
   });
 }
+
+joinRoom();
