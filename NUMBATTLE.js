@@ -53,7 +53,7 @@ async function joinRoom() {
 }
 
 function setupUI() {
-  const board = document.getElementById("board");
+  const board = document.getElementById("numberGrid");
   for (let i = 1; i <= 9; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
