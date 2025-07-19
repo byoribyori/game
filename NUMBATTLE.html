@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NumBattle</title>
+  <link rel="stylesheet" href="NUMBATTLE.css" />
+  <script type="module" src="NUMBATTLE.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>NumBattle 🔢</h1>
+
+    <div id="entry">
+      <input type="text" id="roomInput" placeholder="部屋番号を入力" />
+      <button id="joinBtn">入室</button>
+    </div>
+
+    <div id="game" class="hidden">
+      <p>あなたは <span id="role">?</span> です</p>
+      <p>ターン：<span id="turn">1</span> / 9</p>
+      <div class="grid" id="numberGrid"></div>
+      <p>あなた: <span id="myScore">0</span>点 / 相手: <span id="opponentScore">0</span>点</p>
+    </div>
+  </div>
+</body>
+</html>
